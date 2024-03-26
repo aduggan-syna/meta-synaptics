@@ -103,6 +103,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
 IMAGE_INSTALL:append:dolphin = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-v4l2isp-daemon \
+    synasdk-drivers-hrx-v4l2 \
 "
 
 IMAGE_INSTALL:append:platypus = " \
