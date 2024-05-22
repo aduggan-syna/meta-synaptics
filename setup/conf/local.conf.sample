@@ -89,7 +89,7 @@ DISTRO ?= "poky"
 #  - 'package_rpm' for rpm style packages
 # E.g.: PACKAGE_CLASSES ?= "package_rpm package_deb package_ipk"
 # We default to rpm:
-PACKAGE_CLASSES ?= "package_rpm"
+PACKAGE_CLASSES ?= "package_deb"
 
 #
 # SDK target architecture
@@ -271,3 +271,8 @@ INITRAMFS_IMAGE = "core-image-initramfs-boot"
 
 #OPTEE TA encryption
 OPTEE_TA_ENC= ##OPTEE_TA_ENC##
+
+#Install and setup support for pre-built package feeds
+PACKAGE_FEED_URIS ?= "https://astra-packages.synaptics.com/${ASTRA_VERSION}"
+EXTRA_IMAGE_FEATURES += " package-management "
+
