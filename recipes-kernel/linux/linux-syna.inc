@@ -130,5 +130,7 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
 "
 
 KERNEL_MODULE_PROBECONF:append = "bcmdhd "
+KERNEL_MODULE_PROBECONF:append = "syna_drm "
 
 # module_conf_bcmdhd = "options bcmdhd firmware_path=bcm/fw_bcm43752.bin nvram_path=bcm/bcmdhd_43752.cal clm_path=bcm/bcmdhd_clm_43752.blob"
+module_conf_syna_drm = "options syna_drm hdmi_preferred_mode=1920x1080"
