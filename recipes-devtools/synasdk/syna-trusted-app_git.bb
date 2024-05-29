@@ -36,47 +36,11 @@ do_compile () {
 }
 
 do_install () {
-    input_ta_path="${B}/target/ta/enc/${syna_chip_name}/${syna_chip_rev}"
-    find "${input_ta_path}" -type f -regex '.*\.ta$' -exec sh -c \
-        'install -Dm0644 {} ${D}${nonarch_base_libdir}/ta/$(basename {})' \;
-
-    install -d ${D}${nonarch_base_libdir}/firmware
-    install -d ${D}${nonarch_base_libdir}/firmware/ta
-
     # 1316a183 is the TA UUID common prefix.
     install -d ${D}${nonarch_base_libdir}/optee_armtz
     find "${S}/ta_enc" -type f \
         -regex ".*${syna_chip_name}/${syna_chip_rev}.*1316a183.*\.ta$" -exec sh -c \
         'install -Dm0644 {} ${D}${nonarch_base_libdir}/optee_armtz/$(basename {})' \;
-
-    install -d ${D}${libdir}/tee-supplicant/plugins
-    find "${S}/ta_enc" -type f \
-        -regex ".*${syna_chip_name}/${syna_chip_rev}.*1316a183.*\.plugin$" -exec sh -c \
-        'install -Dm0644 {} ${D}${libdir}/tee-supplicant/plugins/$(basename {})' \;
-
-    KERNEL_LOAD_TA=""
-    if [ "is${CONFIG_TA_GFX_IMG_LINUX}" = "isy" ]; then
-        KERNEL_LOAD_TA+="libgfx_img_linux.ta"
-    fi
-    if [ "is${CONFIG_AMP_IOMMU}" = "isy" ]; then
-        KERNEL_LOAD_TA+=" libptm.ta"
-        KERNEL_LOAD_TA+=" libvmeta.ta"
-    fi
-    if [ "is${CONFIG_BL_TA_FASTLOGO}" = "isy" ]; then
-        KERNEL_LOAD_TA+=" libfastlogo.ta"
-    fi
-    if [ "is${CONFIG_BL_TA_DHUB}" = "isy" ]; then
-        KERNEL_LOAD_TA+=" libdhub.ta"
-    fi
-
-    if [ "is${CONFIG_MIPI_DSI_TA}" = "isy" ]; then
-        KERNEL_LOAD_TA+=" libmipi_dsi.ta"
-    fi
-
-    for i in ${KERNEL_LOAD_TA}; do \
-        mv "${D}${nonarch_base_libdir}/ta/${i}" \
-             "${D}${nonarch_base_libdir}/firmware/ta/${i}"
-    done;
 }
 
 FILES:${PN} = " \
@@ -91,47 +55,26 @@ do_deploy () {
     security_tools_path="${STAGING_DIR_NATIVE}${prefix}/libexec/syna/"
     security_keys_path="${STAGING_DATADIR_NATIVE}/syna/keys/${syna_chip_name}/${syna_chip_rev}"
 
-    input_ta_path="target/${CONFIG_TA_IMAGE_PATH}/${syna_chip_name}/${syna_chip_rev}"
+    input_ta_path="${S}/ta_enc"
+    input_sub_path="${syna_chip_name}/${syna_chip_rev}"
+
     # Use genimg to pack all preload TAs
     params=""
 
+    if [ "is${syna_chip_name}" = "isdolphin" -a "is${CONFIG_GENX_ENABLE}" == "isy" ]; then
+	    input_sub_path="${syna_chip_name}/${syna_chip_rev}/genx"
+    fi
+
     if [ "is${CONFIG_BL_TA_FASTLOGO}" = "isy" ]; then
-        if [ -f ${input_ta_path}/libfastlogo.ta/libfastlogo.ta ]; then
-            params="$params -i LOGO -d ${input_ta_path}/libfastlogo.ta/libfastlogo.ta"
-        else
-            echo "no libfastlogo.ta under ${input_ta_path}"
-            exit 1
-        fi
+	    if [ -f ${input_ta_path}/libfastlogo.ta/${input_sub_path}/1316a183-894d-43fe-9893-bb946ae103f5.ta ]; then
+		    params="$params -i 03F5 -d ${input_ta_path}/libfastlogo.ta/${input_sub_path}/1316a183-894d-43fe-9893-bb946ae103f5.ta"
+	    else
+		    echo "no 1316a183-894d-43fe-9893-bb946ae103f5.ta under ${input_ta_path}/libfastlogo.ta/${input_sub_path}!!!"
+			    exit 1
+	    fi
     fi
 
-    if [ "is${CONFIG_BL_TA_KEYMASTER}" = "isy" ]; then
-        if [ -f ${input_ta_path}/libgencrypto.ta/libgencrypto.ta ]; then
-            params="$params -i CYPT -d ${input_ta_path}/libgencrypto.ta/libgencrypto.ta"
-        else
-            echo "no libgencrypto.ta under ${input_ta_path}"
-            exit 1
-        fi
-    fi
-
-    if [ "is${CONFIG_BL_TA_DHUB}" = "isy" ]; then
-        if [ -f ${input_ta_path}/libdhub.ta/libdhub.ta ]; then
-            params="$params -i DHUB -d ${input_ta_path}/libdhub.ta/libdhub.ta"
-        else
-            echo "no libdhub.ta under ${input_ta_path}!!!"
-            exit 1
-        fi
-    fi
-
-    if [ "is${CONFIG_MIPI_DSI_TA}" = "isy" ]; then
-        if [ -f ${input_ta_path}/libmipi_dsi.ta/libmipi_dsi.ta ]; then
-            params="$params -i MIPI -d ${input_ta_path}/libmipi_dsi.ta/libmipi_dsi.ta"
-        else
-            echo "no libmipi_dsi.ta under ${input_ta_path}!!!"
-            exit 1
-        fi
-    fi
-
-    genimg -n preload_ta $params -o ${DEPLOYDIR}/preload_ta.subimg
+    genimg -n preload_ta -A 4096 $params -o ${DEPLOYDIR}/preload_ta.subimg
     rm ${DEPLOYDIR}/*.header
 }
 
