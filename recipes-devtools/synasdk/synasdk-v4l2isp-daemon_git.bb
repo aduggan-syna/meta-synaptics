@@ -28,6 +28,7 @@ SRC_URI:append:dolphin = " \
     file://IMX415.xml \
     file://isp_media_server.service \
     file://isp_media_server.sh \
+    file://isp_media_server.env \
 "
 
 EXTRA_OECMAKE = " \
@@ -40,6 +41,7 @@ FILES:${PN} = " \
     ${sbindir}/* \
     ${systemd_system_unitdir}/* \
     ${datadir}/* \
+    ${sysconfdir}/default/isp_media_server \
 "
 
 INSANE_SKIP:${PN} += "dev-so"
@@ -52,6 +54,8 @@ do_install:append() {
         install -m 0644 ${WORKDIR}/isp_media_server.service ${D}${systemd_system_unitdir}
         install -d ${D}${sbindir}
         install -m 0755 ${WORKDIR}/isp_media_server.sh ${D}${sbindir}
+        install -d ${D}${sysconfdir}/default
+        install -m 0644 ${WORKDIR}/isp_media_server.env ${D}${sysconfdir}/default/isp_media_server
     fi
 
     install -d ${D}${datadir}

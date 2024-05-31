@@ -1,17 +1,17 @@
 [Unit]
 Description=VSI ISP Media Service
 After=synasdk-modules-load.service
+RequiresMountsFor=/run
 
 [Service]
+EnvironmentFile=-/etc/default/isp_media_server
 Type=oneshot
 ExecStart=-/bin/bash /usr/sbin/isp_media_server.sh start
 ExecStop=-/bin/bash /usr/sbin/isp_media_server.sh stop
 Restart=no
 RemainAfterExit=yes
-StandardError=journal
 PermissionsStartOnly=true
 IgnoreSIGPIPE=no
 
 [Install]
 WantedBy=multi-user.target
-
