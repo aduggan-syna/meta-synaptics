@@ -12,7 +12,7 @@ PV = "git${SRCPV}"
 
 COMPATIBLE_MACHINE = "dolphin"
 
-DEPENDS = "libmxml synasdk-v4l2isp-sensordrv synasdk-v4l2isp-prebuilts"
+DEPENDS = "libmxml wayland libdrm synasdk-v4l2isp-sensordrv synasdk-v4l2isp-prebuilts"
 
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/v4l2isp/daemon"
 
