@@ -119,6 +119,7 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-good-rtsp \
     gstreamer1.0-plugins-good-rtpmanager \
     gstreamer1.0-plugins-good-jpeg \
+    gstreamer1.0-plugins-good-png \
     hostapd \
     iptables \
     protobuf \
@@ -185,6 +186,7 @@ IMAGE_INSTALL:append:dolphin = " \
     synasdk-drivers-hrx-v4l2 \
     synasdk-vpu-plugin \
     synasdk-drivers-isp \
+    synasdk-v4l2isp-qtapp \
 "
 
 IMAGE_INSTALL:append:platypus = " \
