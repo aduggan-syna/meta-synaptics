@@ -69,6 +69,8 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-base-compositor \
     gstreamer1.0-plugins-base-videorate \
     gstreamer1.0-plugins-good-cairo \
+    gstreamer1.0-plugins-good-rtsp \
+    gstreamer1.0-plugins-good-rtpmanager \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
