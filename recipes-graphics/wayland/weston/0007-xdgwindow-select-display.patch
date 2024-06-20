@@ -1,0 +1,132 @@
+diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
+index 63e1431..3465371 100644
+--- a/desktop-shell/shell.c
++++ b/desktop-shell/shell.c
+@@ -4243,25 +4243,28 @@ weston_view_set_initial_position(struct weston_view *view,
+ 	struct weston_seat *seat;
+ 	pixman_rectangle32_t area;
+ 
+-	/* As a heuristic place the new window on the same output as the
+-	 * pointer. Falling back to the output containing 0, 0.
+-	 *
+-	 * TODO: Do something clever for touch too?
+-	 */
+-	wl_list_for_each(seat, &compositor->seat_list, link) {
+-		struct weston_pointer *pointer = weston_seat_get_pointer(seat);
++	target_output = get_output_user_override(compositor);
++	if (!target_output) {
++		/* As a heuristic place the new window on the same output as the
++		 * pointer. Falling back to the output containing 0, 0.
++		 *
++		 * TODO: Do something clever for touch too?
++		 */
++		wl_list_for_each(seat, &compositor->seat_list, link) {
++			struct weston_pointer *pointer = weston_seat_get_pointer(seat);
+ 
+-		if (pointer) {
+-			ix = wl_fixed_to_int(pointer->x);
+-			iy = wl_fixed_to_int(pointer->y);
+-			break;
++			if (pointer) {
++				ix = wl_fixed_to_int(pointer->x);
++				iy = wl_fixed_to_int(pointer->y);
++				break;
++			}
+ 		}
+-	}
+ 
+-	wl_list_for_each(output, &compositor->output_list, link) {
+-		if (pixman_region32_contains_point(&output->region, ix, iy, NULL)) {
+-			target_output = output;
+-			break;
++		wl_list_for_each(output, &compositor->output_list, link) {
++			if (pixman_region32_contains_point(&output->region, ix, iy, NULL)) {
++				target_output = output;
++				break;
++			}
+ 		}
+ 	}
+ 
+diff --git a/shared/shell-utils.c b/shared/shell-utils.c
+index a301eef..962e6ad 100644
+--- a/shared/shell-utils.c
++++ b/shared/shell-utils.c
+@@ -27,6 +27,9 @@
+ #include "config.h"
+ #include "shared/shell-utils.h"
+ #include <libweston-desktop/libweston-desktop.h>
++#include <string.h>
++
++#define OUTPUT_NAME_MAX_LEN 9 //HDMI-A-1
+ 
+ struct weston_output *
+ get_default_output(struct weston_compositor *compositor)
+@@ -38,6 +41,41 @@ get_default_output(struct weston_compositor *compositor)
+ 			    struct weston_output, link);
+ }
+ 
++struct weston_output *
++get_output_user_override(struct weston_compositor *compositor)
++{
++	struct weston_output *output = NULL, *target_output = NULL;
++	char *override_disp, *override_disp_file;
++	int str_len;
++	FILE *filp;
++
++	override_disp_file = getenv("SHELL_OVERRIDE_DISPLAY_WINDOW");
++
++	if (override_disp_file) {
++		filp = fopen(override_disp_file, "r");
++		if (filp) {
++			fseek(filp, 0, SEEK_END);
++			str_len = ftell(filp);
++			fseek(filp, 0, SEEK_SET);
++
++			override_disp = malloc(str_len);
++			if (override_disp)
++				fread(override_disp, sizeof(char), str_len, filp);
++			fclose(filp);
++
++			if (str_len && (str_len <= OUTPUT_NAME_MAX_LEN)) {
++				wl_list_for_each(output, &compositor->output_list, link) {
++					if (!memcmp(output->name, override_disp, str_len-1))
++						target_output = output;
++				}
++			}
++
++			free(override_disp);
++		}
++	}
++	return target_output;
++}
++
+ struct weston_output *
+ get_focused_output(struct weston_compositor *compositor)
+ {
+@@ -66,6 +104,12 @@ get_focused_output(struct weston_compositor *compositor)
+ 			break;
+ 	}
+ 
++	/* if there is no input device connected, let the default output selection
++	 * be overridden by user via file entry
++	 */
++	if (!output)
++		output = get_output_user_override(compositor);
++
+ 	return output;
+ }
+ 
+diff --git a/shared/shell-utils.h b/shared/shell-utils.h
+index b25de1a..c949951 100644
+--- a/shared/shell-utils.h
++++ b/shared/shell-utils.h
+@@ -37,6 +37,9 @@ struct weston_solid_color_surface {
+ struct weston_output *
+ get_default_output(struct weston_compositor *compositor);
+ 
++struct weston_output *
++get_output_user_override(struct weston_compositor *compositor);
++
+ struct weston_output *
+ get_focused_output(struct weston_compositor *compositor);
+ 
