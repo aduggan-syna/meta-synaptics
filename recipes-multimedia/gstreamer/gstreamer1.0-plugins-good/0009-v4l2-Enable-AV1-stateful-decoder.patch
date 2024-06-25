@@ -155,7 +155,7 @@ index 41f1763bff..056d540ed9 100644
 +    case V4L2_PIX_FMT_AV1:
 +      structure = gst_structure_new ("video/x-av1",
 +          "stream-format", G_TYPE_STRING, "obu-stream", "alignment",
-+          G_TYPE_STRING, "frame", NULL);
++          G_TYPE_STRING, "tu", NULL);
 +      break;
      case V4L2_PIX_FMT_GREY:    /*  8  Greyscale     */
      case V4L2_PIX_FMT_Y16:
