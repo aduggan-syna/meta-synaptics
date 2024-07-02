@@ -23,6 +23,7 @@ SRCREV_FORMAT = "taenc"
 require synasdk-build.inc
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
+INSANE_SKIP:${PN} += "file-rdeps"
 
 do_compile () {
     # We may not need them from the syna-release package
@@ -47,6 +48,11 @@ do_install () {
     find "${S}/ta_enc" -type f \
         -regex ".*${syna_chip_name}/${syna_chip_rev}.*1316a183.*\.ta$" -exec sh -c \
         'install -Dm0644 {} ${D}${nonarch_base_libdir}/optee_armtz/$(basename {})' \;
+
+    install -d ${D}${libdir}/tee-supplicant/plugins
+    find "${S}/ta_enc" -type f \
+        -regex ".*${syna_chip_name}/${syna_chip_rev}.*1316a183.*\.plugin$" -exec sh -c \
+        'install -Dm0644 {} ${D}${libdir}/tee-supplicant/plugins/$(basename {})' \;
 
     KERNEL_LOAD_TA=""
     if [ "is${CONFIG_TA_GFX_IMG_LINUX}" = "isy" ]; then
@@ -77,6 +83,7 @@ FILES:${PN} = " \
     ${nonarch_base_libdir}/ta \
     ${nonarch_base_libdir}/firmware/ta \
     ${nonarch_base_libdir}/optee_armtz \
+    ${libdir}/tee-supplicant/plugins \
 "
 
 do_deploy () {
