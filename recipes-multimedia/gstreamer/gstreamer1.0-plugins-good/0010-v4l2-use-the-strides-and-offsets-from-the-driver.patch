@@ -1,7 +1,7 @@
-From 23e7aaa2084bf0823080d18000ab69e189b10710 Mon Sep 17 00:00:00 2001
+From fc44cedebbac7287acdfb9d9542320edad9dbf91 Mon Sep 17 00:00:00 2001
 From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
 Date: Tue, 26 Sep 2023 15:37:18 +0800
-Subject: [PATCH 05/15] v4l2: use the strides and offsets from the driver
+Subject: [PATCH 10/19] v4l2: use the strides and offsets from the driver
 
 The negotiation could endup a size much larger than the driver
 could support.
@@ -11,7 +11,7 @@ could support.
  2 files changed, 24 insertions(+), 32 deletions(-)
 
 diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
-index 58c209929b..92b83dbfba 100644
+index 38569bff5d..4a74f0cc07 100644
 --- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
 +++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
 @@ -624,6 +624,13 @@ gst_v4l2_buffer_pool_set_config (GstBufferPool * bpool, GstStructure * config)
@@ -29,10 +29,10 @@ index 58c209929b..92b83dbfba 100644
  done:
    ret = GST_BUFFER_POOL_CLASS (parent_class)->set_config (bpool, config);
 diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
-index 9736cd5bf5..701bb5ef82 100644
+index 98aa03fda8..10723780ce 100644
 --- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
 +++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
-@@ -3360,7 +3360,7 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
+@@ -3378,7 +3378,7 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
  {
    const GstVideoFormatInfo *finfo = info->finfo;
    gboolean standard_stride = TRUE;
@@ -41,7 +41,7 @@ index 9736cd5bf5..701bb5ef82 100644
  
    if (GST_VIDEO_INFO_FORMAT (info) == GST_VIDEO_FORMAT_ENCODED) {
      v4l2object->n_v4l2_planes = 1;
-@@ -3374,24 +3374,6 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
+@@ -3392,24 +3392,6 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
    else
      stride = format->fmt.pix.bytesperline;
  
@@ -66,7 +66,7 @@ index 9736cd5bf5..701bb5ef82 100644
    /* adjust bottom padding */
    padded_height = format->fmt.pix.height;
  
-@@ -3404,6 +3386,20 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
+@@ -3422,6 +3404,20 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
    align->padding_bottom =
        padded_height - GST_VIDEO_INFO_FIELD_HEIGHT (info) - align->padding_top;
  
@@ -87,7 +87,7 @@ index 9736cd5bf5..701bb5ef82 100644
    /* setup the strides and offset */
    if (V4L2_TYPE_IS_MULTIPLANAR (v4l2object->type)) {
      struct v4l2_pix_format_mplane *pix_mp = &format->fmt.pix_mp;
-@@ -3420,6 +3416,7 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
+@@ -3438,6 +3434,7 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
        gst_v4l2_object_set_stride (info, align, i, stride);
        info->offset[i] = info->size;
        info->size += pix_mp->plane_fmt[i].sizeimage;
@@ -95,7 +95,7 @@ index 9736cd5bf5..701bb5ef82 100644
      }
  
      /* Extrapolate stride if planar format are being set in 1 v4l2 plane */
-@@ -3431,6 +3428,7 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
+@@ -3449,6 +3446,7 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
      /* only one plane in non-MPLANE mode */
      v4l2object->n_v4l2_planes = 1;
      info->size = format->fmt.pix.sizeimage;
@@ -103,7 +103,7 @@ index 9736cd5bf5..701bb5ef82 100644
      stride = format->fmt.pix.bytesperline;
  
      if (info->stride[0] != stride)
-@@ -3439,19 +3437,6 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
+@@ -3457,19 +3455,6 @@ gst_v4l2_object_save_format (GstV4l2Object * v4l2object,
      gst_v4l2_object_extrapolate_info (v4l2object, info, align, stride);
    }
  

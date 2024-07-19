@@ -1,7 +1,7 @@
-From 1e286642c6846e7a7afda24de2c3d40c2488e65a Mon Sep 17 00:00:00 2001
+From eb40d64ced559a591874e6bf929f8dc6c9c03def Mon Sep 17 00:00:00 2001
 From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
 Date: Wed, 20 Dec 2023 15:59:46 +0800
-Subject: [PATCH 07/15] v4l2object: add probing of colorspace bt2100-pq
+Subject: [PATCH 12/19] v4l2object: add probing of colorspace bt2100-pq
 
 We should also add bt2020-10, bt2100-hlg here but V4L2 don't
 have their transfer functions' defination.
@@ -10,7 +10,7 @@ have their transfer functions' defination.
  1 file changed, 11 insertions(+)
 
 diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
-index a2f4aae834..41f1763bff 100644
+index 66ebe08777..6edbbf5546 100644
 --- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
 +++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
 @@ -2521,6 +2521,17 @@ gst_v4l2_object_add_colorspace (GstV4l2Object * v4l2object, GstStructure * s,

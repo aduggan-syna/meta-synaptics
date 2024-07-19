@@ -1,7 +1,7 @@
-From 029fa380b02ce68545c131eaf68c0c15b082b90f Mon Sep 17 00:00:00 2001
+From bc910fe7f20dfa8be7bcaf20f7931bbb60283bdd Mon Sep 17 00:00:00 2001
 From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
 Date: Thu, 7 Dec 2023 15:20:04 +0800
-Subject: [PATCH 11/15] v4l2videodec: src_ch resume
+Subject: [PATCH 15/19] v4l2videodec: src_ch resume
 
 We could skip a buffer allocation if the buffer requirement is
 the same.
@@ -14,7 +14,7 @@ Signed-off-by: Hsia-Jun(Randy) Li <randy.li@synaptics.com>
  3 files changed, 108 insertions(+), 6 deletions(-)
 
 diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
-index 9ebbd93735..9877edb488 100644
+index 4a74f0cc07..6831ca3d55 100644
 --- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
 +++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
 @@ -724,6 +724,59 @@ streamon_failed:
@@ -77,7 +77,7 @@ index 9ebbd93735..9877edb488 100644
  /* Call with streamlock held, or when streaming threads are down */
  static void
  gst_v4l2_buffer_pool_streamoff (GstV4l2BufferPool * pool)
-@@ -1677,15 +1730,18 @@ gst_v4l2_buffer_pool_release_buffer (GstBufferPool * bpool, GstBuffer * buffer)
+@@ -1674,15 +1727,18 @@ gst_v4l2_buffer_pool_release_buffer (GstBufferPool * bpool, GstBuffer * buffer)
    gboolean queued = FALSE;
  
    if (gst_v4l2_is_buffer_valid (buffer, &group)) {

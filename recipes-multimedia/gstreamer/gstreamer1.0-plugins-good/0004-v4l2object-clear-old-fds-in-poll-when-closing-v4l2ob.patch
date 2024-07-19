@@ -1,7 +1,7 @@
-From 7d17e63a9f4700c42891aa863455f7c99b4e7892 Mon Sep 17 00:00:00 2001
+From d08dbb7bd684bf1dee9020baca24c70595868932 Mon Sep 17 00:00:00 2001
 From: Chao Guo <chao.guo@nxp.com>
 Date: Mon, 18 Dec 2023 11:03:57 +0900
-Subject: [PATCH 03/15] v4l2object: clear old fds in poll when closing
+Subject: [PATCH 04/19] v4l2object: clear old fds in poll when closing
  v4l2object
 
 When reopening a v4l2 device, the v4l2object->poll will include some old fds,
@@ -22,7 +22,7 @@ Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/58
  1 file changed, 4 insertions(+)
 
 diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
-index 7c787f11fc..9736cd5bf5 100644
+index e7241ebf79..e0166907aa 100644
 --- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
 +++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
 @@ -969,6 +969,10 @@ gst_v4l2_object_close (GstV4l2Object * v4l2object)

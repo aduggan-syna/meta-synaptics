@@ -1,7 +1,7 @@
-From 9752cb46bcbb59f16c2c3337104df6fdb0aa9b30 Mon Sep 17 00:00:00 2001
+From 57f8f3185f07381071b55595cd3337404d96989b Mon Sep 17 00:00:00 2001
 From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
 Date: Thu, 1 Dec 2022 14:49:03 +0800
-Subject: [PATCH 09/15] v4l2: Enable AV1 stateful decoder
+Subject: [PATCH 14/19] v4l2: Enable AV1 stateful decoder
 
 ---
  .../sys/v4l2/gstv4l2av1codec.c                | 78 +++++++++++++++++++
@@ -137,7 +137,7 @@ index 0000000000..be23eec56d
 +
 +#endif
 diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
-index 41f1763bff..056d540ed9 100644
+index 6edbbf5546..ff418f636a 100644
 --- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
 +++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
 @@ -194,6 +194,7 @@ static const GstV4L2FormatDesc gst_v4l2_formats[] = {

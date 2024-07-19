@@ -7,19 +7,23 @@ BUGTRACKER = "https://gitlab.freedesktop.org/gstreamer/gst-plugins-good/-/issues
 SRC_URI = "https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-${PV}.tar.xz \
            file://0001-qt-include-ext-qt-gstqtgl.h-instead-of-gst-gl-gstglf.patch \
            file://0001-v4l2-Define-ioctl_req_t-for-posix-linux-case.patch \
-           file://0003-v4l2object-clear-old-fds-in-poll-when-closing-v4l2ob.patch;striplevel=3 \
-           file://0004-v4l2-update-v4l2-header.patch;striplevel=3 \
-           file://0005-v4l2-use-the-strides-and-offsets-from-the-driver.patch;striplevel=3 \
-           file://0006-v4l2-object-add-NV15-format.patch;striplevel=3 \
-           file://0007-v4l2object-add-probing-of-colorspace-bt2100-pq.patch;striplevel=3 \
-           file://0008-v4l2videodec-allow-variable-framerate.patch;striplevel=3 \
-           file://0009-v4l2-Enable-AV1-stateful-decoder.patch;striplevel=3 \
-           file://0010-v4l2bufferpool-fix-enqueue-buffer-counter.patch;striplevel=3 \
-           file://0011-v4l2videodec-src_ch-resume.patch;striplevel=3 \
-           file://0012-v4l2videodec-ensure-finish-dispatchs-pending.patch;striplevel=3 \
-           file://0013-v4l2-videodec-only-copy-the-frame-visual-region.patch;striplevel=3 \
-           file://0014-v4l2object-parse-stride_align.patch;striplevel=3 \
-           file://0015-v4l2transform-force-256-Bytes-aligned-stride.patch;striplevel=3 \
+           file://0003-v4l2object-scale-the-encoded-sizeimage-based-on-maxi.patch;striplevel=3 \
+           file://0004-v4l2object-clear-old-fds-in-poll-when-closing-v4l2ob.patch;striplevel=3 \
+           file://0005-v4l2-Also-set-max_width-max_height-if-enum-framesize.patch;striplevel=3 \
+           file://0006-v4l2-allocator-Fix-unref-log-trace-on-memory-release.patch;striplevel=3 \
+           file://0007-v4l2bufferpool-queue-back-the-buffer-flagged-LAST-bu.patch;striplevel=3 \
+           file://0008-v4l2bufferpool-Ensure-freshly-created-buffers-are-no.patch;striplevel=3 \
+           file://0009-v4l2-update-v4l2-header.patch;striplevel=3 \
+           file://0010-v4l2-use-the-strides-and-offsets-from-the-driver.patch;striplevel=3 \
+           file://0011-v4l2-object-add-NV15-format.patch;striplevel=3 \
+           file://0012-v4l2object-add-probing-of-colorspace-bt2100-pq.patch;striplevel=3 \
+           file://0013-v4l2videodec-allow-variable-framerate.patch;striplevel=3 \
+           file://0014-v4l2-Enable-AV1-stateful-decoder.patch;striplevel=3 \
+           file://0015-v4l2videodec-src_ch-resume.patch;striplevel=3 \
+           file://0016-v4l2videodec-ensure-finish-dispatchs-pending.patch;striplevel=3 \
+           file://0017-v4l2-videodec-only-copy-the-frame-visual-region.patch;striplevel=3 \
+           file://0018-v4l2object-parse-stride_align.patch;striplevel=3 \
+           file://0019-v4l2transform-force-256-Bytes-aligned-stride.patch;striplevel=3 \
            "
 
 SRC_URI[sha256sum] = "e305b9f07f52743ca481da0a4e0c76c35efd60adaf1b0694eb3bb021e2137e39"
