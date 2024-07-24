@@ -1,0 +1,13 @@
+diff --git a/profiles/input/input.conf b/profiles/input/input.conf
+index d8645f3..1e1e2dd 100644
+--- a/profiles/input/input.conf
++++ b/profiles/input/input.conf
+@@ -10,7 +10,7 @@
+ 
+ # Enable HID protocol handling in userspace input profile
+ # Defaults to false (HIDP handled in HIDP kernel module)
+-#UserspaceHID=true
++UserspaceHID=true
+ 
+ # Limit HID connections to bonded devices
+ # The HID Profile does not specify that devices must be bonded, however some
