@@ -31,6 +31,7 @@ IMAGE_INSTALL:append = " \
     synasdk-drivers-dwc3-syna \
     synasdk-drivers-phy-syna-usb \
     synasdk-drivers-berlin-chipid \
+    synasdk-drivers-rpi-panel-attiny-regulator \
     synasdk-demos \
     alsa-utils \
     gstreamer1.0-meta-base \
