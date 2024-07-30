@@ -14,10 +14,11 @@ PV = "git${SRCPV}"
 
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/v4l2isp"
 
-DEPENDS = "libmxml synasdk-v4l2isp-sensordrv"
+DEPENDS = "libmxml gstreamer1.0 gstreamer1.0-plugins-base synasdk-v4l2isp-sensordrv"
 
 FILES:${PN} = " \
     ${libdir}/*.so* \
+    ${bindir}/t_server_c* \
 "
 
 INSANE_SKIP:${PN} = "ldflags"
@@ -30,9 +31,14 @@ FILES_SOLIBSDEV = ""
 
 do_install () {
     install -m 0755 -d ${D}${libdir}
+    install -m 0755 -d ${D}${bindir}
     install ${S}/lib/libisp_driver.so ${D}${libdir}
     install ${S}/lib/libmc_media_device.so ${D}${libdir}
     install ${S}/lib/libt_common_c.so* ${D}${libdir}
     install ${S}/lib/libt_json_c.so* ${D}${libdir}
     install ${S}/lib/libt_database_c.so* ${D}${libdir}
+    install ${S}/lib/libt_driver_c.so* ${D}${libdir}
+    install ${S}/lib/libt_shell_c.so* ${D}${libdir}
+    install ${S}/lib/libt_transmit_c.so* ${D}${libdir}
+    install ${S}/bin/t_server_c* ${D}${bindir}
 }
