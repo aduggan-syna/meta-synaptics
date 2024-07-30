@@ -1,6 +1,6 @@
 DESCRIPTION = "Bootloader for Synaptics platform."
-LICENSE = "CLOSED"
-LICENSE_FLAGS = "Synaptics-EULA"
+LICENSE = "GPL-2.0-or-later"
+LIC_FILES_CHKSUM = "file://boot/u-boot_2019_10/Licenses/README;md5=30503fd321432fc713238f582193b78e"
 SECTION = "bootloaders"
 
 PR = "r3"
