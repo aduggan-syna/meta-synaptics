@@ -16,22 +16,22 @@ fi
 echo "\
 [Unit]
 Before=local-fs.target
-After=blockdev@dev-${root_block}p1.target
+After=blockdev@dev-${root_block}p@FACTORY_PARTITION@.target
 
 [Mount]
-What=${root_device}p1
+What=${root_device}p@FACTORY_PARTITION@
 Where=/factory_setting" \
 	> ${mount_location}/factory_setting.mount
 
 echo "\
 [Unit]
 Before=local-fs.target
-Requires=systemd-fsck@dev-${root_block}p18.service
-After=systemd-fsck@dev-${root_block}p18.service
-After=blockdev@dev-${root_block}p18.target
+Requires=systemd-fsck@dev-${root_block}p@HOME_PARTITION@.service
+After=systemd-fsck@dev-${root_block}p@HOME_PARTITION@.service
+After=blockdev@dev-${root_block}p@HOME_PARTITION@.target
 
 [Mount]
-What=${root_device}p18
+What=${root_device}p@HOME_PARTITION@
 Where=/home" \
 	> ${mount_location}/home.mount
 
