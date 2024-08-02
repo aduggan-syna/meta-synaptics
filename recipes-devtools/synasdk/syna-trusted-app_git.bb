@@ -41,6 +41,11 @@ do_install () {
     find "${S}/ta_enc" -type f \
         -regex ".*${syna_chip_name}/${syna_chip_rev}.*1316a183.*\.ta$" -exec sh -c \
         'install -Dm0644 {} ${D}${nonarch_base_libdir}/optee_armtz/$(basename {})' \;
+
+    install -d ${D}${libdir}/tee-supplicant/plugins
+    find "${S}/ta_enc" -type f \
+        -regex ".*${syna_chip_name}/${syna_chip_rev}.*1316a183.*\.plugin$" -exec sh -c \
+        'install -Dm0644 {} ${D}${libdir}/tee-supplicant/plugins/$(basename {})' \;
 }
 
 FILES:${PN} = " \
