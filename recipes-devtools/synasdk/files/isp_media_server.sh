@@ -26,7 +26,7 @@ set -e
 
 case $1 in
     start)
-        echo "sensor=imx258 xml=/usr/share/IMX258.xml manu_json=/usr/share/ISP_Manual.json \
+        echo "sensor=imx258 xml=/usr/share/IMX258.xml manu_json=/usr/share/ISP_Manual_IMX258.json \
         auto_json=/usr/share/ISP_Auto.json i2c_bus_id=3 mipi_id=0 mode=0" > /proc/vsi/isp_subdev0
         echo -n "Starting $DESC: "
         start-stop-daemon --start $SSD_OPTIONS  > $LOGFILE &

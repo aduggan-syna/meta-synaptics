@@ -22,7 +22,8 @@ SYSTEMD_SERVICE:${PN} = "isp_media_server.service"
 SYSTEMD_AUTO_ENABLE = "enable"
 
 SRC_URI:append:dolphin = " \
-    file://ISP_Manual.json \
+    file://ISP_Manual_IMX258.json \
+    file://ISP_Manual_IMX415.json \
     file://ISP_Auto.json \
     file://IMX258.xml \
     file://IMX415.xml \
@@ -61,7 +62,8 @@ do_install:append() {
     fi
 
     install -d ${D}${datadir}
-    install -m 0644 ${WORKDIR}/ISP_Manual.json ${D}${datadir}
+    install -m 0644 ${WORKDIR}/ISP_Manual_IMX258.json ${D}${datadir}
+    install -m 0644 ${WORKDIR}/ISP_Manual_IMX415.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/ISP_Auto.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX258.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX415.xml ${D}${datadir}
