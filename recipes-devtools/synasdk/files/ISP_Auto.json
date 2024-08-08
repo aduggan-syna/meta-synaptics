@@ -24,7 +24,7 @@
       "motionFilter": 0.5,
       "motionThreshold": 0.7,
       "roiWeight": 0.6,
-      "semMode": 1,
+      "semMode": 0,
       "setPoint": 80,
       "targetFilter": 0.5,
       "tolerance": 20,
