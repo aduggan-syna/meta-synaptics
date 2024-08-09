@@ -12,6 +12,8 @@ BBLAYERS ?= " \
   ##OEROOT##/../meta-openembedded/meta-oe \
   ##OEROOT##/../meta-openembedded/meta-python \
   ##OEROOT##/../meta-openembedded/meta-multimedia \
+  ##OEROOT##/../meta-browser/meta-chromium \
+  ##OEROOT##/../meta-clang \
   ##OEROOT##/../meta-qt5 \
   ##OEROOT##/../meta-synaptics \
   ##OEROOT##/../meta-swupdate \
