@@ -41,7 +41,12 @@ do_compile () {
 }
 
 do_deploy() {
-    install -m 0644 target/preboot/preboot_esmt.bin ${DEPLOYDIR}/preboot.subimg
+    if [ ${MACHINE} == "sl1640usb" ]; then
+        install -m 0644 target/preboot/intermediate/release/sysinit_en.bin ${DEPLOYDIR}/
+        install -m 0644 target/preboot/intermediate/release/miniloader_en.bin ${DEPLOYDIR}/
+    else
+        install -m 0644 target/preboot/preboot_esmt.bin ${DEPLOYDIR}/preboot.subimg
+    fi
 }
 
 addtask deploy before do_package after do_install

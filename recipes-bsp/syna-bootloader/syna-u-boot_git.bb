@@ -61,16 +61,19 @@ do_compile () {
 }
 
 do_deploy () {
-    # sm_fw_en.bin (only for GenX, i.e PLATYPUS for now)
-    if [ -f "${B}/target/release/uboot/sm_fw_en.bin" ]; then
-        install -m 0644 "${B}/target/release/uboot/sm_fw_en.bin" ${DEPLOYDIR}
-    fi
+    if [ "${MACHINE}" = "sl1640usb" ]; then
+        install -m 0644 ${B}/target/release/uboot/uboot_en.bin ${DEPLOYDIR}
+    else
+        # sm_fw_en.bin (only for GenX, i.e PLATYPUS for now)
+        if [ -f "${B}/target/release/uboot/sm_fw_en.bin" ]; then
+            install -m 0644 "${B}/target/release/uboot/sm_fw_en.bin" ${DEPLOYDIR}
+        fi
 
-    # bootloader.subimg
-    prepend_image_info.sh ${B}/target/release/uboot/uboot_en.bin ${DEPLOYDIR}/bootloader_nopreload.subimg
+        # bootloader.subimg
+        prepend_image_info.sh ${B}/target/release/uboot/uboot_en.bin ${DEPLOYDIR}/bootloader_nopreload.subimg
 
-    # Generate Partition tables
-    parse_pt_emmc 101 101 \
+        # Generate Partition tables
+        parse_pt_emmc 101 101 \
                   ${CONFIG_EMMC_BLOCK_SIZE} ${CONFIG_EMMC_TOTAL_SIZE} \
                   ${EMMC_PT_FILE} \
                   ${DEPLOYDIR}/linux_params_mtdparts \
@@ -80,10 +83,11 @@ do_deploy () {
                   ${DEPLOYDIR}/emmc_part_list \
                   ${DEPLOYDIR}/emmc_image_list
 
-    # Update the CRC of the version table
-    crc -a ${DEPLOYDIR}/version_table
-    # Change the subimage files to .gz
-    sed -i -e 's:\([a-zA-Z0-9]\+\)\(_[a|b]\)\?\.subimg,:\1.subimg.gz,:' ${DEPLOYDIR}/emmc_image_list
+        # Update the CRC of the version table
+        crc -a ${DEPLOYDIR}/version_table
+        # Change the subimage files to .gz
+        sed -i -e 's:\([a-zA-Z0-9]\+\)\(_[a|b]\)\?\.subimg,:\1.subimg.gz,:' ${DEPLOYDIR}/emmc_image_list
+    fi
 }
 
 addtask deploy before do_package after do_install
