@@ -29,7 +29,7 @@ DEPENDS:append:syna = " \
 "
 
 CMDLINE_EMMC_BOOT = "console=ttyS0,115200 rootwait rootfstype=ext4"
-CMDLINE_EMMC_BOOT = "console=ttyS0,115200 console=tty0 rootwait rootfstype=ext4"
+CMDLINE_EMMC_BOOT:sl1640usb = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
 CMDLINE_EMMC_BOOT:append = "${@bb.utils.contains('KGDB_ENABLE', '1', ' kgdboc=ttyS0,115200', '', d)}"
 CMDLINE_EMMC_BOOT:append = "${@bb.utils.contains('KGDB_WAIT', '1', ' kgdbwait', '', d)}"
 
