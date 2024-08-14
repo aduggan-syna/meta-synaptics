@@ -16,7 +16,8 @@ RDEPENDS:${PN} = " \
     libdrm \
     wayland \
     imgtec-pvr-firmware \
-    libglapi libgles1-mesa libegl-mesa libgbm \
+    libglapi libgles1-mesa libegl-mesa libgbm mesa-vulkan-drivers \
+    libgles2-mesa \
 "
 
 COMPATIBLE_MACHINE = "syna"
@@ -60,6 +61,20 @@ do_install:append:aarch64 () {
         file_name=`basename "${i}"`
         install -Dm0755 ${i} ${D}${bindir}/${file_name}
     done
+
+    # Check if ${D}${libdir}/libVK_IMG.so exists and create a symbolic link
+    if [ -f "${D}${libdir}/libVK_IMG.so" ]; then \
+        cd ${D}${libdir}
+        ln -sf "libVK_IMG.so" "libVK_IMG.so.1"; \
+        cd -
+    fi
+
+    # Check if ${D}${libdir}/libvulkan.so exists and create a symbolic link
+    if [ -f "${D}${libdir}/libvulkan.so" ]; then \
+        cd ${D}${libdir}
+        ln -sf "libvulkan.so" "libvulkan.so.1"; \
+        cd -
+    fi
 }
 
 do_install:append:arm () {
@@ -91,7 +106,7 @@ do_install:append:arm () {
 INSANE_SKIP:${PN} = "ldflags"
 INSANE_SKIP:${MLPREFIX}imgtec-pvr-firmware = "arch"
 
-SOLIBS = ".so"
+SOLIBS = ".so*"
 FILES_SOLIBSDEV = ""
 
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
