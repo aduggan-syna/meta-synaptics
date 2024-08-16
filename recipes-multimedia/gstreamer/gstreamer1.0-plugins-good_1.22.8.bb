@@ -24,6 +24,7 @@ SRC_URI = "https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-go
            file://0017-v4l2-videodec-only-copy-the-frame-visual-region.patch;striplevel=3 \
            file://0018-v4l2object-parse-stride_align.patch;striplevel=3 \
            file://0019-v4l2transform-force-256-Bytes-aligned-stride.patch;striplevel=3 \
+           file://0020-v4l2src-adding-support-for-bayer-10bit.patch;striplevel=3 \
            "
 
 SRC_URI[sha256sum] = "e305b9f07f52743ca481da0a4e0c76c35efd60adaf1b0694eb3bb021e2137e39"
