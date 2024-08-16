@@ -108,6 +108,7 @@ IMAGE_INSTALL:append:dolphin = " \
 IMAGE_INSTALL:append:platypus = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-drivers-sunplus \
+    synasdk-drivers-syna-dvfs \
 "
 
 TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-framework-staticdev"
