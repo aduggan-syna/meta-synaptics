@@ -72,6 +72,7 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-good-cairo \
     gstreamer1.0-plugins-good-rtsp \
     gstreamer1.0-plugins-good-rtpmanager \
+    hostapd \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
