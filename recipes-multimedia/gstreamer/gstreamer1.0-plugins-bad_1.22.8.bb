@@ -13,6 +13,7 @@ SRC_URI = "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad
            file://0005-waylandsink-enable-window-drag.patch \
            file://0006-kmsink-update-atomic-buffer_rel.patch \
            file://0007-waylandsink-increase-buffer-count.patch \
+           file://0008-kmssink-enable-playback-on-leasedrmfd.patch \
            "
 SRC_URI[sha256sum] = "458783f8236068991e3e296edd671c8eddb8be6fac933c1c2e1503462864ea0f"
 
