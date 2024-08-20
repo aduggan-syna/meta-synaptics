@@ -6,5 +6,6 @@ SRC_URI += "file://0005-backend-drm-allow-linear-framebuffers-if-no-KMS-modi.pat
 SRC_URI += "file://0006-enable-triple-buffer.patch"
 SRC_URI += "file://0007-xdgwindow-select-display.patch"
 SRC_URI += "file://0008-update-drm-planes-on-disconnect.patch"
+SRC_URI += "file://0009-enable-leaseout-drm-resources.patch"
 
 REQUIRED_DISTRO_FEATURES:remove = "${@oe.utils.conditional('VIRTUAL-RUNTIME_init_manager', 'systemd', 'pam', '', d)}"

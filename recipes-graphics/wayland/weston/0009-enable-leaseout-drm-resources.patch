@@ -1,0 +1,461 @@
+diff --git a/compositor/main.c b/compositor/main.c
+index 322f2ff..4a5bb07 100644
+--- a/compositor/main.c
++++ b/compositor/main.c
+@@ -2652,6 +2652,10 @@ load_drm_backend(struct weston_compositor *c,
+ 	                               &config.pageflip_timeout, 0);
+ 	weston_config_section_get_bool(section, "pixman-shadow",
+ 				       &config.use_pixman_shadow, true);
++	weston_config_section_get_uint(section, "lease-connector-id",
++				       &config.lease_connector_id, 0);
++	weston_config_section_get_uint(section, "lease-plane-id",
++				       &config.lease_plane_id, 0);
+ 	if (without_input)
+ 		c->require_input = !without_input;
+ 
+diff --git a/include/libweston/backend-drm.h b/include/libweston/backend-drm.h
+index af2da4a..d0a7603 100644
+--- a/include/libweston/backend-drm.h
++++ b/include/libweston/backend-drm.h
+@@ -223,6 +223,13 @@ struct weston_drm_backend_config {
+ 
+ 	/** Use shadow buffer if using Pixman-renderer. */
+ 	bool use_pixman_shadow;
++
++	/** lease out resources to be used by other specific client.
++	 * leased out resources won't be used by weston, even if no client
++	 * has requested for the resources
++	 */
++	uint32_t lease_connector_id;
++	uint32_t lease_plane_id;
+ };
+ 
+ #ifdef  __cplusplus
+diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
+index 8bebe16..be020e7 100644
+--- a/libweston/backend-drm/drm-internal.h
++++ b/libweston/backend-drm/drm-internal.h
+@@ -249,6 +249,13 @@ enum actions_needed_dmabuf_feedback {
+ 	ACTION_NEEDED_REMOVE_SCANOUT_TRANCHE = (1 << 1),
+ };
+ 
++enum leased_out_objects {
++	LEASE_CONNECTOR_INDEX,
++	LEASE_CRTC_INDEX,
++	LEASE_PLANE_INDEX,
++	LEASE_MAX_COUNT,
++};
++
+ struct drm_backend {
+ 	struct weston_backend base;
+ 	struct weston_compositor *compositor;
+@@ -311,6 +318,13 @@ struct drm_backend {
+ 	bool fb_modifiers;
+ 
+ 	struct weston_log_scope *debug;
++
++	uint32_t leased_objects[LEASE_MAX_COUNT];
++	uint32_t lessee_id;
++	int lease_fd;
++	int lease_sock_fd;
++	struct wl_event_source *leasefd_src;
++	bool lease_active;
+ };
+ 
+ struct drm_mode {
+diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
+index a2da0ed..85b1615 100644
+--- a/libweston/backend-drm/drm.c
++++ b/libweston/backend-drm/drm.c
+@@ -40,6 +40,8 @@
+ #include <linux/vt.h>
+ #include <assert.h>
+ #include <sys/mman.h>
++#include <sys/socket.h>
++#include <sys/un.h>
+ #include <time.h>
+ 
+ #include <xf86drm.h>
+@@ -66,6 +68,8 @@
+ #include "linux-dmabuf-unstable-v1-server-protocol.h"
+ #include "linux-explicit-synchronization.h"
+ 
++#define DRM_LEASE_SOCK_FILENAME "drm_lease_fd_sock"
++
+ static const char default_seat[] = "seat0";
+ 
+ static void
+@@ -926,6 +930,12 @@ create_sprites(struct drm_backend *b)
+ 	}
+ 
+ 	for (i = 0; i < kplane_res->count_planes; i++) {
++		if (b->leased_objects[LEASE_PLANE_INDEX] == kplane_res->planes[i]) {
++			weston_log("skipping plane %d for leasing out\n",
++					kplane_res->planes[i]);
++			continue;
++		}
++
+ 		kplane = drmModeGetPlane(b->drm.fd, kplane_res->planes[i]);
+ 		if (!kplane)
+ 			continue;
+@@ -1595,7 +1605,11 @@ drm_backend_create_crtc_list(struct drm_backend *b, drmModeRes *resources)
+ 
+ 	/* Iterate through all CRTCs */
+ 	for (i = 0; i < resources->count_crtcs; i++) {
+-
++		if (b->leased_objects[LEASE_CRTC_INDEX] == resources->crtcs[i]) {
++			weston_log("skip crtc %d for leasing out\n",
++					resources->crtcs[i]);
++			continue;
++		}
+ 		/* Let's create an object for the CRTC and add it to the list */
+ 		crtc = drm_crtc_create(b, resources->crtcs[i], i);
+ 		if (!crtc)
+@@ -2348,6 +2362,11 @@ drm_backend_discover_connectors(struct drm_backend *b, struct udev_device *drm_d
+ 
+ 	for (i = 0; i < resources->count_connectors; i++) {
+ 		uint32_t connector_id = resources->connectors[i];
++		if (b->leased_objects[LEASE_CONNECTOR_INDEX] == connector_id) {
++			weston_log("skip connector %d for leasing out\n",
++					connector_id);
++			continue;
++		}
+ 
+ 		conn = drmModeGetConnector(b->drm.fd, connector_id);
+ 		if (!conn)
+@@ -2556,9 +2575,28 @@ udev_drm_event(int fd, uint32_t mask, void *data)
+ 	return 1;
+ }
+ 
++static void
++drm_backend_release_lease_resources(struct drm_backend *b)
++{
++	char sock_fd_name[100];
++	const char *runtime_dir = getenv("XDG_RUNTIME_DIR");
++
++	snprintf(sock_fd_name, sizeof (sock_fd_name),
++                        "%s/%s", runtime_dir, DRM_LEASE_SOCK_FILENAME);
++
++	weston_log("revoking lease for lessee_id: %d socfile:%s\n", b->lessee_id, sock_fd_name);
++	drmModeRevokeLease(b->drm.fd, b->lessee_id);
++	close(b->lease_fd);
++
++	wl_event_source_remove(b->leasefd_src);
++	close(b->lease_sock_fd);
++	unlink(sock_fd_name);
++}
++
+ static void
+ drm_destroy(struct weston_compositor *ec)
+ {
++
+ 	struct drm_backend *b = to_drm_backend(ec);
+ 	struct weston_head *base, *next;
+ 	struct drm_crtc *crtc, *crtc_tmp;
+@@ -2571,6 +2609,9 @@ drm_destroy(struct weston_compositor *ec)
+ 
+ 	b->shutting_down = true;
+ 
++	if (b->lease_active)
++		drm_backend_release_lease_resources(b);
++
+ 	destroy_sprites(b);
+ 
+ 	weston_log_scope_destroy(b->debug);
+@@ -2976,6 +3017,275 @@ recorder_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+ }
+ #endif
+ 
++static bool
++check_plane_in_crtc(drmModeRes *res, uint32_t crtc_id, uint32_t possible_crtcs)
++{
++	int i;
++	for (i = 0; i < res->count_crtcs; i++) {
++		if (((1<<i) & possible_crtcs) && (res->crtcs[i] == crtc_id))
++			return true;
++	}
++	return false;
++}
++
++static int leasefd_socket_listen(int sock_fd, uint32_t mask, void *data)
++{
++	struct drm_backend *b = data;
++	int client_fd;
++	struct iovec iov;
++	struct msghdr msg = {0};
++	struct cmsghdr *cmsg;
++	ssize_t ret;
++
++	union {
++		struct cmsghdr hdr;
++		char buf[CMSG_SPACE(sizeof(int))];
++	} cms_dat;
++
++	client_fd = accept(sock_fd, NULL, NULL);
++	if (client_fd < 0) {
++		weston_log("failed to accept connection on lease soc %s\n",
++				strerror(errno));
++		return 1;
++	}
++
++	iov.iov_base = "1";
++	iov.iov_len = 1;
++
++	msg.msg_name = NULL;
++	msg.msg_namelen = 0;
++	msg.msg_iov = &iov;
++	msg.msg_iovlen = 1;
++
++	msg.msg_control = cms_dat.buf;
++	msg.msg_controllen = sizeof(cms_dat.buf);
++
++	cmsg = CMSG_FIRSTHDR(&msg);
++	cmsg->cmsg_type = SCM_RIGHTS;
++	cmsg->cmsg_level = SOL_SOCKET;
++	cmsg->cmsg_len = CMSG_LEN(sizeof (int));
++	memcpy(CMSG_DATA(cmsg), &b->lease_fd, sizeof(int));
++
++	ret = sendmsg(client_fd, &msg, 0);
++	if (ret < 0) {
++		weston_log("error in sending leasefd to client\n");
++	}
++
++	close(client_fd);
++
++	return 1;
++}
++
++static int drm_backend_setup_leasesoc(struct drm_backend *b)
++{
++	int sock_fd;
++	struct sockaddr_un addr;
++	socklen_t size;
++	const char *runtime_dir = "";
++	const char *leasefd_name = DRM_LEASE_SOCK_FILENAME;
++	struct wl_event_loop *loop;
++
++	runtime_dir = getenv("XDG_RUNTIME_DIR");
++	if (!runtime_dir || runtime_dir[0] != '/') {
++		weston_log("XDG_RUNTIME_DIR is invalid or not set in "
++			   "the environment, lease soc won't be created\n");
++
++		return -1;
++	}
++
++	addr.sun_family = AF_LOCAL;
++	snprintf(addr.sun_path, sizeof (addr.sun_path),
++			"%s/%s", runtime_dir, leasefd_name);
++
++	sock_fd = socket(PF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0);
++	if (sock_fd < 0) {
++		weston_log("error opening socket:%s in xdg path:%s\n",
++			   leasefd_name, runtime_dir);
++		return -1;
++	}
++
++	size = offsetof (struct sockaddr_un, sun_path) + strlen(addr.sun_path);
++	if (bind(sock_fd, (struct sockaddr *) &addr, size) < 0) {
++		weston_log("lease_fd: bind() failed with error: %s\n", strerror(errno));
++		goto error_soc_rel;
++	}
++
++	if (listen(sock_fd, 1) < 0) {
++		weston_log("lease_fd:listen() failed with error: %s\n", strerror(errno));
++		goto error_soc_rel;
++	}
++
++	loop = wl_display_get_event_loop(b->compositor->wl_display);
++
++	b->leasefd_src = wl_event_loop_add_fd(loop, sock_fd,
++			WL_EVENT_READABLE,
++			leasefd_socket_listen,
++			b);
++
++	if (b->leasefd_src == NULL)
++		goto error_soc_rel;
++
++	b->lease_sock_fd = sock_fd;
++	return 0;
++
++error_soc_rel:
++	close(sock_fd);
++	return -1;
++}
++
++static void drm_backend_setup_lease(struct drm_backend *b)
++{
++
++	int lessee_fd;
++
++	lessee_fd = drmModeCreateLease(b->drm.fd, b->leased_objects,
++			LEASE_MAX_COUNT, O_CLOEXEC | O_NONBLOCK, &b->lessee_id);
++
++	if (lessee_fd <= 0) {
++		weston_log("error creating drm lease : %s\n", strerror(errno));
++		return;
++	}
++
++	weston_log("drm lease created with fd:%d and leaseId:%d\n", lessee_fd, b->lessee_id);
++	b->lease_fd = lessee_fd;
++	drm_backend_setup_leasesoc(b);
++}
++
++static void
++drm_backend_validate_lease_request(struct drm_backend *b,
++                                   struct weston_drm_backend_config *config,
++                                   drmModeRes *res)
++{
++	drmModePlaneRes *plane_res;
++	drmModePlane *plane;
++	drmModeConnector *conn;
++	drmModeEncoder *encoder;
++	drmModeCrtc *crtc;
++	uint32_t lease_conn_id;
++	uint32_t lease_plane_id;
++	uint32_t lease_crtc_id;
++	uint32_t lease_crtc_index;
++	uint32_t possible_crtcs = 0;
++	int i,j;
++	int drm_fd = b->drm.fd;
++
++	b->lease_active = false;
++	lease_conn_id = config->lease_connector_id;
++	lease_plane_id = config->lease_plane_id;
++	if (!lease_conn_id || !lease_plane_id)
++		return;
++
++	for (i = 0; i < res->count_connectors; i++) {
++		uint32_t connector_id = res->connectors[i];
++		if (connector_id != lease_conn_id)
++			continue;
++
++		conn = drmModeGetConnector(drm_fd, connector_id);
++                if (!conn)
++			return;
++
++		/* Get the crtc that's driving this connector this connector. */
++		encoder = drmModeGetEncoder(drm_fd, conn->encoder_id);
++		drmModeFreeConnector(conn);
++		if (!encoder)
++			return;
++
++		crtc = drmModeGetCrtc(drm_fd, encoder->crtc_id);
++		drmModeFreeEncoder(encoder);
++		if (!crtc)
++			return;
++
++		lease_crtc_id = crtc->crtc_id;
++		drmModeFreeCrtc(crtc);
++		break;
++	}
++
++	if (i == res->count_connectors) {
++		weston_log ("connector requested for lease (%d) is not present\n", lease_conn_id);
++		return;
++	}
++
++	plane_res = drmModeGetPlaneResources(drm_fd);
++	for (i = 0; i < plane_res->count_planes; i++) {
++		if (lease_plane_id != plane_res->planes[i])
++			continue;
++
++		plane = drmModeGetPlane(drm_fd, plane_res->planes[i]);
++		if (!plane)
++			return;
++
++		possible_crtcs = plane->possible_crtcs;
++		drmModeFreePlane(plane);
++		break;
++	}
++
++	if (i == plane_res->count_planes) {
++		weston_log ("plane requested for lease (%d) is not present\n", lease_plane_id);
++		return;
++	}
++
++	weston_log ("selected crtc index for lease:%d plane id for lease:%d (supported crtcs 0x%x)\n",
++			lease_crtc_id, plane->plane_id, possible_crtcs);
++
++	if (!check_plane_in_crtc(res, lease_crtc_id, possible_crtcs)) {
++		weston_log ("selected plane for lease can't be mapped to connector\n");
++		return;
++	}
++
++	// now check if atleast one output can be configured for Weston with resources not reserved for lease.
++	for (i = 0; i < res->count_connectors; i++) {
++		uint32_t connector_id = res->connectors[i];
++		if (connector_id == lease_conn_id)
++			continue;
++
++		conn = drmModeGetConnector(drm_fd, connector_id);
++		encoder = drmModeGetEncoder(drm_fd, conn->encoder_id);
++		drmModeFreeConnector(conn);
++
++		crtc = drmModeGetCrtc(drm_fd, encoder->crtc_id);
++		drmModeFreeEncoder(encoder);
++
++		if (crtc->crtc_id == lease_crtc_index) {
++			/* same crtc connected to multiple connectors */
++			drmModeFreeCrtc(crtc);
++			continue;
++		}
++
++		for (j = 0; j < plane_res->count_planes; j++) {
++			if (lease_plane_id == plane_res->planes[j])
++				continue;
++
++			plane = drmModeGetPlane(drm_fd, plane_res->planes[j]);
++
++			/* TODO: add check primary plane is available for weston */
++			if (check_plane_in_crtc(res, crtc->crtc_id, plane->possible_crtcs)) {
++				drmModeFreePlane(plane);
++				break;
++			}
++			drmModeFreePlane(plane);
++		}
++
++		drmModeFreeCrtc(crtc);
++
++		if (j == plane_res->count_planes)
++			continue;
++		else
++			break;
++	}
++
++	if (i == res->count_connectors) {
++		weston_log ("can't find a path for weston, so skip lease request\n");
++		return;
++	}
++
++	/* requested resources can be leased out */
++	b->leased_objects[LEASE_CONNECTOR_INDEX] = lease_conn_id;
++	b->leased_objects[LEASE_CRTC_INDEX] = lease_crtc_id;
++	b->leased_objects[LEASE_PLANE_INDEX] = lease_plane_id;
++	b->lease_active = true;
++	weston_log ("Reserving drm path to be leased later.. crtc:%d conn:%d plane:%d\n",
++			lease_crtc_id, lease_conn_id, lease_plane_id);
++}
+ 
+ static const struct weston_drm_output_api api = {
+ 	drm_output_set_mode,
+@@ -3087,6 +3397,10 @@ drm_backend_create(struct weston_compositor *compositor,
+ 		goto err_udev_dev;
+ 	}
+ 
++	/* check the lease requests are valid and weston can have one valid output path
++	 * after leasing out requested resources */
++	drm_backend_validate_lease_request(b, config, res);
++
+ 	wl_list_init(&b->crtc_list);
+ 	if (drm_backend_create_crtc_list(b, res) == -1) {
+ 		weston_log("Failed to create CRTC list for DRM-backend\n");
+@@ -3111,6 +3425,9 @@ drm_backend_create(struct weston_compositor *compositor,
+ 
+ 	drmModeFreeResources(res);
+ 
++	if (b->lease_active)
++		drm_backend_setup_lease(b);
++
+ 	/* 'compute' faked zpos values in case HW doesn't expose any */
+ 	drm_backend_create_faked_zpos(b);
+ 
