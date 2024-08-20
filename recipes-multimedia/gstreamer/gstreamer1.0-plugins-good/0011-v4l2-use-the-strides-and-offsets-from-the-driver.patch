@@ -1,7 +1,7 @@
-From fc44cedebbac7287acdfb9d9542320edad9dbf91 Mon Sep 17 00:00:00 2001
+From 3447e1962f16585f3c4416eaa2bcf524075ea92b Mon Sep 17 00:00:00 2001
 From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
 Date: Tue, 26 Sep 2023 15:37:18 +0800
-Subject: [PATCH 10/19] v4l2: use the strides and offsets from the driver
+Subject: [PATCH 11/20] v4l2: use the strides and offsets from the driver
 
 The negotiation could endup a size much larger than the driver
 could support.
@@ -11,7 +11,7 @@ could support.
  2 files changed, 24 insertions(+), 32 deletions(-)
 
 diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
-index 38569bff5d..4a74f0cc07 100644
+index 0dcc5bad5f..c04ce012b2 100644
 --- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
 +++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
 @@ -624,6 +624,13 @@ gst_v4l2_buffer_pool_set_config (GstBufferPool * bpool, GstStructure * config)

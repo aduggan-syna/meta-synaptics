@@ -1,7 +1,7 @@
-From 57f8f3185f07381071b55595cd3337404d96989b Mon Sep 17 00:00:00 2001
+From c280e75b6c2ddba5caac059c9c252f7955ff2944 Mon Sep 17 00:00:00 2001
 From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
 Date: Thu, 1 Dec 2022 14:49:03 +0800
-Subject: [PATCH 14/19] v4l2: Enable AV1 stateful decoder
+Subject: [PATCH 15/20] v4l2: Enable AV1 stateful decoder
 
 ---
  .../sys/v4l2/gstv4l2av1codec.c                | 78 +++++++++++++++++++

@@ -1,7 +1,7 @@
 From be9d2f64de7fe06a68217aacaa0925058a333fbb Mon Sep 17 00:00:00 2001
 From: Hou Qi <qi.hou@nxp.com>
 Date: Thu, 21 Mar 2024 18:07:42 +0900
-Subject: [PATCH 05/19] v4l2: Also set max_width/max_height if enum framesize
+Subject: [PATCH 05/20] v4l2: Also set max_width/max_height if enum framesize
  fail
 
 Some driver doesn't implement enum_framesize. The maximum supported

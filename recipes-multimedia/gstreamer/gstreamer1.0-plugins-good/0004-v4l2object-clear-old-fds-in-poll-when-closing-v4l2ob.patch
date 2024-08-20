@@ -1,7 +1,7 @@
 From d08dbb7bd684bf1dee9020baca24c70595868932 Mon Sep 17 00:00:00 2001
 From: Chao Guo <chao.guo@nxp.com>
 Date: Mon, 18 Dec 2023 11:03:57 +0900
-Subject: [PATCH 04/19] v4l2object: clear old fds in poll when closing
+Subject: [PATCH 04/20] v4l2object: clear old fds in poll when closing
  v4l2object
 
 When reopening a v4l2 device, the v4l2object->poll will include some old fds,

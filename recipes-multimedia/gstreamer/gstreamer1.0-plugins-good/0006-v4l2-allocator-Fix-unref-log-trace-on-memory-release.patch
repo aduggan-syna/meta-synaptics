@@ -1,7 +1,7 @@
 From 7a059e40b8aa2d64ab87610f8d69ee7c25e49a78 Mon Sep 17 00:00:00 2001
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Fri, 5 Apr 2024 14:21:38 +0200
-Subject: [PATCH 06/19] v4l2: allocator: Fix unref log/trace on memory release
+Subject: [PATCH 06/20] v4l2: allocator: Fix unref log/trace on memory release
 
 Use gst_object_unref() instead of g_object_unref() in
 gst_v4l2_allocator_release(), so refcounting log and

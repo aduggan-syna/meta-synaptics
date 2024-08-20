@@ -1,7 +1,7 @@
-From 6507259a5a6099d862db19baf2f5bbc5f2da3be8 Mon Sep 17 00:00:00 2001
+From 1d175f7184ef0ba3fec8f0197d4c67c03e4f7085 Mon Sep 17 00:00:00 2001
 From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
 Date: Tue, 23 Apr 2024 18:22:36 +0800
-Subject: [PATCH 18/19] v4l2object: parse stride_align
+Subject: [PATCH 19/20] v4l2object: parse stride_align
 
 It is hard to propose the plane sizes, we just assume
 the driver would update it to the right value.

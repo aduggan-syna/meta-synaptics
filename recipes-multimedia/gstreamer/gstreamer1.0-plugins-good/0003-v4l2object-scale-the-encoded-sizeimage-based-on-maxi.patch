@@ -1,7 +1,7 @@
 From 762c05c155a245d1a3d30c353c33c2a48d96cfaa Mon Sep 17 00:00:00 2001
 From: Shengqi Yu <shengqi.yu@mediatek.com>
 Date: Fri, 5 May 2023 17:01:50 +0800
-Subject: [PATCH 03/19] v4l2object: scale the encoded sizeimage based on
+Subject: [PATCH 03/20] v4l2object: scale the encoded sizeimage based on
  maximum resolution
 
 The default 2MB ENCODED_BUFFER_SIZE can't support some 4K video playback. We now

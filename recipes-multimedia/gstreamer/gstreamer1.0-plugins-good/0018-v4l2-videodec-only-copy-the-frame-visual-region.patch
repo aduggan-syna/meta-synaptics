@@ -1,7 +1,7 @@
-From bd4241d28bb484d041685ea251d9d2e0693bd04a Mon Sep 17 00:00:00 2001
+From 7bde3d22a1d78d3fa4af79baeaea36b0c167d5c3 Mon Sep 17 00:00:00 2001
 From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
 Date: Wed, 20 Mar 2024 15:25:12 +0800
-Subject: [PATCH 17/19] v4l2: videodec: only copy the frame visual region
+Subject: [PATCH 18/20] v4l2: videodec: only copy the frame visual region
 
 Sometimes the hardware would need an extra memory space, it would
 be hard for a user to notice that.
@@ -15,7 +15,7 @@ CSMSSMART-599
  3 files changed, 40 insertions(+), 3 deletions(-)
 
 diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
-index 6831ca3d55..443693eaa5 100644
+index a4fe84903e..33d05e671e 100644
 --- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
 +++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
 @@ -152,7 +152,7 @@ gst_v4l2_buffer_pool_copy_buffer (GstV4l2BufferPool * pool, GstBuffer * dest,
@@ -51,7 +51,7 @@ index 6831ca3d55..443693eaa5 100644
    for (guint i = 0; i < GST_VIDEO_INFO_N_PLANES(&obj->info); i++) {
      GST_VIDEO_INFO_PLANE_OFFSET(&pool->caps_info, i) =
        GST_VIDEO_INFO_PLANE_OFFSET(&obj->info, i);
-@@ -2383,3 +2390,21 @@ gst_v4l2_buffer_pool_enable_resolution_change (GstV4l2BufferPool * pool)
+@@ -2381,3 +2388,21 @@ gst_v4l2_buffer_pool_enable_resolution_change (GstV4l2BufferPool * pool)
  {
    gst_v4l2_object_subscribe_event (pool->obj, V4L2_EVENT_SOURCE_CHANGE);
  }
