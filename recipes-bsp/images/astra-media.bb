@@ -73,6 +73,8 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-good-rtsp \
     gstreamer1.0-plugins-good-rtpmanager \
     hostapd \
+    protobuf \
+    opencv \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
