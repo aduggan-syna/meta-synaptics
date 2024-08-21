@@ -5,7 +5,7 @@
 #*
 #*******************************************************************************/
 
-inherit image_types synausbimg_common
+inherit image_types synaimg_common
 
 # This variable is available to request which values are suitable for IMAGE_FSTYPES
 IMAGE_TYPES:append:syna = " \
