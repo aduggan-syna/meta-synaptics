@@ -1,0 +1,49 @@
+#!/bin/sh
+# Copyright (C) 2011 O.S. Systems Software LTDA.
+# Licensed on MIT
+
+adbd_hook_handler() {
+	status=$1
+	module=$2
+
+	adbd_wanted_status=pre
+	adbd_wanted_module=debug
+
+	if [ "$bootparam_shell" != "" ] &&
+		[ "$status" = "$adbd_wanted_status" ] &&
+		     [ "$module" = "$adbd_wanted_module" ]; then
+		if [ "$status" = "pre" ]; then
+			status_msg="before"
+		else
+			status_msg="after"
+		fi
+
+		msg "Setup adbd..."
+		msg "mount devpts"
+		mkdir -p /dev/pts /dev/shm
+		mount -t devpts devpts /dev/pts
+                msg "mount configfs"
+		mount -t configfs none /sys/kernel/config
+		msg "Load neccessary drivers..."
+		load_kernel_module pwm_berlin
+		load_kernel_module i2c_dyndmx_pinctrl
+		load_kernel_module phy_syna_usb
+		load_kernel_module roles
+		load_kernel_module dwc2
+		load_kernel_module reset_berlin
+		msg "Setup android gadget..."
+		/usr/bin/android-gadget-setup
+		msg "Start adbd"
+		/usr/bin/adbd &
+		msg "Start android gadget..."
+		/usr/bin/android-gadget-start
+	fi
+}
+
+adbd_enabled() {
+	return 0
+}
+
+adbd_run() {
+	add_module_pre_hook "adbd_hook_handler"
+}
