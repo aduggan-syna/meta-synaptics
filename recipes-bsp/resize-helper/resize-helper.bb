@@ -3,6 +3,7 @@ DESCRIPTION = "Resize root filesystem to fit available disk space"
 SECTION = "admin"
 
 LICENSE = "BSD-2-Clause"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/BSD-2-Clause;md5=cb641bc04cda31daea161b1bc15da69f"
 
 SRC_URI = " \
 	file://resize-helper.service;name=resize-helper-service \
