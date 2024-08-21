@@ -9,9 +9,8 @@ if [ -f /factory_setting/serialno ]; then
 fi
 
 if [ "null$serial" == "null" ]; then
-  cmdline=$(cat /proc/cmdline)
-  if [ $cmdline =~ chipid ]; then
-    serial=$([[ $cmdline =~ chipid=([a-z0-9]+*)[[:space:]] ]] && echo ${BASH_REMATCH[1]})
+  if grep chipid /proc/cmdline; then
+    serial=`awk -F'chipid=' '{print $2}'|awk '{print $1}'`
   fi
   if [ "null$serial" == "null" ]; then
     serial="SL16x0"
