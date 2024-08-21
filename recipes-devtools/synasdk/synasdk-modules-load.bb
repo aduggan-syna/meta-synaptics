@@ -22,6 +22,7 @@ SYNA_KERNEL_MODULE_LOAD:append:dolphin = " \
     vvcam_video \
     vvcam_isp_subdev \
     synap \
+    hrx_v4l2 \
 "
 
 SYNA_KERNEL_MODULE_LOAD:append:platypus = " \

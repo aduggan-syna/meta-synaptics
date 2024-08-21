@@ -5,9 +5,6 @@ LICENSE = "CLOSED"
 
 COMPATIBLE_MACHINE = "dolphin"
 
-KERNEL_MODULE_AUTOLOAD:append:dolphin = " hrx-v4l2"
-KERNEL_MODULE_PROBECONF:append:dolphin = " hrx-v4l2"
-
 inherit module
 
 SRC_URI = "file://COPYING \
