@@ -20,6 +20,7 @@ MACHINE_EXTRA_RRECOMMENDS += " \
     kernel-modules \
     kernel-firmware-sdsd8997-combo-v4 \
     linux-firmware-syna \
+    resize-helper \
 "
 
 # Synaptics BSP default providers
