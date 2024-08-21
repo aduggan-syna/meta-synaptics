@@ -131,8 +131,6 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
 
 KERNEL_MODULE_PROBECONF:append = "bcmdhd "
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
-KERNEL_MODULE_PROBECONF:append = "sunplus "
 
 # module_conf_bcmdhd = "options bcmdhd firmware_path=bcm/fw_bcm43752.bin nvram_path=bcm/bcmdhd_43752.cal clm_path=bcm/bcmdhd_clm_43752.blob"
 module_conf_syna_drm = "options syna_drm hdmi_preferred_mode=1920x1080"
-module_conf_sunplus = "softdep sunplus post: dwmac-generic"
