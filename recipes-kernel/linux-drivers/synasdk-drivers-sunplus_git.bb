@@ -8,6 +8,7 @@ COMPATIBLE_MACHINE = "platypus"
 
 KERNEL_MODULE_AUTOLOAD:append = " sunplus"
 KERNEL_MODULE_PROBECONF:append = " sunplus"
+module_conf_sunplus = "softdep sunplus post: dwmac-generic"
 
 inherit module
 
