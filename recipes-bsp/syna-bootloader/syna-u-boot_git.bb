@@ -61,16 +61,14 @@ do_compile () {
 }
 
 do_deploy () {
-    if [ "${MACHINE}" = "sl1640usb" ]; then
-        install -m 0644 ${B}/target/release/uboot/uboot_en.bin ${DEPLOYDIR}
-    else
+    # bootloader.subimg
+    prepend_image_info.sh ${B}/target/release/uboot/uboot_en.bin ${DEPLOYDIR}/bootloader_nopreload.subimg
+
+    if [ "${MACHINE}" != "sl1640usb" ]; then
         # sm_fw_en.bin (only for GenX, i.e PLATYPUS for now)
         if [ -f "${B}/target/release/uboot/sm_fw_en.bin" ]; then
             install -m 0644 "${B}/target/release/uboot/sm_fw_en.bin" ${DEPLOYDIR}
         fi
-
-        # bootloader.subimg
-        prepend_image_info.sh ${B}/target/release/uboot/uboot_en.bin ${DEPLOYDIR}/bootloader_nopreload.subimg
 
         # Generate Partition tables
         parse_pt_emmc 101 101 \
