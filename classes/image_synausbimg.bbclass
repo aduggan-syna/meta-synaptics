@@ -81,7 +81,8 @@ IMAGE_CMD:synausbimg () {
     for f in ${DEPLOY_DIR_IMAGE}/*.dtb
     do
         if [ ! -L $f ]; then
-            cp $f ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
+            dtb_base_name=` basename $f | awk -F '--' '{print $1}'`
+            cp $f ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/$dtb_base_name.dtb
         fi
     done
     cp ${DEPLOY_DIR_IMAGE}/core-image-initramfs-boot-${MACHINE}.cpio.gz ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/ramdisk.cpio.gz
