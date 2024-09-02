@@ -8,4 +8,7 @@ SRC_URI += "file://0007-xdgwindow-select-display.patch"
 SRC_URI += "file://0008-update-drm-planes-on-disconnect.patch"
 SRC_URI += "file://0009-enable-leaseout-drm-resources.patch"
 
+PACKAGECONFIG:append:class-target = " wl_shell"
+PACKAGECONFIG[wl_shell] = "-Ddeprecated-wl-shell=true,-Ddeprecated-wl-shell=false"
+
 REQUIRED_DISTRO_FEATURES:remove = "${@oe.utils.conditional('VIRTUAL-RUNTIME_init_manager', 'systemd', 'pam', '', d)}"
