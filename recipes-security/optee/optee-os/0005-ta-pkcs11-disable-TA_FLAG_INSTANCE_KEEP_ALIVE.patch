@@ -1,0 +1,30 @@
+From 7637cdad6d0a7b85053ac03dfb3eab1832918cc9 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Tue, 9 Jul 2024 17:20:58 +0800
+Subject: [PATCH 05/11] ta: pkcs11: disable TA_FLAG_INSTANCE_KEEP_ALIVE
+
+https://synaptics.atlassian.net/browse/CSMVV-27
+
+Change-Id: I25679121b340fe70445fb1056722d696d62e6a53
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ ta/pkcs11/src/user_ta_header_defines.h | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/ta/pkcs11/src/user_ta_header_defines.h b/ta/pkcs11/src/user_ta_header_defines.h
+index 4d468ca..e848cb3 100644
+--- a/ta/pkcs11/src/user_ta_header_defines.h
++++ b/ta/pkcs11/src/user_ta_header_defines.h
+@@ -11,8 +11,7 @@
+ #define TA_UUID				PKCS11_TA_UUID
+ 
+ #define TA_FLAGS			(TA_FLAG_SINGLE_INSTANCE | \
+-					 TA_FLAG_MULTI_SESSION | \
+-					 TA_FLAG_INSTANCE_KEEP_ALIVE)
++					 TA_FLAG_MULTI_SESSION)
+ 
+ #define TA_STACK_SIZE			(4 * 1024)
+ 
+-- 
+2.7.4
+

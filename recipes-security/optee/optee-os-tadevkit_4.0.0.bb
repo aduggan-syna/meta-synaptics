@@ -1,34 +1,21 @@
-require optee.inc
+require optee-os_4.0.0.bb
+
 SUMMARY = "OP-TEE Trusted OS TA devkit"
 DESCRIPTION = "OP-TEE TA devkit for build TAs"
 HOMEPAGE = "https://www.op-tee.org/"
 
-LICENSE = "BSD-2-Clause"
-LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
-SRC_URI = "${SYNA_SRC_OPTEE_DEV}"
-
-SRCREV_optee_dev = "${SYNA_SRCREV_OPTEE_DEV}"
-
 DEPENDS += "python3-pycryptodome-native"
-require ../../recipes-devtools/synasdk/synasdk-config.inc
-
-S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee/optee_dev"
 
 do_install() {
-    source ${CONFIG_FILE}
-    source ${CHIP_RC_FILE}
-
     #install TA devkit
     install -d ${D}${includedir}/optee/export-user_ta/
-    for f in ${S}/${syna_chip_name}/export-ta_${OPTEE_ARCH}/* ; do
+    for f in ${B}/export-ta_${OPTEE_ARCH}/* ; do
         cp -aR $f ${D}${includedir}/optee/export-user_ta/
     done
-    mkdir -p ${D}${nonarch_base_libdir}/optee_armtz/
-    if [ "x${OPTEE_TA_ENC}" = "xdev" ];then
-        install -D -p -m0444 ${S}/${syna_chip_name}/export-ta_${OPTEE_ARCH}/ta/*.ta ${D}${nonarch_base_libdir}/optee_armtz/
-    else
-        install -D -p -m0444 ${S}/${syna_chip_name}/export-ta_${OPTEE_ARCH}/ta_prod/*.ta ${D}${nonarch_base_libdir}/optee_armtz/
-    fi
+
+    #install tas in optee_armtz
+    install -d ${D}${nonarch_base_libdir}/optee_armtz/
+    install -m 444 ${B}/ta/*/*.ta ${D}${nonarch_base_libdir}/optee_armtz
 }
 
 do_deploy() {
@@ -40,11 +27,9 @@ FILES:${PN} += " ${nonarch_base_libdir}/optee_armtz/ "
 
 # Build paths are currently embedded
 INSANE_SKIP:${PN}-dev += "buildpaths"
-
 INSANE_SKIP:append = " staticdev"
 INSANE_SKIP:append = " arch"
 INSANE_SKIP:append = " already-stripped"
-
 
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"

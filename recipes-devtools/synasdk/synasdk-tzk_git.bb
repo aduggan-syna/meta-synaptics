@@ -8,7 +8,7 @@ inherit nopackages deploy
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-DEPENDS += "synasdk-security-native synasdk-tools-native vim-native bc-native"
+DEPENDS += "synasdk-security-native synasdk-tools-native vim-native bc-native optee-os arm-trusted-firmware"
 
 COMPATIBLE_MACHINE = "syna"
 
@@ -24,6 +24,20 @@ PV = "${ASTRA_VERSION}+git${SRCPV}"
 do_compile:append () {
     security_tools_path="${STAGING_DIR_NATIVE}${prefix}/libexec/syna/"
     security_keys_path="${STAGING_DATADIR_NATIVE}/syna/keys/${syna_chip_name}/${syna_chip_rev}"
+    if [ "is${syna_chip_name}" = "isdolphin" ]; then
+      dst_tz_bin="${S}/tee/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz2_op_en.bin"
+      dst_atf_bin="${S}/tee/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz1_op_en.bin"
+    else
+      dst_tz_bin="${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz2_op_en.bin"
+      dst_atf_bin="${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz1_op_en.bin"
+	fi
+
+    if [ -f ${STAGING_BASELIBDIR}/firmware/tz1_en.bin ]; then
+      cp ${STAGING_BASELIBDIR}/firmware/tz1_en.bin ${dst_atf_bin}
+    fi
+    if [ -f ${STAGING_BASELIBDIR}/firmware/tz2_en.bin ]; then
+      cp ${STAGING_BASELIBDIR}/firmware/tz2_en.bin ${dst_tz_bin}
+    fi
 
     . build/module/tee/build.sh
 }
