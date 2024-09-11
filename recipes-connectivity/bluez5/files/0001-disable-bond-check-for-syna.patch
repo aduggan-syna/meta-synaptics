@@ -1,0 +1,70 @@
+diff --git a/profiles/input/hog.c b/profiles/input/hog.c
+index d50b823..33b2a23 100644
+--- a/profiles/input/hog.c
++++ b/profiles/input/hog.c
+@@ -181,17 +181,23 @@ static int hog_accept(struct btd_service *service)
+ 			return -EINVAL;
+ 	}
+ 
++	DBG("rs.log btd_is_syna_rcu=%d\n", btd_is_syna_rcu(device));
+ 	/* HOGP 1.0 Section 6.1 requires bonding */
+-	if (!device_is_bonded(device, btd_device_get_bdaddr_type(device))) {
+-		struct bt_gatt_client *client;
+-
+-		if (!auto_sec)
+-			return -ECONNREFUSED;
+-
+-		client = btd_device_get_gatt_client(device);
+-		if (!bt_gatt_client_set_security(client,
+-						BT_ATT_SECURITY_MEDIUM))
+-			return -ECONNREFUSED;
++	if (!btd_is_syna_rcu(device)) {
++		DBG("rs.log NOT SYNA RCU\n");
++		if (!device_is_bonded(device, btd_device_get_bdaddr_type(device))) {
++			struct bt_gatt_client *client;
++
++			if (!auto_sec)
++				return -ECONNREFUSED;
++
++			client = btd_device_get_gatt_client(device);
++			if (!bt_gatt_client_set_security(client,
++							BT_ATT_SECURITY_MEDIUM))
++				return -ECONNREFUSED;
++		}
++	} else {
++		DBG("rs.log SYNA RCU\n");
+ 	}
+ 
+ 	/* TODO: Replace GAttrib with bt_gatt_client */
+
+diff --git a/src/device.c b/src/device.c
+index 9a4f2ce..c2aecee 100644
+--- a/src/device.c
++++ b/src/device.c
+@@ -6907,3 +6907,16 @@ int8_t btd_device_get_volume(struct btd_device *device)
+ {
+ 	return device->volume;
+ }
++
++gboolean btd_is_syna_rcu(struct btd_device *device)
++{
++	unsigned char addr1[3] = {0x74, 0x9E, 0xA5}; //Black Remote
++	unsigned char addr2[3] = {0xD0, 0x1B, 0x1F}; //White Remote
++
++	return (((device->conn_bdaddr.b[5] == addr1[0])&&
++			(device->conn_bdaddr.b[4] == addr1[1])&&
++			(device->conn_bdaddr.b[3] == addr1[2])) |
++           ((device->conn_bdaddr.b[5] == addr2[0])&&
++			(device->conn_bdaddr.b[4] == addr2[1])&&
++			(device->conn_bdaddr.b[3] == addr2[2])));
++}
+
+diff --git a/src/device.h b/src/device.h
+index d7f8862..b3f85a6 100644
+--- a/src/device.h
++++ b/src/device.h
+@@ -186,3 +186,4 @@ void btd_device_cleanup(void);
+ 
+ void btd_device_set_volume(struct btd_device *dev, int8_t volume);
+ int8_t btd_device_get_volume(struct btd_device *dev);
++gboolean btd_is_syna_rcu(struct btd_device *device);
