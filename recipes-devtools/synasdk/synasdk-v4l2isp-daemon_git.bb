@@ -29,6 +29,7 @@ SRC_URI:append:dolphin = " \
     file://IMX415.xml \
     file://IMX258_2K.xml \
     file://IMX415_2K.xml \
+    file://OV5647_480p.xml \
     file://isp_media_server.service \
     file://isp_media_server.sh \
     file://isp_media_server.env \
@@ -69,4 +70,5 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/IMX415.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX258_2K.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX415_2K.xml ${D}${datadir}
+    install -m 0644 ${WORKDIR}/OV5647_480p.xml ${D}${datadir}
 }
