@@ -8,7 +8,7 @@ inherit nopackages deploy
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-DEPENDS += "synasdk-security-native synasdk-tools-native vim-native bc-native optee-os arm-trusted-firmware"
+DEPENDS += "synasdk-security-native synasdk-tools-native vim-native bc-native optee-os arm-trusted-firmware cmake-native synasdk-tee-bootparam-native"
 
 COMPATIBLE_MACHINE = "syna"
 
@@ -39,6 +39,7 @@ do_compile:append () {
       cp ${STAGING_BASELIBDIR}/firmware/tz2_en.bin ${dst_tz_bin}
     fi
 
+    cp -av ${STAGING_DIR_NATIVE}${datadir}/syna/tee/bootparam/* ${S}/tee/tee/products
     . build/module/tee/build.sh
 }
 
