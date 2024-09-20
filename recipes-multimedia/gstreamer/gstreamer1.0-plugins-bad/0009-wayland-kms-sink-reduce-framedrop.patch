@@ -1,0 +1,96 @@
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 8285710..bb87dc8 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -43,6 +43,7 @@
+ #endif
+ 
+ #include "gstwaylandsink.h"
++#include <stdbool.h>
+ #include <gst/allocators/allocators.h>
+ 
+ #include <gst/video/videooverlay.h>
+@@ -72,6 +73,8 @@ GST_DEBUG_CATEGORY (gstwayland_debug);
+     "RGB16, BGR16, YUY2, YVYU, UYVY, AYUV, NV12, NV21, NV16, NV61, " \
+     "YUV9, YVU9, Y41B, I420, YV12, Y42B, v308 }"
+ 
++#define REDRAW_TIMEOUT 16 /*allow 16ms timeout to account for offset b/w vsync and pts */
++
+ static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE ("sink",
+     GST_PAD_SINK,
+     GST_PAD_ALWAYS,
+@@ -750,6 +753,18 @@ render_last_buffer (GstWaylandSink * self, gboolean redraw)
+   gst_wl_window_render (self->window, wlbuffer, info);
+ }
+ 
++static gboolean
++wait_for_deraw (GstWaylandSink * self, guint ms)
++{
++  guint i = ms;
++  for (;i;i--) {
++    g_usleep(1000);
++    if (!self->redraw_pending)
++      return true;
++  }
++  return false;
++}
++
+ static void
+ on_window_closed (GstWlWindow * window, gpointer user_data)
+ {
+@@ -798,9 +813,15 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ 
+   /* drop buffers until we get a frame callback */
+   if (self->redraw_pending) {
+-    GST_LOG_OBJECT (self, "buffer %" GST_PTR_FORMAT " dropped (redraw pending)",
++    g_mutex_unlock (&self->render_lock);
++    GST_LOG_OBJECT (self, "waiting for prev frame before buffer %" GST_PTR_FORMAT "", buffer);
++    if (!wait_for_deraw(self, REDRAW_TIMEOUT)) {
++      g_mutex_lock (&self->render_lock);
++      GST_LOG_OBJECT (self, "buffer %" GST_PTR_FORMAT " dropped (redraw pending)",
+         buffer);
+-    goto done;
++      goto done;
++    }
++    g_mutex_lock (&self->render_lock);
+   }
+ 
+   /* make sure that the application has called set_render_rectangle() */
+diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
+index 5b1d7bd..cc1c026 100644
+--- a/sys/kms/gstkmssink.c
++++ b/sys/kms/gstkmssink.c
+@@ -77,6 +77,8 @@ GST_DEBUG_CATEGORY_STATIC (gst_kms_sink_debug);
+ GST_DEBUG_CATEGORY_STATIC (CAT_PERFORMANCE);
+ #define GST_CAT_DEFAULT gst_kms_sink_debug
+ 
++#define PREV_FRAME_TIMEOUT 16 /*latency*/
++
+ static GstFlowReturn gst_kms_sink_show_frame (GstVideoSink * vsink,
+     GstBuffer * buf);
+ static void gst_kms_sink_video_overlay_init (GstVideoOverlayInterface * iface);
+@@ -1419,6 +1421,15 @@ gst_kms_sink_stop (GstBaseSink * bsink)
+     gst_kms_allocator_clear_cache (self->allocator);
+ 
+   gst_buffer_replace (&self->last_buffer, NULL);
++
++  if (self->flip_done_buffer) {
++    gst_buffer_replace (&self->flip_done_buffer, NULL);
++  }
++
++  if (self->display_queued_buffer) {
++    gst_buffer_replace (&self->display_queued_buffer, NULL);
++  }
++
+   gst_caps_replace (&self->allowed_caps, NULL);
+   gst_object_replace ((GstObject **) & self->pool, NULL);
+   gst_object_replace ((GstObject **) & self->allocator, NULL);
+@@ -1778,7 +1789,7 @@ gst_kms_wait_frame_push(GstKMSSink * self)
+   }
+ 
+   do {
+-    ret = gst_poll_wait (self->poll, 5 * GST_MSECOND);
++    ret = gst_poll_wait (self->poll, PREV_FRAME_TIMEOUT * GST_MSECOND);
+   } while (ret == -1 && (errno == EAGAIN || errno == EINTR));
+ 
+   if (ret == 0) {
