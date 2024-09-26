@@ -39,7 +39,12 @@ do_compile:append () {
       cp ${STAGING_BASELIBDIR}/firmware/tz2_en.bin ${dst_tz_bin}
     fi
 
-    cp -av ${STAGING_DIR_NATIVE}${datadir}/syna/tee/bootparam/* ${S}/tee/tee/products
+    if [ "is${syna_chip_name}" = "isdolphin" ]; then
+      cp -av ${STAGING_DIR_NATIVE}${datadir}/syna/tee/bootparam/${syna_chip_name}/genx/* ${S}/tee/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/
+    else
+      cp -av ${STAGING_DIR_NATIVE}${datadir}/syna/tee/bootparam/${syna_chip_name}/* ${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/
+    fi
+
     . build/module/tee/build.sh
 }
 
