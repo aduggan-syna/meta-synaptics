@@ -89,6 +89,8 @@ do_compile:append () {
         genx_secure_image "TZK_BOOT_PARAMETER" ${S}/boot_param_extras.bin 0x0 ${S}/bootparam.bin ${dst_tee_dir}/bootparam_en.bin
         genx_secure_image "TZK_BOOT_PARAMETER" ${S}/boot_param_extras.bin 0x0 ${S}/bootparam_recovery.bin ${dst_tee_dir}/bootparam_recovery_en.bin
 
+        cp ${module_topdir}/products/${syna_chip_name}/${tz_rel_ver}/${tz_memlayout}/oem_setting.cfg ${dst_oem_dir} -v
+        find ${dst_tee_dir} -name '*.info' | xargs -r rm
     fi
 }
 
