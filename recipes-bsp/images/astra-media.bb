@@ -77,6 +77,7 @@ IMAGE_INSTALL:append = " \
     iptables \
     protobuf \
     opencv \
+    qtmultimedia \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
