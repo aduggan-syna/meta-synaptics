@@ -32,6 +32,7 @@ IMAGE_INSTALL:append = " \
     synasdk-drivers-phy-syna-usb \
     synasdk-drivers-berlin-chipid \
     synasdk-drivers-rpi-panel-attiny-regulator \
+    synasdk-drivers-rogue-ws \
     synasdk-demos \
     alsa-utils \
     gstreamer1.0-meta-base \
