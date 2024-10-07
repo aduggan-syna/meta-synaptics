@@ -6,6 +6,7 @@ IMAGE_INSTALL:append = " \
     qtbase-examples qtdeclarative-examples \
     synasdk-syna-player-framework \
     synasdk-syna-video-player \
+    synasdk-syna-capability-demo \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
