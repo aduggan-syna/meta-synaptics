@@ -122,15 +122,35 @@ do_deploy:append() {
 
 # Kernel modules for Platypus and Dolphin
 KERNEL_MODULE_AUTOLOAD:append = " \
+    amp_bm \
+    vpu \
+    syna_drm \
+    pvrsrvkm \
+    synap \
     bcmdhd \
 "
 
 KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
     isp \
+    vvcam_vb \
+    vvcam_isp \
+    vvcam_video \
+    vvcam_isp_subdev \
+    hrx_v4l2 \
 "
 
 KERNEL_MODULE_PROBECONF:append = "bcmdhd "
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
+KERNEL_MODULE_PROBECONF:append = "amp_bm "
+KERNEL_MODULE_PROBECONF:append = "pvrsrvkm "
+KERNEL_MODULE_PROBECONF:append = "syna-vpu "
+KERNEL_MODULE_PROBECONF:append = "vpu "
+
+module_conf_syna_drm = "softdep syna_drm pre: amp_bm fxl6408"
+module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
+
+module_conf_syna-vpu = "softdep syna-vpu pre: amp_bm"
+module_conf_vpu = "softdep vpu pre: amp_bm"
 
 # module_conf_bcmdhd = "options bcmdhd firmware_path=bcm/fw_bcm43752.bin nvram_path=bcm/bcmdhd_43752.cal clm_path=bcm/bcmdhd_clm_43752.blob"
 module_conf_syna_drm = "options syna_drm hdmi_preferred_mode=1920x1080"

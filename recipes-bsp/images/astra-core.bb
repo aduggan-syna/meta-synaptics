@@ -28,7 +28,6 @@ IMAGE_INSTALL:append = " \
     synasdk-drivers-phy-syna-usb \
     synasdk-drivers-berlin-chipid \
     synasdk-macaddr \
-    synasdk-modules-load \
     ethtool \
     syna-mount-generator \
     syna-wifi-tools \
