@@ -31,6 +31,7 @@ IMAGE_INSTALL:append = " \
     synasdk-modules-load \
     ethtool \
     syna-mount-generator \
+    syna-csi-tools \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
