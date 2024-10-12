@@ -2,38 +2,32 @@
 
 mount_location=$1
 
-if cat /proc/cmdline| grep mmcblk1; then
-  root_block=mmcblk1
-  root_device=/dev/${root_block}
-elif cat /proc/cmdline| grep mmcblk0; then
-  root_block=mmcblk0
-  root_device=/dev/${root_block}
-else
-  echo "Not boot from mmc!"
-  exit 1
-fi
+factory_dev=`fdisk -lx|grep factory_setting|awk '{print $1}'`
+factory_dev_service_name=`echo ${factory_dev}|cut -c2-|sed 's/\//-/'`
+home_dev=`fdisk -lx|grep home|awk '{print $1}'`
+home_dev_service_name=`echo ${home_dev}|cut -c2-|sed 's/\//-/'`
 
 echo "\
 [Unit]
 Before=local-fs.target
-After=blockdev@dev-${root_block}p@FACTORY_PARTITION@.target
+After=blockdev@${factory_dev_service_name}.target
 
 [Mount]
-What=${root_device}p@FACTORY_PARTITION@
+What=${factory_dev}
 Where=/factory_setting" \
-	> ${mount_location}/factory_setting.mount
+        > ${mount_location}/factory_setting.mount
 
 echo "\
 [Unit]
 Before=local-fs.target
-Requires=systemd-fsck@dev-${root_block}p@HOME_PARTITION@.service
-After=systemd-fsck@dev-${root_block}p@HOME_PARTITION@.service
-After=blockdev@dev-${root_block}p@HOME_PARTITION@.target
+Requires=systemd-fsck@${home_dev_service_name}.service
+After=systemd-fsck@${home_dev_service_name}.service
+After=blockdev@${home_dev_service_name}.target
 
 [Mount]
-What=${root_device}p@HOME_PARTITION@
+What=${home_dev}
 Where=/home" \
-	> ${mount_location}/home.mount
+        > ${mount_location}/home.mount
 
 cd ${mount_location}/local-fs.target.requires
 ln -s ../factory_setting.mount factory_setting.mount
