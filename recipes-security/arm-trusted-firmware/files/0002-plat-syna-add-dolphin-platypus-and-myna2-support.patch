@@ -1,4 +1,4 @@
-From a648811e6d7ff4c94e9fa208014ad1a5cb526018 Mon Sep 17 00:00:00 2001
+From f0da723443bf48a5463ca122c099d0df92699e7c Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 13:18:24 +0800
 Subject: [PATCH 2/4] plat: syna: add dolphin, platypus and myna2 support
@@ -9,7 +9,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/common/aarch64/berlin_helpers.S   |  186 +
  plat/syna/berlin/common/berlin_bl31_setup.c        |  402 +
  plat/syna/berlin/common/berlin_common.mk           |   42 +
- plat/syna/berlin/common/berlin_pm.c                |  532 ++
+ plat/syna/berlin/common/berlin_pm.c                |  536 ++
  plat/syna/berlin/common/berlin_sip_svc.c           |   85 +
  plat/syna/berlin/common/berlin_stack_protector.c   |   25 +
  plat/syna/berlin/common/berlin_topology.c          |   63 +
@@ -49,7 +49,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../include/soc/dolphin/secure_register_setting.h  |   45 +
  plat/syna/berlin/include/soc/myna2/Galois_memmap.h |  666 ++
  plat/syna/berlin/include/soc/myna2/avpll_regs.h    |  100 +
- plat/syna/berlin/include/soc/myna2/berlin_def.h    |  133 +
+ plat/syna/berlin/include/soc/myna2/berlin_def.h    |  134 +
  plat/syna/berlin/include/soc/myna2/clock_regs.h    |   27 +
  plat/syna/berlin/include/soc/myna2/cpu_wrp.h       | 7189 +++++++++++++++++
  plat/syna/berlin/include/soc/myna2/ctypes.h        |  126 +
@@ -77,7 +77,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/soc/myna2/plat_pm.c               |  406 +
  plat/syna/berlin/soc/myna2/plat_setup.c            |   24 +
  plat/syna/berlin/soc/myna2/suspend.S               |   21 +
- plat/syna/berlin/soc/myna2/suspend.c               |  136 +
+ plat/syna/berlin/soc/myna2/suspend.c               |  171 +
  plat/syna/berlin/soc/platypus/berlin_soc.mk        |   21 +
  plat/syna/berlin/soc/platypus/clock.c              |  211 +
  plat/syna/berlin/soc/platypus/mc.c                 |  120 +
@@ -98,7 +98,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/suspend/sha256_ce.S               |  156 +
  plat/syna/berlin/suspend/suspend.ld.S              |   83 +
  plat/syna/berlin/suspend/suspend_entrypoint.S      |   67 +
- 92 files changed, 53084 insertions(+)
+ 92 files changed, 53124 insertions(+)
  create mode 100644 plat/syna/berlin/common/aarch64/berlin_helpers.S
  create mode 100644 plat/syna/berlin/common/berlin_bl31_setup.c
  create mode 100644 plat/syna/berlin/common/berlin_common.mk
@@ -842,10 +842,10 @@ index 0000000..8d9a923
 +				${COMMON_DIR}/berlin_sip_svc.c
 diff --git a/plat/syna/berlin/common/berlin_pm.c b/plat/syna/berlin/common/berlin_pm.c
 new file mode 100644
-index 0000000..a2ef7cd
+index 0000000..3536f90
 --- /dev/null
 +++ b/plat/syna/berlin/common/berlin_pm.c
-@@ -0,0 +1,532 @@
+@@ -0,0 +1,536 @@
 +/*
 + * Copyright (c) 2015-2021, ARM Limited and Contributors. All rights reserved.
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
@@ -1058,6 +1058,10 @@ index 0000000..a2ef7cd
 +
 +#ifdef CFG_SUSPEND_WAKEUP_INTR
 +	berlin_set_wakeup_sources(CFG_SUSPEND_WAKEUP_INTR, -1, -1, -1);
++#endif
++
++#ifdef CFG_UART_WAKEUP_INTR
++	berlin_set_wakeup_sources(CFG_UART_WAKEUP_INTR, -1, -1, -1);
 +#endif
 +}
 +
@@ -23516,10 +23520,10 @@ index 0000000..a647cae
 +#endif
 diff --git a/plat/syna/berlin/include/soc/myna2/berlin_def.h b/plat/syna/berlin/include/soc/myna2/berlin_def.h
 new file mode 100644
-index 0000000..9928bf3
+index 0000000..dcc9596
 --- /dev/null
 +++ b/plat/syna/berlin/include/soc/myna2/berlin_def.h
-@@ -0,0 +1,133 @@
+@@ -0,0 +1,134 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -23647,6 +23651,7 @@ index 0000000..9928bf3
 +#define IRQ_TOTAL_IRQ 0x6D
 +// IRQ_gethIntr: 0x6B
 +#define CFG_SUSPEND_WAKEUP_INTR 0x6B
++#define CFG_UART_WAKEUP_INTR 0x34
 +
 +// Hash calculate
 +//#define BCM_CALCULATE_HASH		1
@@ -51252,10 +51257,10 @@ index 0000000..8c3dc30
 +	.word   . - suspend_entry
 diff --git a/plat/syna/berlin/soc/myna2/suspend.c b/plat/syna/berlin/soc/myna2/suspend.c
 new file mode 100644
-index 0000000..483274f
+index 0000000..291b060
 --- /dev/null
 +++ b/plat/syna/berlin/soc/myna2/suspend.c
-@@ -0,0 +1,136 @@
+@@ -0,0 +1,171 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -51272,6 +51277,7 @@ index 0000000..483274f
 +#include "tz.h"
 +#include <drivers/ti/uart/uart_16550.h>
 +#include <lib/xlat_tables/xlat_tables_v2.h>
++#include <lib/mmio.h>
 +
 +#pragma weak berlin_idle
 +#pragma weak berlin_suspend
@@ -51289,6 +51295,31 @@ index 0000000..483274f
 +
 +	/* Restore the FIQ bit in SCR_EL3 */
 +	write_scr_el3(scr);
++}
++
++void uart_irq_enable(bool enable)
++{
++	if (enable) {
++		mmio_write_32(UART_0_BASE + UARTIER, 0x1);
++	} else {
++		mmio_write_32(UART_0_BASE + UARTIER, 0);
++	}
++}
++
++bool uart_check_wakeup_key(void)
++{
++	uint32_t key = 0;
++
++	/* check the key only when "data ready" */
++	if (mmio_read_32(UART_0_BASE + UARTLSR) & 0x1) {
++		key = mmio_read_32(UART_0_BASE + UARTRX) & 0xFF;
++
++		if ((key != 'W') && (key != 'w') && (key != ' '))
++			return false;
++	}
++
++	/* return true directly if not uart wake up */
++	return true;
 +}
 +
 +void berlin_suspend(unsigned int power_state, void *param)
@@ -51384,8 +51415,17 @@ index 0000000..483274f
 +	berlin_suspend(x1, (void *)x2);
 +	NOTICE("#######Wait for Interrupt to wakeup system#######\n");
 +
++	uart_irq_enable(true);
++
++idle:
 +	berlin_idle();
++
++	if (!uart_check_wakeup_key())
++		goto idle;
++
 +	INFO("#######resume start#######\n");
++
++	uart_irq_enable(false);
 +
 +	berlin_resume();
 +	INFO("#######resume end#######\n");
