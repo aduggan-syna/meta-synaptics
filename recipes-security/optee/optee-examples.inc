@@ -17,8 +17,6 @@ SRC_URI = "git://github.com/linaro-swg/optee_examples.git;branch=master;protocol
 EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  HOST_CROSS_COMPILE=${HOST_PREFIX} \
                  TA_CROSS_COMPILE=${HOST_PREFIX} \
-                 LIBGCC_LOCATE_CFLAGS="--sysroot=${STAGING_DIR_TARGET}"\
-                 comp-cflagscore="-sysroot=${STAGING_DIR_TARGET}"\
                  OUTPUT_DIR=${B} \
                "
 
@@ -27,9 +25,6 @@ B = "${WORKDIR}/build"
 
 
 do_compile() {
-    export CFLAGS="${CFLAGS} --sysroot=${STAGING_DIR_HOST}"
-    export LIBGCC_LOCATE_CFLAGS=--sysroot=${STAGING_DIR_HOST}
-    export OPTEE_TA_ENC="${OPTEE_TA_ENC}"
     oe_runmake -C ${S}
 }
 do_compile[cleandirs] = "${B}"

@@ -21,18 +21,13 @@ B = "${WORKDIR}/build"
 EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  OPTEE_OPENSSL_EXPORT=${STAGING_INCDIR} \
                  CROSS_COMPILE_HOST=${HOST_PREFIX} \
-                 CROSS_COMPILE_TA=${HOST_PREFIX} comp-cflagscore="-sysroot=${STAGING_DIR_TARGET}" \
-                 LIBGCC_LOCATE_CFLAGS="--sysroot=${STAGING_DIR_TARGET}" \
-                 CFG_PKCS11_TA=y \
+                 CROSS_COMPILE_TA=${HOST_PREFIX} \
                  O=${B} \
                "
 
 CFLAGS += "-Wno-error=deprecated-declarations"
 
 do_compile() {
-    export CFLAGS="${CFLAGS} --sysroot=${STAGING_DIR_HOST}"
-    export LIBGCC_LOCATE_CFLAGS=--sysroot=${STAGING_DIR_HOST}
-    export OPTEE_TA_ENC="${OPTEE_TA_ENC}"
     cd ${S}
     # Top level makefile doesn't seem to handle parallel make gracefully
     oe_runmake xtest

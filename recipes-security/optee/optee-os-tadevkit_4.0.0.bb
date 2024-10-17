@@ -12,25 +12,18 @@ do_install() {
     for f in ${B}/export-ta_${OPTEE_ARCH}/* ; do
         cp -aR $f ${D}${includedir}/optee/export-user_ta/
     done
-
-    #install tas in optee_armtz
-    install -d ${D}${nonarch_base_libdir}/optee_armtz/
-    install -m 444 ${B}/ta/*/*.ta ${D}${nonarch_base_libdir}/optee_armtz
 }
 
 do_deploy() {
 	echo "Do not inherit do_deploy from optee-os."
 }
 
-#FILES:${PN} = "${includedir}/optee/"
-FILES:${PN} += " ${nonarch_base_libdir}/optee_armtz/ "
+FILES:${PN} = "${includedir}/optee/"
 
 # Build paths are currently embedded
 INSANE_SKIP:${PN}-dev += "buildpaths"
-INSANE_SKIP:append = " staticdev"
-INSANE_SKIP:append = " arch"
-INSANE_SKIP:append = " already-stripped"
 
-INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
-INHIBIT_PACKAGE_STRIP = "1"
-INHIBIT_SYSROOT_STRIP = "1"
+# Include extra headers needed by SPMC tests to TA DEVKIT.
+# Supported after op-tee v3.20
+EXTRA_OEMAKE:append = "${@bb.utils.contains('MACHINE_FEATURES', 'optee-spmc-test', \
+                                        ' CFG_SPMC_TESTS=y', '' , d)}"

@@ -19,11 +19,8 @@ SRC_URI = "git://github.com/OP-TEE/optee_os.git;branch=master;protocol=https"
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build"
 
-OPTEEMACHINE = "synaptics"
-
 EXTRA_OEMAKE += " \
     PLATFORM=${OPTEEMACHINE} \
-    PLATFORM_FLAVOR=${SYNA_CHIP} \
     CFG_${OPTEE_CORE}_core=y \
     CROSS_COMPILE_core=${HOST_PREFIX} \
     CROSS_COMPILE_ta_${OPTEE_ARCH}=${HOST_PREFIX} \

@@ -9,7 +9,7 @@ inherit systemd update-rc.d cmake
 
 SRC_URI = " \
     git://github.com/OP-TEE/optee_client.git;branch=master;protocol=https \
-    file://tee-supplicant.service \
+    file://tee-supplicant@.service \
     file://tee-supplicant.sh \
 "
 
@@ -18,23 +18,22 @@ UPSTREAM_CHECK_GITTAGREGEX = "^(?P<pver>\d+(\.\d+)+)$"
 S = "${WORKDIR}/git"
 
 EXTRA_OECMAKE = " \
-    -DRPMB_EMU=OFF \
     -DBUILD_SHARED_LIBS=ON \
     -DCFG_TEE_FS_PARENT_PATH='${localstatedir}/lib/tee' \
 "
 EXTRA_OECMAKE:append:toolchain-clang = " -DCFG_WERROR=0"
 
 do_install:append() {
-    install -D -p -m0644 ${WORKDIR}/tee-supplicant.service ${D}${systemd_system_unitdir}/tee-supplicant.service
+    install -D -p -m0644 ${WORKDIR}/tee-supplicant@.service ${D}${systemd_system_unitdir}/tee-supplicant@.service
     install -D -p -m0755 ${WORKDIR}/tee-supplicant.sh ${D}${sysconfdir}/init.d/tee-supplicant
 
     sed -i -e s:@sysconfdir@:${sysconfdir}:g \
            -e s:@sbindir@:${sbindir}:g \
-              ${D}${systemd_system_unitdir}/tee-supplicant.service \
+              ${D}${systemd_system_unitdir}/tee-supplicant@.service \
               ${D}${sysconfdir}/init.d/tee-supplicant
 }
 
-SYSTEMD_SERVICE:${PN} = "tee-supplicant.service"
+SYSTEMD_SERVICE:${PN} = "tee-supplicant@.service"
 
 INITSCRIPT_PACKAGES = "${PN}"
 INITSCRIPT_NAME:${PN} = "tee-supplicant"

@@ -1,0 +1,5 @@
+FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
+EXTRA_OECMAKE += " \
+    -DRPMB_EMU=OFF \
+"
+

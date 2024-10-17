@@ -3,6 +3,8 @@ UPSTREAM_CHECK_GITTAGREGEX = "^(?P<pver>\d+(\.\d+)+)$"
 # Please add supported machines below or set it in .bbappend or .conf
 
 OPTEEMACHINE ?= "${MACHINE}"
+OPTEEMACHINE:aarch64:qemuall ?= "vexpress-qemu_armv8a"
+OPTEEMACHINE:arm:qemuall ?= "vexpress-qemu_virt"
 
 OPTEE_ARCH = "null"
 OPTEE_ARCH:arm = "arm32"
@@ -15,7 +17,6 @@ OPTEE_COMPILER = "${@bb.utils.contains("BBFILE_COLLECTIONS", "clang-layer", "${O
 # Set here but not passed to EXTRA_OEMAKE by default as that breaks
 # the optee-os build
 TA_DEV_KIT_DIR = "${STAGING_INCDIR}/optee/export-user_ta"
-DEPENDS:append = " xxd-native coreutils-native "
 
 EXTRA_OEMAKE += "V=1 \
                  LIBGCC_LOCATE_CFLAGS='${HOST_CC_ARCH}${TOOLCHAIN_OPTIONS}' \
