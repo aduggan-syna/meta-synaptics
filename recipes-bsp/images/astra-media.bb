@@ -67,7 +67,7 @@ IMAGE_INSTALL:append = " \
     ethtool \
     gstreamer1.0-libav \
     syna-mount-generator \
-    syna-csi-tools \
+    syna-wifi-tools \
     gstreamer1.0-plugins-base-compositor \
     gstreamer1.0-plugins-base-videorate \
     gstreamer1.0-plugins-good-cairo \
