@@ -9,7 +9,6 @@ SRC_URI += " \
     file://0008-plat-syna-add-dolphin-platypus-and-myna2-support.patch \
     file://0009-libutee-add-syna-syscalls.patch \
     file://0010-core-support-berlin-secure-and-non-secure-heap.patch \
-    file://0011-sign_encrypt.py-force-to-generate-TA-with-legacy-for.patch \
    "
 OPTEEMACHINE = "synaptics"
 SYNA_CHIP:myna2 = "myna2"
