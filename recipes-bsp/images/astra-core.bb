@@ -52,6 +52,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     synasdk-drivers-syna-hwmon \
     synasdk-brcm-bt-start \
     syna-trusted-app \
+    pciutils \
 "
 
 IMAGE_INSTALL:append:platypus = " \

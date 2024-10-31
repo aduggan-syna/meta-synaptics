@@ -105,6 +105,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     tim-vx \
     tflite-vx-delegate \
     libdrm-tests \
+    pciutils \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
