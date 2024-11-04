@@ -28,3 +28,5 @@ do_install:append() {
 }
 
 RPROVIDES:${PN} += "kernel-module-synap"
+KERNEL_MODULE_AUTOLOAD:append = " synap"
+KERNEL_MODULE_PROBECONF:append = " synap"

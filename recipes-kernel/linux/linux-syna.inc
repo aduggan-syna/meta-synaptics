@@ -126,7 +126,6 @@ KERNEL_MODULE_AUTOLOAD:append = " \
     vpu \
     syna_drm \
     pvrsrvkm \
-    synap \
     bcmdhd \
 "
 
