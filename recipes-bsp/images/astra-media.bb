@@ -78,6 +78,7 @@ IMAGE_INSTALL:append = " \
     protobuf \
     opencv \
     qtmultimedia \
+    gstreamer1.0-rtsp-server \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
