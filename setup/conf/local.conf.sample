@@ -260,7 +260,7 @@ INHERIT += "image-buildinfo"
 IMAGE_BUILDINFO_VARS:append = " SYNA_SDK_REVISION"
 
 #Use systemd
-DISTRO_FEATURES:append = " systemd"
+DISTRO_FEATURES:append = " systemd sysvinit"
 VIRTUAL-RUNTIME_init_manager = "systemd"
 DISTRO_FEATURES_BACKFILL_CONSIDERED += "sysvinit"
 VIRTUAL-RUNTIME_initscripts = ""
@@ -275,4 +275,6 @@ OPTEE_TA_ENC= ##OPTEE_TA_ENC##
 #Install and setup support for pre-built package feeds
 PACKAGE_FEED_URIS ?= "https://astra-packages.synaptics.com/${ASTRA_VERSION}"
 EXTRA_IMAGE_FEATURES += " package-management "
+
+IMAGE_FSTYPES += " synaimg ext4 ext4.gz"
 

@@ -12,6 +12,18 @@ TEE_OPTEE = " \
     optee-test \
 "
 
+SWUPDATE_INSTALL = " \
+    swupdate \
+    swupdate-client \
+    swupdate-progress \
+    swupdate-tools \
+    swupdate-tools-hawkbit \
+    swupdate-tools-ipc \
+    libubootenv \
+    libubootenv-bin \
+    swu-conf \
+"
+
 IMAGE_INSTALL:append = " \
     gdbserver \
     curl \
@@ -80,7 +92,10 @@ IMAGE_INSTALL:append = " \
     qtmultimedia \
     gstreamer1.0-rtsp-server \
     synasdk-bootctrl \
+    ${SWUPDATE_INSTALL} \
 "
+
+IMAGE_INSTALL:remove:sl1640usb = "${SWUPDATE_INSTALL}"
 
 IMAGE_INSTALL:append:myna2 = " \
     ${TEE_OPTEE} \
@@ -144,3 +159,27 @@ ROOTFS_POSTPROCESS_COMMAND += "mount_usb; add_version; "
 LICENSE = "MIT"
 
 inherit core-image
+
+# Include dependencies and SWUpdate
+inherit swupdate
+
+SRC_URI = "file://generate_swu.sh"
+
+do_swuimage() {
+    if [ ${MACHINE} == "sl1640usb" ]; then
+        return
+    fi
+    # Change to build directory (or wherever your images are generated)
+    cd ${WORKDIR}
+
+    # Run the script to generate the .swu image and sw-description
+    chmod +x generate_swu.sh
+    MACHINE=${MACHINE} ./generate_swu.sh ${DEPLOY_DIR_IMAGE} 3
+
+    # Copy the output .swu file to the deployment directory
+    # install -d ${DEPLOY_DIR_IMAGE}
+    cp ${DEPLOY_DIR_IMAGE}/image.swu ${DEPLOY_DIR_IMAGE}/astra-media-${PV}.swu
+}
+# Ensure swu image is built after do_image_synaimg task
+SYNA_IMAGE = '${@bb.utils.contains("MACHINE", "sl1640usb", "synausbimg", "synaimg",d)}'
+addtask swuimage after do_image_${SYNA_IMAGE}
