@@ -1,0 +1,15 @@
+rootfs=$(swupdate -g)
+
+fw_setenv upgrade_available 0
+
+rootfs_num=$(echo "$rootfs" | grep -o '[0-9]*$')
+
+if (( rootfs_num % 2 == 0 )); then
+    # To select the partition B
+    selection="-e stable,copy2"
+    echo "$selection"
+else
+    # To select the partition A
+    selection="-e stable,copy1"
+    echo "$selection"
+fi

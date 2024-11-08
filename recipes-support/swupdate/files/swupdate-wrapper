@@ -1,0 +1,16 @@
+#!/bin/sh
+echo "Running swupdate-wrapper" >> /var/log/swupdate.log
+selection=$(sh /usr/lib/swupdate/conf.d/09-swupdate-args.sh)
+echo "Selection: $selection" >> /var/log/swupdate.log
+# Enabling the swupdate for always checking the double copy selection
+ 
+if [[ "$@" == *"-h"* || "$@" == *"-v"* || "$@" == *"-g"* ]]; then
+    # Run swupdate without piping to swupdate-progress
+    /usr/bin/swupdate $selection "$@"
+else
+    # Run swupdate with progress
+    /usr/bin/swupdate $selection "$@" | /usr/bin/swupdate-progress
+fi
+ 
+exit_status=$?
+echo "swupdate exited with status: $exit_status" >> /var/log/swupdate.log
