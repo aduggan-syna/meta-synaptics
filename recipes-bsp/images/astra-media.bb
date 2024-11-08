@@ -79,6 +79,7 @@ IMAGE_INSTALL:append = " \
     opencv \
     qtmultimedia \
     gstreamer1.0-rtsp-server \
+    synasdk-bootctrl \
 "
 
 IMAGE_INSTALL:append:myna2 = " \

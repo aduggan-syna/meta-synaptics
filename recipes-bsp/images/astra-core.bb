@@ -31,6 +31,7 @@ IMAGE_INSTALL:append = " \
     ethtool \
     syna-mount-generator \
     syna-wifi-tools \
+    synasdk-bootctrl \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
