@@ -4,6 +4,8 @@ SRC_URI += "${SYNA_SRC_TA_ENC}"
 
 SRCREV_taenc = "${SYNA_SRCREV_TA_ENC}"
 
+SRCREV_FORMAT = "taenc"
+
 SYNA_TA_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/ta_enc"
 
 EARLY_SYNA_TA:myna2 =" ${SYNA_TA_PATH}/libmipi_dsi.ta/myna2/A0/genx/1316a183-894d-43fe-9893-bb946ae1043e.stripped.elf \
