@@ -17,8 +17,13 @@ SRC_URI:append= " \
             file://0001-genx-warm-boot-support.patch \
             file://0002-plat-syna-add-dolphin-platypus-and-myna2-support.patch \
             file://0003-berlin-pm-just-return-if-cpu-idle.patch \
-            file://0004-add-syna-keys-and-enc-tools.patch \
         "
+
+require recipes-devtools/synasdk/synasdk-config.inc
+DEPENDS:append = " \
+    synasdk-tools-native \
+    synasdk-security-native \
+"
 
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build"
@@ -42,13 +47,32 @@ do_compile() {
 }
 
 do_install:append() {
-	export security_dir="${S}/security/genx"
+    . ${CONFIG_FILE}
+    . ${CHIP_RC_FILE}
 
-	enc_tool=${S}/security/genx/enc.sh
-	in_bin=${B}/${ATF_PLATFORM}/${ATF_SOC}/release/${ATF_TARGET}.${ATF_SUFFIX}
-	out_bin=${D}${nonarch_base_libdir}/firmware/tz1_en.bin
-	mkdir -pv ${D}${nonarch_base_libdir}/firmware/
-	${enc_tool} ${ATF_SOC} A0 ATF ${in_bin} ${out_bin}
+    SYNA_KEY_PATH="${STAGING_DIR_NATIVE}/usr/share/syna/keys"
+    security_keys_path="${SYNA_KEY_PATH}/${syna_chip_name}/${syna_chip_rev}"
+    security_libexec_path="${STAGING_DIR_NATIVE}/usr/libexec/syna"
+
+    in_bin=${B}/${ATF_PLATFORM}/${ATF_SOC}/release/${ATF_TARGET}.${ATF_SUFFIX}
+    out_bin=${D}${nonarch_base_libdir}/firmware/tz1_en.bin
+    mkdir -pv ${D}${nonarch_base_libdir}/firmware/
+
+    prod_image_flag=0x00000000
+    destination_addr=0x00120000
+    ${security_libexec_path}/in_extras.py "ATF" ${B}/atf_extras.bin ${prod_image_flag} ${destination_addr}
+
+    # Generate image
+    gen_x_secure_image --chip-name=${syna_chip_name} \
+                       --chip-rev=${syna_chip_rev} \
+                       --img_type="ATF" \
+                       --key_type="ree" \
+                       --length=0x0 \
+                       --extras=${B}/atf_extras.bin \
+                       --workdir-security-tools=${security_libexec_path} \
+                       --workdir-security-keys=${security_keys_path} \
+                       --in_payload=${in_bin} \
+                       --out_store=${out_bin}
 }
 
 do_deploy() {
