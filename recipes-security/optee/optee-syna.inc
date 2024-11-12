@@ -5,7 +5,6 @@ PATCHTOOL = "git"
 SRC_URI += " \
     file://0005-ta-pkcs11-disable-TA_FLAG_INSTANCE_KEEP_ALIVE.patch \
     file://0006-lib-extend-newlib-apis.patch \
-    file://0007-use-REE-keys-to-sign-AFT-TZK.patch \
     file://0008-plat-syna-add-dolphin-platypus-and-myna2-support.patch \
     file://0009-libutee-add-syna-syscalls.patch \
     file://0010-core-support-berlin-secure-and-non-secure-heap.patch \

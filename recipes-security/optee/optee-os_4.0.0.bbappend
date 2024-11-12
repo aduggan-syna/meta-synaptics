@@ -1,10 +1,16 @@
 require optee-syna.inc
+require recipes-devtools/synasdk/synasdk-config.inc
 
 SRC_URI += "${SYNA_SRC_TA_ENC}"
 
 SRCREV_taenc = "${SYNA_SRCREV_TA_ENC}"
 
 SRCREV_FORMAT = "taenc"
+
+DEPENDS:append = " \
+    synasdk-tools-native \
+    synasdk-security-native \
+"
 
 SYNA_TA_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/ta_enc"
 
@@ -27,10 +33,30 @@ EARLY_SYNA_TA:dolphin=" ${SYNA_TA_PATH}/libfastlogo.ta/dolphin/A0/genx/1316a183-
 EXTRA_OEMAKE += " CFG_EARLY_TA=y EARLY_TA_PATHS="${EARLY_SYNA_TA}""
 
 do_install:append() {
-	export security_dir="${S}/security/genx"
+    # Launch script to generate required configurations (ex. ${syna_chip_rev})
+    . ${CONFIG_FILE}
+    . ${CHIP_RC_FILE}
 
-	enc_tool=${S}/security/genx/enc.sh
-	in_bin=${B}/core/tee-pager_v2.bin
-	out_bin=${D}${nonarch_base_libdir}/firmware/tz2_en.bin
-	${enc_tool} ${SYNA_CHIP} A0 TZK ${in_bin} ${out_bin}
+    SYNA_KEY_PATH="${STAGING_DIR_NATIVE}/usr/share/syna/keys"
+    security_keys_path="${SYNA_KEY_PATH}/${syna_chip_name}/${syna_chip_rev}"
+    security_libexec_path="${STAGING_DIR_NATIVE}/usr/libexec/syna"
+
+    in_bin=${B}/core/tee-pager_v2.bin
+    out_bin=${D}${nonarch_base_libdir}/firmware/tz2_en.bin
+
+    # Prepare tzk_extra.bin
+    prod_image_flag=0x00000000
+    destination_addr=0x00160000
+    ${security_libexec_path}/in_extras.py "TZ_KERNEL" ${B}/tzk_extras.bin ${prod_image_flag} ${destination_addr}
+
+    # Generate image
+    gen_x_secure_image --chip-name=${syna_chip_name} \
+                       --chip-rev=${syna_chip_rev} \
+                       --img_type="TZ_KERNEL" \
+                       --key_type="ree" \
+                       --length=0x0 --extras=${B}/tzk_extras.bin \
+                       --workdir-security-tools=${security_libexec_path} \
+                       --workdir-security-keys=${security_keys_path} \
+                       --in_payload=${in_bin} \
+                       --out_store=${out_bin}
 }
