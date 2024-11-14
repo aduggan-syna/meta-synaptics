@@ -10,7 +10,7 @@ inherit module
 SRC_URI = "file://COPYING \
            ${SYNA_SRC_LINUX_5_15_MODULES}"
 
-SRCREV = "${AUTOREV}"
+SRCREV = "${SYNA_SRCREV_LINUX_5_15_MODULES}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
