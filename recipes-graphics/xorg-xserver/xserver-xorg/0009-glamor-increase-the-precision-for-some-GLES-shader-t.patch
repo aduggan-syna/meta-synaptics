@@ -1,0 +1,37 @@
+From 52e78410e4a134842da252be6ac867de4156de65 Mon Sep 17 00:00:00 2001
+From: brendan King <Brendan.King@imgtec.com>
+Date: Thu, 5 Aug 2021 10:46:59 +0100
+Subject: [PATCH 09/12] glamor: increase the precision for some GLES shader
+ types
+
+For OpenGLES shaders, set the default precision for sampler2D to
+mediump, and the default precision for float to highp, when possible.
+---
+ glamor/glamor_priv.h | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/glamor/glamor_priv.h b/glamor/glamor_priv.h
+index 49ee57eee..5d7679899 100644
+--- a/glamor/glamor_priv.h
++++ b/glamor/glamor_priv.h
+@@ -44,9 +44,14 @@
+ #include <epoxy/egl.h>
+ #endif
+ 
+-#define GLAMOR_DEFAULT_PRECISION  \
+-    "#ifdef GL_ES\n"              \
+-    "precision mediump float;\n"  \
++#define GLAMOR_DEFAULT_PRECISION          \
++    "#ifdef GL_ES\n"                      \
++    "precision mediump sampler2D;\n"      \
++    "#ifdef GL_FRAGMENT_PRECISION_HIGH\n" \
++    "precision highp float;\n"            \
++    "#else\n"                             \
++    "precision mediump float;\n"          \
++    "#endif\n"                            \
+     "#endif\n"
+ 
+ #include "glyphstr.h"
+-- 
+2.25.1
+

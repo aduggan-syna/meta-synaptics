@@ -1,0 +1,39 @@
+From 2204cd5585c49cd5f9ed373ef709d234b6f03aaf Mon Sep 17 00:00:00 2001
+From: Frank Binns <frank.binns@imgtec.com>
+Date: Wed, 23 Apr 2014 13:55:27 +0100
+Subject: [PATCH 01/12] present: don't do a vblank abort on a pending flip
+ during window destruction
+
+As part of present's window destroy function, any vblanks associated with the
+destroyed window are aborted and destroyed. However, this can include a
+pending flip. This means that when the corresponding flip event is finally
+processed it gets ignored. As a result, any deferred unflip is never performed
+and, more importantly, the now idle pixmap is never destroyed. This results in
+a leak between server resets.
+
+Fix this by preventing any pending flip, associated with the window being
+destroyed, from being aborted and destroyed during window destruction.
+---
+ present/present_screen.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/present/present_screen.c b/present/present_screen.c
+index 15684eda4..16e016967 100644
+--- a/present/present_screen.c
++++ b/present/present_screen.c
+@@ -77,8 +77,10 @@ present_free_window_vblank(WindowPtr window)
+     present_vblank_ptr          vblank, tmp;
+ 
+     xorg_list_for_each_entry_safe(vblank, tmp, &window_priv->vblank, window_list) {
+-        screen_priv->abort_vblank(window->drawable.pScreen, window, vblank->crtc, vblank->event_id, vblank->target_msc);
+-        present_vblank_destroy(vblank);
++        if (vblank != screen_priv->flip_pending) {
++            screen_priv->abort_vblank(window->drawable.pScreen, window, vblank->crtc, vblank->event_id, vblank->target_msc);
++            present_vblank_destroy(vblank);
++        }
+     }
+ }
+ 
+-- 
+2.25.1
+

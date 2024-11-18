@@ -1,0 +1,115 @@
+From 12abb20243f71077897f4e39859cc35d42d89a17 Mon Sep 17 00:00:00 2001
+From: Brendan King <Brendan.King@imgtec.com>
+Date: Tue, 16 Jun 2020 16:21:41 +0100
+Subject: [PATCH 08/12] glx: allow direct GLX with DRI3 only screens
+
+Indirect GLX requires the DRI2 extension, which not all screens
+support. Indirect GLX is disabled by default, and rarely used these
+days. Rather than add support for screens that support the image
+driver extension, but not the DRI2 extension, prevent the use of
+indirect GLX by preventing the creation of indirect GLX contexts
+and drawables.
+
+A dummy DRI image loader extension has been added to GLX, so that
+screens that check for the extension during screen initialisation,
+won't return an error.
+---
+ glx/glxdri2.c | 62 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 62 insertions(+)
+
+diff --git a/glx/glxdri2.c b/glx/glxdri2.c
+index 822515a86..24bc4d508 100644
+--- a/glx/glxdri2.c
++++ b/glx/glxdri2.c
+@@ -760,6 +760,39 @@ dri2FlushFrontBuffer(__DRIdrawable * driDrawable, void *loaderPrivate)
+              0, 0, private->width, private->height);
+ }
+ 
++static int
++dri3GetBuffers(__DRIdrawable *driDrawable,
++               unsigned int format,
++               uint32_t *stamp,
++               void *loaderPrivate,
++               uint32_t bufferMask,
++               struct __DRIimageList *buffers)
++{
++    LogMessage(X_INFO, "AIGLX: Indirect GLX is not supported\n");
++
++    return 0;
++}
++
++static void
++dri3FlushFrontBuffer(__DRIdrawable *driDrawable, void *loaderPrivate)
++{
++    LogMessage(X_INFO, "AIGLX: Indirect GLX is not supported\n");
++}
++
++static unsigned
++dri3GetCapability(void *loaderPrivate, enum dri_loader_cap cap)
++{
++    LogMessage(X_INFO, "AIGLX: Indirect GLX is not supported\n");
++
++    return 0;
++}
++
++static void
++dri3FlushSwapBuffers(__DRIdrawable *driDrawable, void *loaderPrivate)
++{
++    LogMessage(X_INFO, "AIGLX: Indirect GLX is not supported\n");
++}
++
+ static const __DRIdri2LoaderExtension loaderExtension = {
+     {__DRI_DRI2_LOADER, 3},
+     dri2GetBuffers,
+@@ -771,12 +804,26 @@ static const __DRIuseInvalidateExtension dri2UseInvalidate = {
+     {__DRI_USE_INVALIDATE, 1}
+ };
+ 
++static const __DRIimageLoaderExtension imageLoaderExtension = {
++    {__DRI_IMAGE_LOADER, 3},
++    dri3GetBuffers,
++    dri3FlushFrontBuffer,
++    dri3GetCapability,
++    dri3FlushSwapBuffers,
++};
++
+ static const __DRIextension *loader_extensions[] = {
+     &loaderExtension.base,
+     &dri2UseInvalidate.base,
+     NULL
+ };
+ 
++static const __DRIextension *loader_extensions_fallback[] = {
++    &imageLoaderExtension.base,
++    &dri2UseInvalidate.base,
++    NULL
++};
++
+ static Bool
+ glxDRIEnterVT(ScrnInfoPtr scrn)
+ {
+@@ -966,6 +1013,21 @@ __glXDRIscreenProbe(ScreenPtr pScreen)
+                                           screen->fd,
+                                           loader_extensions,
+                                           &screen->driConfigs, screen);
++    if (screen->driScreen == NULL) {
++        /* The screen might not support the DRI2 extension, but might
++         * support the image driver extension. This will allow direct
++         * GLX to work, but not indirect GLX.
++         */
++        LogMessage(X_INFO,
++                   "AIGLX: Trying image driver extension for screen %d\n",
++                   pScreen->myNum);
++
++        screen->driScreen =
++            (*screen->dri2->createNewScreen) (pScreen->myNum,
++                                              screen->fd,
++                                              loader_extensions_fallback,
++                                              &screen->driConfigs, screen);
++    }
+ 
+     if (screen->driScreen == NULL) {
+         LogMessage(X_ERROR, "AIGLX error: Calling driver entry point failed\n");
+-- 
+2.25.1
+

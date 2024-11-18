@@ -1,0 +1,255 @@
+From a081980af6b41409e7bc60a2d1d5386bf5b20d47 Mon Sep 17 00:00:00 2001
+From: Brendan King <Brendan.King@imgtec.com>
+Date: Fri, 19 Nov 2021 16:57:53 +0000
+Subject: [PATCH 02/12] glamor: improve OpenGLES support
+
+Use an OpenGLES 3.0 context, where possible.
+
+OpenGLES 3.0 has map buffer range, so use it when preparing a pixmap for
+CPU access.
+
+OpenGLES may support GL_EXT_buffer_storage.
+
+If OpenGLES supports the OES_read_format, IMG_read_format and
+EXT_texture_format_BGRA8888 format extensions, make use of them
+for 24 and 32 bit depths.
+
+No output was being produced for the zero line width circle and
+ellipse tests in x11perf, due to no points being drawn by
+glamor_poly_point_gl. This was due to gl_PointSize not being set
+in the poly_point vertex shader, something that is not required
+for desktop OpenGL.
+
+Commit:
+
+    commit dbfbe58b94ec07a45fd6170f96bffec55051724e
+    Author: Corentin Rossignon <corentin.rossignon@gmail.com>
+    Date:   Thu Jan 4 08:34:01 2018 +0100
+    glamor: Specify GLSL version for xv shader
+
+broke the Xv shader on OpenGLES, by adding a "#version 120"
+statement to the shader source. The original problem was the use
+of "sample" as a variable name. Remove the #version statement, and
+change the variable name from "sample" to "smp".
+---
+ glamor/glamor.c         | 35 ++++++++++++++++++++++++-----------
+ glamor/glamor_egl.c     | 24 +++++++++++++++++++++++-
+ glamor/glamor_points.c  |  3 ++-
+ glamor/glamor_prepare.c | 25 +++++++++++++++++++------
+ glamor/glamor_priv.h    |  1 +
+ glamor/glamor_xv.c      | 16 +++++++---------
+ 6 files changed, 76 insertions(+), 28 deletions(-)
+
+diff --git a/glamor/glamor.c b/glamor/glamor.c
+index da2ea94ba..a9ad1c473 100644
+--- a/glamor/glamor.c
++++ b/glamor/glamor.c
+@@ -585,11 +585,18 @@ glamor_setup_formats(ScreenPtr screen)
+                       GL_RGB, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, TRUE);
+ 
+     if (glamor_priv->is_gles) {
+-        assert(X_BYTE_ORDER == X_LITTLE_ENDIAN);
+-        glamor_add_format(screen, 24, PICT_x8b8g8r8,
+-                          GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, TRUE);
+-        glamor_add_format(screen, 32, PICT_a8b8g8r8,
+-                          GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, TRUE);
++        if (glamor_priv->has_format_bgra8888) {
++            glamor_add_format(screen, 24, PICT_x8r8g8b8,
++                              GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE, TRUE);
++            glamor_add_format(screen, 32, PICT_a8r8g8b8,
++                              GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE, TRUE);
++	} else {
++            assert(X_BYTE_ORDER == X_LITTLE_ENDIAN);
++            glamor_add_format(screen, 24, PICT_x8b8g8r8,
++                              GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, TRUE);
++            glamor_add_format(screen, 32, PICT_a8b8g8r8,
++                              GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, TRUE);
++	}
+     } else {
+         glamor_add_format(screen, 24, PICT_x8r8g8b8,
+                           GL_RGBA, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, TRUE);
+@@ -783,10 +790,6 @@ glamor_init(ScreenPtr screen, unsigned int flags)
+         epoxy_has_gl_extension("GL_ARB_instanced_arrays"))
+         glamor_priv->use_gpu_shader4 = epoxy_has_gl_extension("GL_EXT_gpu_shader4");
+ 
+-    glamor_priv->has_rw_pbo = FALSE;
+-    if (!glamor_priv->is_gles)
+-        glamor_priv->has_rw_pbo = TRUE;
+-
+     glamor_priv->has_khr_debug = epoxy_has_gl_extension("GL_KHR_debug");
+     glamor_priv->has_pack_invert =
+         epoxy_has_gl_extension("GL_MESA_pack_invert");
+@@ -794,9 +797,11 @@ glamor_init(ScreenPtr screen, unsigned int flags)
+         epoxy_has_gl_extension("GL_EXT_framebuffer_blit");
+     glamor_priv->has_map_buffer_range =
+         epoxy_has_gl_extension("GL_ARB_map_buffer_range") ||
+-        epoxy_has_gl_extension("GL_EXT_map_buffer_range");
++        epoxy_has_gl_extension("GL_EXT_map_buffer_range") ||
++        (glamor_priv->is_gles && gl_version >= 30);
+     glamor_priv->has_buffer_storage =
+-        epoxy_has_gl_extension("GL_ARB_buffer_storage");
++        epoxy_has_gl_extension("GL_ARB_buffer_storage") ||
++        epoxy_has_gl_extension("GL_EXT_buffer_storage");
+     glamor_priv->has_mesa_tile_raster_order =
+         epoxy_has_gl_extension("GL_MESA_tile_raster_order");
+     glamor_priv->has_nv_texture_barrier =
+@@ -815,9 +820,17 @@ glamor_init(ScreenPtr screen, unsigned int flags)
+     glamor_priv->has_clear_texture =
+         epoxy_gl_version() >= 44 ||
+         epoxy_has_gl_extension("GL_ARB_clear_texture");
++    glamor_priv->has_format_bgra8888 =
++        !glamor_priv->is_gles ||
++        (epoxy_has_gl_extension("GL_IMG_read_format") &&
++         epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888"));
+ 
+     glamor_priv->can_copyplane = (gl_version >= 30);
+ 
++    glamor_priv->has_rw_pbo = FALSE;
++    if (!glamor_priv->is_gles || glamor_priv->has_map_buffer_range)
++        glamor_priv->has_rw_pbo = TRUE;
++
+     glamor_setup_debug_output(screen);
+ 
+     glamor_priv->use_quads = !glamor_priv->is_gles &&
+diff --git a/glamor/glamor_egl.c b/glamor/glamor_egl.c
+index 6e0fc6596..d2e4a6f6d 100644
+--- a/glamor/glamor_egl.c
++++ b/glamor/glamor_egl.c
+@@ -1018,6 +1018,28 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
+         }
+     }
+ 
++    if (glamor_egl->context == EGL_NO_CONTEXT) {
++        static const EGLint config_attribs[] = {
++            EGL_CONTEXT_CLIENT_VERSION, 3,
++            EGL_CONTEXT_MINOR_VERSION_KHR, 0,
++            EGL_NONE
++        };
++        if (eglBindAPI(EGL_OPENGL_ES_API)) {
++            glamor_egl->context = eglCreateContext(glamor_egl->display,
++                                                   NULL, EGL_NO_CONTEXT,
++                                                   config_attribs);
++        }
++
++        if (glamor_egl->context != EGL_NO_CONTEXT) {
++            if (!eglMakeCurrent(glamor_egl->display,
++                                EGL_NO_SURFACE, EGL_NO_SURFACE, glamor_egl->context)) {
++                xf86DrvMsg(scrn->scrnIndex, X_ERROR,
++                           "Failed to make GLES3 context current\n");
++                goto error;
++            }
++        }
++    }
++
+     if (glamor_egl->context == EGL_NO_CONTEXT) {
+         static const EGLint config_attribs[] = {
+             EGL_CONTEXT_CLIENT_VERSION, 2,
+@@ -1041,7 +1063,7 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
+ 
+         if (glamor_egl->context == EGL_NO_CONTEXT) {
+             xf86DrvMsg(scrn->scrnIndex, X_ERROR,
+-                       "glamor: Failed to create GL or GLES2 contexts\n");
++                       "glamor: Failed to create GL or GLES contexts\n");
+             goto error;
+         }
+ 
+diff --git a/glamor/glamor_points.c b/glamor/glamor_points.c
+index faf6f433b..688370602 100644
+--- a/glamor/glamor_points.c
++++ b/glamor/glamor_points.c
+@@ -32,7 +32,8 @@
+ static const glamor_facet glamor_facet_point = {
+     .name = "poly_point",
+     .vs_vars = "attribute vec2 primitive;\n",
+-    .vs_exec = GLAMOR_POS(gl_Position, primitive),
++    .vs_exec = GLAMOR_POS(gl_Position, primitive)
++               "        gl_PointSize = 1.0;\n",
+ };
+ 
+ static Bool
+diff --git a/glamor/glamor_prepare.c b/glamor/glamor_prepare.c
+index 835c4ebea..4e059cfe2 100644
+--- a/glamor/glamor_prepare.c
++++ b/glamor/glamor_prepare.c
+@@ -125,12 +125,25 @@ glamor_prep_pixmap_box(PixmapPtr pixmap, glamor_access_t access, BoxPtr box)
+     RegionUninit(&region);
+ 
+     if (priv->pbo) {
+-        if (priv->map_access == GLAMOR_ACCESS_RW)
+-            gl_access = GL_READ_WRITE;
+-        else
+-            gl_access = GL_READ_ONLY;
+-
+-        pixmap->devPrivate.ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, gl_access);
++        if (glamor_priv->has_map_buffer_range) {
++            if (priv->map_access == GLAMOR_ACCESS_RW)
++                gl_access = GL_MAP_WRITE_BIT;
++            else
++                gl_access = GL_MAP_READ_BIT;
++
++            pixmap->devPrivate.ptr = glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0,
++                                                      pixmap->devKind *
++                                                      pixmap->drawable.height,
++                                                      gl_access);
++        } else {
++            if (priv->map_access == GLAMOR_ACCESS_RW)
++                gl_access = GL_READ_WRITE;
++            else
++                gl_access = GL_READ_ONLY;
++
++            pixmap->devPrivate.ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER,
++                                                 gl_access);
++        }
+         glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+     }
+ 
+diff --git a/glamor/glamor_priv.h b/glamor/glamor_priv.h
+index 028a6d374..a94eaa360 100644
+--- a/glamor/glamor_priv.h
++++ b/glamor/glamor_priv.h
+@@ -216,6 +216,7 @@ typedef struct glamor_screen_private {
+     Bool has_dual_blend;
+     Bool has_clear_texture;
+     Bool has_texture_swizzle;
++    Bool has_format_bgra8888;
+     Bool is_core_profile;
+     Bool can_copyplane;
+     Bool use_gpu_shader4;
+diff --git a/glamor/glamor_xv.c b/glamor/glamor_xv.c
+index dbb490599..95d337b2b 100644
+--- a/glamor/glamor_xv.c
++++ b/glamor/glamor_xv.c
+@@ -94,8 +94,6 @@ static const glamor_facet glamor_facet_xv_planar_2 = {
+ static const glamor_facet glamor_facet_xv_planar_3 = {
+     .name = "xv_planar_3",
+ 
+-    .version = 120,
+-
+     .source_name = "v_texcoord0",
+     .vs_vars = ("attribute vec2 position;\n"
+                 "attribute vec2 v_texcoord0;\n"
+@@ -111,14 +109,14 @@ static const glamor_facet glamor_facet_xv_planar_3 = {
+                 "uniform vec4 vco;\n"
+                 "varying vec2 tcs;\n"),
+     .fs_exec = (
+-                "        float sample;\n"
++                "        float smp;\n"
+                 "        vec4 temp1;\n"
+-                "        sample = texture2D(y_sampler, tcs).w;\n"
+-                "        temp1.xyz = offsetyco.www * vec3(sample) + offsetyco.xyz;\n"
+-                "        sample = texture2D(u_sampler, tcs).w;\n"
+-                "        temp1.xyz = ucogamma.xyz * vec3(sample) + temp1.xyz;\n"
+-                "        sample = texture2D(v_sampler, tcs).w;\n"
+-                "        temp1.xyz = clamp(vco.xyz * vec3(sample) + temp1.xyz, 0.0, 1.0);\n"
++                "        smp = texture2D(y_sampler, tcs).w;\n"
++                "        temp1.xyz = offsetyco.www * vec3(smp) + offsetyco.xyz;\n"
++                "        smp = texture2D(u_sampler, tcs).w;\n"
++                "        temp1.xyz = ucogamma.xyz * vec3(smp) + temp1.xyz;\n"
++                "        smp = texture2D(v_sampler, tcs).w;\n"
++                "        temp1.xyz = clamp(vco.xyz * vec3(smp) + temp1.xyz, 0.0, 1.0);\n"
+                 "        temp1.w = 1.0;\n"
+                 "        gl_FragColor = temp1;\n"
+                 ),
+-- 
+2.25.1
+

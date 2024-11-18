@@ -1,0 +1,53 @@
+From a87700dfe71322dcdcc86f7878d320796ec74452 Mon Sep 17 00:00:00 2001
+From: Brendan King <Brendan.King@imgtec.com>
+Date: Thu, 10 Sep 2020 18:27:21 +0100
+Subject: [PATCH 12/12] config: Fix bus ID of platform device with PCI parent
+
+IMG Test Chip systems may create platform devices that have PCI
+parents. Changes to device probing and detection:
+
+"linux: Make platform device probe less fragile"
+"linux: Fix platform device PCI detection for complex bus topologies"
+"linux: Fix platform device probe for DT-based PCI"
+
+resulted in such devices having the PCI bus ID of their parent,
+rather than the platform bus ID. This in turn resulted in a
+different path being taken through probeSingleDevice in
+xfb86platformBus.c, as the devices now had a pci_device structure
+associated with them. No PCI match was found due to the parent device
+being in the Multimedia Controller device class, rather than the
+Display Controller one. In any case, had the device class been the
+latter, and we got a match, calling doPlatformProbe via this path
+would be the wrong thing to do, as the match would be for the parent
+device.
+
+Since xf86platformProbeDev had failed to find a screen,
+xf86CallDriverProbe ended up falling back to the old probe method,
+which failed.
+---
+ config/udev.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/config/udev.c b/config/udev.c
+index 836fc2afa..463a0f5e6 100644
+--- a/config/udev.c
++++ b/config/udev.c
+@@ -545,11 +545,15 @@ config_udev_odev_setup_attribs(struct udev_device *udev_device, const char *path
+ 
+     value = udev_device_get_property_value(udev_device, "ID_PATH");
+     if (value && (str = strrstr(value, "pci-"))) {
++
+         value = str;
+ 
+         if ((str = strstr(value, "usb-")))
+             value = str;
+ 
++        if ((str = strstr(value, "platform-")))
++            value = str;
++
+         attribs->busid = XNFstrdup(value);
+         attribs->busid[3] = ':';
+     }
+-- 
+2.25.1
+

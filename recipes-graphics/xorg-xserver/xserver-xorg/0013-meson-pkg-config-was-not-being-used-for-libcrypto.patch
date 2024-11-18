@@ -1,0 +1,25 @@
+From f6d063f66d3cfdb97bc01397e8dcda40c0243b27 Mon Sep 17 00:00:00 2001
+From: Brendan King <Brendan.King@imgtec.com>
+Date: Tue, 13 Sep 2022 18:55:52 +0100
+Subject: [PATCH 13/13] meson: pkg-config was not being used for libcrypto
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index a6afd5575..d1bd54824 100644
+--- a/meson.build
++++ b/meson.build
+@@ -365,7 +365,7 @@ foreach t : test_sha1
+         endif
+     elif t == 'libcrypto'
+         # we don't need all of OpenSSL, just libcrypto
+-        libcrypto_dep = cc.find_library('crypto', required: false)
++        libcrypto_dep = dependency('libcrypto', required: false)
+         openssl_dep = dependency('openssl', required: false)
+         if libcrypto_dep.found() or openssl_dep.found()
+             sha1_found = true
+-- 
+2.34.1
+

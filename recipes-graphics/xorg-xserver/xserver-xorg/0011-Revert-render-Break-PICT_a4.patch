@@ -1,0 +1,33 @@
+From dd64f289a0626736fb0bae7ee864b90273f400f7 Mon Sep 17 00:00:00 2001
+From: Brendan King <Brendan.King@imgtec.com>
+Date: Thu, 25 Nov 2021 17:51:05 +0000
+Subject: [PATCH 11/12] Revert "render: Break PICT_a4"
+
+This reverts commit 436fd7e8b4966c305ea9c43f3c14c2ca04c35539,
+"render: Break PICT_a4".
+
+The change breaks the x11perf aa4trap1 test case, causing a segfault if
+x11perf is run for that specific test case ("x11perf -aa4trap1"), or
+for all test cases ("x11perf -all").
+---
+ render/picture.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/render/picture.c b/render/picture.c
+index 2be4b1954..3fa48f919 100644
+--- a/render/picture.c
++++ b/render/picture.c
+@@ -188,6 +188,10 @@ PictureCreateDefaultFormats(ScreenPtr pScreen, int *nformatp)
+                                            PICT_TYPE_A, 8, 0, 0, 0);
+     formats[nformats].depth = 8;
+     nformats++;
++    formats[nformats].format = PICT_FORMAT(BitsPerPixel(4),
++                                           PICT_TYPE_A, 4, 0, 0, 0);
++    formats[nformats].depth = 4;
++    nformats++;
+     formats[nformats].format = PICT_a8r8g8b8;
+     formats[nformats].depth = 32;
+     nformats++;
+-- 
+2.25.1
+

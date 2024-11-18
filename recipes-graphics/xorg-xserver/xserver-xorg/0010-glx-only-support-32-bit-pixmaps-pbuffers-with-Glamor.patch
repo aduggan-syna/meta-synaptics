@@ -1,0 +1,130 @@
+From a52371d22b8eff2599c667a80925f431fe4a47f8 Mon Sep 17 00:00:00 2001
+From: brendan King <Brendan.King@imgtec.com>
+Date: Thu, 26 Aug 2021 17:32:39 +0100
+Subject: [PATCH 10/12] glx: only support 32 bit pixmaps/pbuffers with Glamor
+
+Glamor can't export pixmaps that don't have a depth of 32. This
+causes rendering to pixmaps and pbuffers to fail with Mesa, when
+using DRI3.
+
+The changes are marked with "#ifdef GLAMOR", and assume Glamor is
+in use if the X Server is built with Glamor support, rather than
+checking Glamor is in use at run time.
+---
+ glx/glxcmds.c      | 28 +++++++++++++++++++++++++---
+ glx/glxdricommon.c | 15 +++++++++++++++
+ glx/glxscreens.c   |  2 ++
+ 3 files changed, 42 insertions(+), 3 deletions(-)
+
+diff --git a/glx/glxcmds.c b/glx/glxcmds.c
+index fc26a2e34..003c8ae3c 100644
+--- a/glx/glxcmds.c
++++ b/glx/glxcmds.c
+@@ -893,7 +893,7 @@ __glXDisp_CopyContext(__GLXclientState * cl, GLbyte * pc)
+ 
+ enum {
+     GLX_VIS_CONFIG_UNPAIRED = 18,
+-    GLX_VIS_CONFIG_PAIRED = 22
++    GLX_VIS_CONFIG_PAIRED = 24
+ };
+ 
+ enum {
+@@ -979,6 +979,8 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
+         buf[p++] = modes->transparentAlpha;
+         buf[p++] = GLX_TRANSPARENT_INDEX_VALUE;
+         buf[p++] = modes->transparentIndex;
++        buf[p++] = GLX_DRAWABLE_TYPE;
++        buf[p++] = modes->drawableType & ~GLX_PBUFFER_BIT;
+         buf[p++] = GLX_SAMPLES_SGIS;
+         buf[p++] = modes->samples;
+         buf[p++] = GLX_SAMPLE_BUFFERS_SGIS;
+@@ -1035,11 +1037,22 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
+     reply = (xGLXGetFBConfigsReply) {
+         .type = X_Reply,
+         .sequenceNumber = client->sequence,
+-        .length = __GLX_FBCONFIG_ATTRIBS_LENGTH * pGlxScreen->numFBConfigs,
+-        .numFBConfigs = pGlxScreen->numFBConfigs,
+         .numAttribs = __GLX_TOTAL_FBCONFIG_ATTRIBS
+     };
+ 
++    reply.numFBConfigs = pGlxScreen->numFBConfigs;
++
++    /* Filter out configs that don't support any type of drawable. Such
++     * configs can arise if the GLX_WINDOW_BIT is removed whilst creating
++     * visuals.
++     */
++    for (modes = pGlxScreen->fbconfigs; modes != NULL; modes = modes->next) {
++        if (!modes->drawableType)
++            reply.numFBConfigs--;
++    }
++
++    reply.length = __GLX_FBCONFIG_ATTRIBS_LENGTH * reply.numFBConfigs;
++
+     if (client->swapped) {
+         __GLX_SWAP_SHORT(&reply.sequenceNumber);
+         __GLX_SWAP_INT(&reply.length);
+@@ -1050,6 +1063,10 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
+     WriteToClient(client, sz_xGLXGetFBConfigsReply, &reply);
+ 
+     for (modes = pGlxScreen->fbconfigs; modes != NULL; modes = modes->next) {
++        /* Filter out configs that don't support any type of drawable */
++        if (!modes->drawableType)
++            continue;
++
+         p = 0;
+ 
+ #define WRITE_PAIR(tag,value) \
+@@ -1214,6 +1231,11 @@ DoCreateGLXPixmap(ClientPtr client, __GLXscreen * pGlxScreen,
+         return BadPixmap;
+     }
+ 
++#ifdef GLAMOR
++    if (pDraw->bitsPerPixel != 32)
++        return BadAlloc;
++#endif
++
+     err = DoCreateGLXDrawable(client, pGlxScreen, config, pDraw, drawableId,
+                               glxDrawableId, GLX_DRAWABLE_PIXMAP);
+ 
+diff --git a/glx/glxdricommon.c b/glx/glxdricommon.c
+index 35a539629..21d3cb249 100644
+--- a/glx/glxdricommon.c
++++ b/glx/glxdricommon.c
+@@ -231,6 +231,21 @@ createModeFromConfig(const __DRIcoreExtension * core,
+     }
+ #endif
+ 
++#ifdef GLAMOR
++    if (!render_type_is_pbuffer_only(renderType) &&
++	config->config.rgbBits < 24) {
++        config->config.drawableType &= ~(GLX_PBUFFER_BIT | GLX_PIXMAP_BIT);
++        if (!config->config.drawableType) {
++            free(config);
++            return NULL;
++        } else {
++	    config->config.maxPbufferWidth = 0;
++	    config->config.maxPbufferHeight = 0;
++	    config->config.maxPbufferPixels = 0;
++	}
++    }
++#endif
++
+     return &config->config;
+ }
+ 
+diff --git a/glx/glxscreens.c b/glx/glxscreens.c
+index 5cd9fcfd4..5e45de1c3 100644
+--- a/glx/glxscreens.c
++++ b/glx/glxscreens.c
+@@ -258,6 +258,8 @@ pickFBConfig(__GLXscreen * pGlxScreen, VisualPtr visual)
+     for (config = pGlxScreen->fbconfigs; config != NULL; config = config->next) {
+         int score = 0;
+ 
++        if (!(config->drawableType & ~GLX_PBUFFER_BIT))
++	    continue;
+         if (config->redMask != visual->redMask ||
+             config->greenMask != visual->greenMask ||
+             config->blueMask != visual->blueMask)
+-- 
+2.25.1
+

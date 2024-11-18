@@ -1,0 +1,152 @@
+From df5f59cba1c5a8b980fe0c7122c5f0f0155f39c6 Mon Sep 17 00:00:00 2001
+From: Brendan King <Brendan.King@imgtec.com>
+Date: Fri, 20 Jul 2018 13:36:02 +0100
+Subject: [PATCH 05/12] glamor: fix SW cursor handling for IMG OpenGLES3
+
+Add a soft cursor workaround when using OpenGLES with Imagination
+Technologies GPUs.
+
+Use miPushPixels unconditionally in glamor_push_pixels, as using
+glamor_push_pixels_gl results in no cursor on the screen.
+
+Pass the hint GLAMOR_CREATE_PIXMAP_CURSOR when creating the
+pixmap used to save the screen area under the cursor, and call
+glFinish whenever the pixmap is the destination for
+glamor_copy_fbo_fbo_draw. This avoids the initial cursor image
+being left on the screen when the cursor is moved.
+---
+ glamor/glamor.c          | 10 ++++++++++
+ glamor/glamor.h          |  2 ++
+ glamor/glamor_copy.c     |  3 +++
+ glamor/glamor_glyphblt.c |  9 +++++++--
+ glamor/glamor_priv.h     |  4 ++++
+ mi/midispcur.c           |  9 ++++++++-
+ 6 files changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/glamor/glamor.c b/glamor/glamor.c
+index 0eba61696..23134aae4 100644
+--- a/glamor/glamor.c
++++ b/glamor/glamor.c
+@@ -230,6 +230,9 @@ glamor_create_pixmap(ScreenPtr screen, int w, int h, int depth,
+ 
+     pixmap_priv->type = GLAMOR_TEXTURE_ONLY;
+ 
++    pixmap_priv->needs_glfinish = (usage == GLAMOR_CREATE_PIXMAP_CURSOR) &&
++                                  glamor_priv->img_tech_soft_cursor_workaround;
++
+     if (usage == GLAMOR_CREATE_PIXMAP_NO_TEXTURE) {
+         glamor_init_pixmap_private_small(pixmap, pixmap_priv);
+         return pixmap;
+@@ -846,6 +849,13 @@ glamor_init(ScreenPtr screen, unsigned int flags)
+          strstr((char *)glGetString(GL_RENDERER), "V3D")))
+         glamor_priv->use_quads = FALSE;
+ 
++    /* Driver-specific hack: Enable a soft cursor workaround when using
++     * using OpenGLES with Imagination Technologies GPUs.
++     */
++    if (strstr((char *)glGetString(GL_VENDOR), "Imagination Technologies") &&
++        glamor_priv->is_gles)
++        glamor_priv->img_tech_soft_cursor_workaround = TRUE;
++
+     glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &glamor_priv->max_fbo_size);
+     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glamor_priv->max_fbo_size);
+     glGetIntegerv(GL_MAX_VIEWPORT_DIMS, max_viewport_size);
+diff --git a/glamor/glamor.h b/glamor/glamor.h
+index 31157471d..07c16bd32 100644
+--- a/glamor/glamor.h
++++ b/glamor/glamor.h
+@@ -131,6 +131,8 @@ extern _X_EXPORT Bool glamor_destroy_pixmap(PixmapPtr pixmap);
+ #define GLAMOR_CREATE_PIXMAP_NO_TEXTURE 0x106
+ #define GLAMOR_CREATE_FORMAT_CBCR       0x107
+ 
++#define GLAMOR_CREATE_PIXMAP_CURSOR     0x200
++
+ /* @glamor_egl_exchange_buffers: Exchange the underlying buffers(KHR image,fbo).
+  *
+  * @front: front pixmap.
+diff --git a/glamor/glamor_copy.c b/glamor/glamor_copy.c
+index 050d2bf8b..7329beef3 100644
+--- a/glamor/glamor_copy.c
++++ b/glamor/glamor_copy.c
+@@ -525,6 +525,9 @@ bail_ctx:
+     glDisable(GL_SCISSOR_TEST);
+     glDisableVertexAttribArray(GLAMOR_VERTEX_POS);
+ 
++    if (ret && dst_priv->needs_glfinish)
++        glFinish();
++
+     return ret;
+ }
+ 
+diff --git a/glamor/glamor_glyphblt.c b/glamor/glamor_glyphblt.c
+index 78315ea9b..e64b56e69 100644
+--- a/glamor/glamor_glyphblt.c
++++ b/glamor/glamor_glyphblt.c
+@@ -244,8 +244,13 @@ void
+ glamor_push_pixels(GCPtr pGC, PixmapPtr pBitmap,
+                    DrawablePtr pDrawable, int w, int h, int x, int y)
+ {
+-    if (glamor_push_pixels_gl(pGC, pBitmap, pDrawable, w, h, x, y))
+-        return;
++    ScreenPtr screen = pDrawable->pScreen;
++    glamor_screen_private *glamor_priv = glamor_get_screen_private(screen);
++
++    if (!glamor_priv->img_tech_soft_cursor_workaround) {
++        if (glamor_push_pixels_gl(pGC, pBitmap, pDrawable, w, h, x, y))
++            return;
++    }
+ 
+     miPushPixels(pGC, pBitmap, pDrawable, w, h, x, y);
+ }
+diff --git a/glamor/glamor_priv.h b/glamor/glamor_priv.h
+index a94eaa360..49ee57eee 100644
+--- a/glamor/glamor_priv.h
++++ b/glamor/glamor_priv.h
+@@ -319,6 +319,8 @@ typedef struct glamor_screen_private {
+     glamor_program xv_prog;
+ 
+     struct glamor_context ctx;
++
++    Bool img_tech_soft_cursor_workaround;
+ } glamor_screen_private;
+ 
+ typedef enum glamor_access {
+@@ -405,6 +407,8 @@ typedef struct glamor_pixmap_private {
+     glamor_pixmap_fbo **fbo_array;
+ 
+     Bool is_cbcr;
++
++    Bool needs_glfinish;
+ } glamor_pixmap_private;
+ 
+ extern DevPrivateKeyRec glamor_pixmap_private_key;
+diff --git a/mi/midispcur.c b/mi/midispcur.c
+index d1da0fd58..79460d626 100644
+--- a/mi/midispcur.c
++++ b/mi/midispcur.c
+@@ -50,6 +50,13 @@ in this Software without prior written authorization from The Open Group.
+ 
+ #include "inputstr.h"
+ 
++#ifdef GLAMOR
++#include "../glamor/glamor.h"
++#define MI_CREATE_PIXMAP_USAGE_CURSOR GLAMOR_CREATE_PIXMAP_CURSOR
++#else
++#define MI_CREATE_PIXMAP_USAGE_CURSOR 0
++#endif
++
+ /* per-screen private data */
+ static DevPrivateKeyRec miDCScreenKeyRec;
+ 
+@@ -398,7 +405,7 @@ miDCSaveUnderCursor(DeviceIntPtr pDev, ScreenPtr pScreen,
+         if (pSave)
+             (*pScreen->DestroyPixmap) (pSave);
+         pBuffer->pSave = pSave =
+-            (*pScreen->CreatePixmap) (pScreen, w, h, pScreen->rootDepth, 0);
++            (*pScreen->CreatePixmap) (pScreen, w, h, pScreen->rootDepth, MI_CREATE_PIXMAP_USAGE_CURSOR);
+         if (!pSave)
+             return FALSE;
+     }
+-- 
+2.25.1
+
