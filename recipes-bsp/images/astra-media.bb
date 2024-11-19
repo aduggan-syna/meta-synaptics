@@ -178,7 +178,7 @@ do_swuimage() {
 
     # Copy the output .swu file to the deployment directory
     # install -d ${DEPLOY_DIR_IMAGE}
-    cp ${DEPLOY_DIR_IMAGE}/image.swu ${DEPLOY_DIR_IMAGE}/astra-media-${PV}.swu
+    cp ${DEPLOY_DIR_IMAGE}/image.swu ${DEPLOY_DIR_IMAGE}/astra-media.swu
 }
 # Ensure swu image is built after do_image_synaimg task
 SYNA_IMAGE = '${@bb.utils.contains("MACHINE", "sl1640usb", "synausbimg", "synaimg",d)}'
