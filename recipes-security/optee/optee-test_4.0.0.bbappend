@@ -1,5 +1,5 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
-EXTRA_OECMAKE += " \
+EXTRA_OEMAKE += " \
     CFG_PKCS11_TA=y \
 "
 
