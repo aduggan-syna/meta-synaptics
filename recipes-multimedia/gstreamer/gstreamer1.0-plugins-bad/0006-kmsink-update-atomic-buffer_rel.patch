@@ -1,5 +1,5 @@
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index c1e9f64..761e8d5 100644
+index c1e9f64..04e83c3 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -79,6 +79,9 @@ static GstFlowReturn gst_kms_sink_show_frame (GstVideoSink * vsink,
@@ -83,15 +83,15 @@ index c1e9f64..761e8d5 100644
 +                                      &mode_blob_id);
 +
 +  req = drmModeAtomicAlloc();
-+
-+  g_clear_pointer (&self->connector_props, gst_structure_free);
-+  self->connector_props = gst_structure_new ("conn_prop", "CRTC_ID", G_TYPE_INT,
-+                                             self->crtc_id, NULL);
-+  gst_kms_sink_update_connector_properties (self, req);
  
 -  err = drmModeSetCrtc (self->fd, self->crtc_id, fb_id, 0, 0,
 -      (uint32_t *) & self->conn_id, 1, mode);
 -  if (err)
++  g_clear_pointer (&self->connector_props, gst_structure_free);
++  self->connector_props = gst_structure_new ("conn_prop", "CRTC_ID", G_TYPE_INT,
++                                             self->crtc_id, NULL);
++  gst_kms_sink_update_connector_properties (self, req);
++
 +  g_clear_pointer (&self->crtc_props, gst_structure_free);
 +  self->crtc_props = gst_structure_new ("crtc_prop", "MODE_ID", G_TYPE_INT, mode_blob_id,
 +                                        "ACTIVE", G_TYPE_INT, true, NULL);
@@ -254,23 +254,31 @@ index c1e9f64..761e8d5 100644
  
    ret = TRUE;
  
-@@ -1543,8 +1609,8 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1233,6 +1299,11 @@ gst_kms_sink_stop (GstBaseSink * bsink)
+     gst_kms_allocator_clear_cache (self->allocator);
+ 
+   gst_buffer_replace (&self->last_buffer, NULL);
++
++  if (self->flip_done_buffer) {
++    gst_buffer_replace (&self->flip_done_buffer, NULL);
++  }
++
+   gst_caps_replace (&self->allowed_caps, NULL);
+   gst_object_replace ((GstObject **) & self->pool, NULL);
+   gst_object_replace ((GstObject **) & self->allocator, NULL);
+@@ -1543,8 +1614,8 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
      }
    }
  
 -  /* we need at least 2 buffer because we hold on to the last one */
 -  gst_query_add_allocation_pool (query, pool, size, 2, 0);
-+  /* request 4 buffer for tear free operation considering bcm queue*/
-+  gst_query_add_allocation_pool (query, pool, size, 4, 0);
++  /* request 3 buffer for tear free operation considering bcm queue*/
++  gst_query_add_allocation_pool (query, pool, size, 3, 0);
    if (pool)
      gst_object_unref (pool);
  
-@@ -1581,68 +1647,37 @@ sync_handler (gint fd, guint frame, guint sec, guint usec, gpointer data)
- }
- 
- static gboolean
--gst_kms_sink_sync (GstKMSSink * self)
-+gst_kms_wait_frame_push(GstKMSSink * self)
+@@ -1584,65 +1655,27 @@ static gboolean
+ gst_kms_sink_sync (GstKMSSink * self)
  {
    gint ret;
 -  gboolean waiting;
@@ -302,30 +310,20 @@ index c1e9f64..761e8d5 100644
 -        DRM_MODE_PAGE_FLIP_EVENT, &waiting);
 -    if (ret)
 -      goto pageflip_failed;
-+  if (!self->pageflip_pending) {
-+    return TRUE;
-   }
- 
+-  }
+-
 -  while (waiting) {
--    do {
--      ret = gst_poll_wait (self->poll, 3 * GST_SECOND);
--    } while (ret == -1 && (errno == EAGAIN || errno == EINTR));
-+  do {
-+    ret = gst_poll_wait (self->poll, 5 * GST_MSECOND);
-+  } while (ret == -1 && (errno == EAGAIN || errno == EINTR));
++  while (self->pageflip_pending) {
+     do {
+       ret = gst_poll_wait (self->poll, 3 * GST_SECOND);
+     } while (ret == -1 && (errno == EAGAIN || errno == EINTR));
  
--    ret = drmHandleEvent (self->fd, &evctxt);
--    if (ret)
+     ret = drmHandleEvent (self->fd, &evctxt);
+     if (ret)
 -      goto event_failed;
-+  if (ret == 0) {
-+    /*timeout waiting for drm event*/
-+    return TRUE;
++      goto pageflip_event_failed;
    }
  
-+  ret = drmHandleEvent (self->fd, &evctxt);
-+  if (ret)
-+    goto pageflip_event_failed;
-+
    return TRUE;
  
    /* ERRORS */
@@ -349,7 +347,7 @@ index c1e9f64..761e8d5 100644
          g_strerror (errno), errno);
      return FALSE;
    }
-@@ -1876,6 +1911,50 @@ done:
+@@ -1876,6 +1909,50 @@ done:
    return buf;
  }
  
@@ -400,26 +398,7 @@ index c1e9f64..761e8d5 100644
  static GstFlowReturn
  gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
  {
-@@ -1916,7 +1995,17 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
-   if (fb_id == 0)
-     goto buffer_invalid;
- 
--  GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
-+  if (self->pageflip_pending) {
-+    /*wait for 5ms for the last submitted frame to display before dropping current*/
-+    gst_kms_wait_frame_push(self);
-+    if ((self->pageflip_pending) && (buffer != self->last_buffer)) {
-+      GST_WARNING_OBJECT(self, "skipping buffer(%p) as last frame not displayed\n", buffer);
-+      res = GST_FLOW_OK;
-+      goto bail;
-+    }
-+  }
-+
-+  GST_DEBUG_OBJECT (self, "displaying fb %d", fb_id);
- 
-   GST_OBJECT_LOCK (self);
-   if (self->modesetting_enabled) {
-@@ -1977,14 +2066,11 @@ retry_set_plane:
+@@ -1977,14 +2054,11 @@ retry_set_plane:
    gst_kms_push_hdr_infoframe (self, FALSE);
  #endif
  
@@ -436,24 +415,25 @@ index c1e9f64..761e8d5 100644
    if (ret) {
      if (self->can_scale) {
        self->can_scale = FALSE;
-@@ -1994,19 +2080,22 @@ retry_set_plane:
+@@ -1993,20 +2067,27 @@ retry_set_plane:
+     goto set_plane_failed;
    }
  
- sync_frame:
--  /* Wait for the previous frame to complete redraw */
--  if (!self->skip_vsync && !gst_kms_sink_sync (self)) {
--    GST_OBJECT_UNLOCK (self);
--    goto bail;
--  }
 +  self->pageflip_pending = true;
+ sync_frame:
+   /* Wait for the previous frame to complete redraw */
+-  if (!self->skip_vsync && !gst_kms_sink_sync (self)) {
++  if (!gst_kms_sink_sync (self)) {
+     GST_OBJECT_UNLOCK (self);
++    GST_WARNING_OBJECT(self, "error pageflip buffer(%p)\n", buffer);
+     goto bail;
+   }
++  GST_DEBUG_OBJECT(self, "done pageflip buffer(%p)\n", buf);
  
    /* Save the rendered buffer and its metadata in case a redraw is needed */
    if (buffer != self->last_buffer) {
-+    if (self->display_queued_buffer) {
-+      gst_buffer_replace (&self->flip_done_buffer, self->display_queued_buffer);
-+    }
 +    if (self->last_buffer) {
-+      gst_buffer_replace (&self->display_queued_buffer, self->last_buffer);
++      gst_buffer_replace (&self->flip_done_buffer, self->last_buffer);
 +    }
      gst_buffer_replace (&self->last_buffer, buffer);
      self->last_width = GST_VIDEO_SINK_WIDTH (self);
@@ -464,7 +444,7 @@ index c1e9f64..761e8d5 100644
    g_clear_pointer (&self->tmp_kmsmem, gst_memory_unref);
  
    GST_OBJECT_UNLOCK (self);
-@@ -2050,6 +2139,14 @@ gst_kms_sink_drain (GstKMSSink * self)
+@@ -2050,6 +2131,10 @@ gst_kms_sink_drain (GstKMSSink * self)
    if (!self->last_buffer)
      return;
  
@@ -472,14 +452,10 @@ index c1e9f64..761e8d5 100644
 +    gst_buffer_replace (&self->flip_done_buffer, NULL);
 +  }
 +
-+  if (self->display_queued_buffer) {
-+    gst_buffer_replace (&self->display_queued_buffer, NULL);
-+  }
-+
    /* We only need to return the last_buffer if it depends on upstream buffer.
     * In this case, the last_buffer will have a GstParentBufferMeta set. */
    parent_meta = gst_buffer_get_parent_buffer_meta (self->last_buffer);
-@@ -2196,9 +2293,7 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
+@@ -2196,9 +2281,7 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
      case PROP_FD:
        _validate_and_set_external_fd (sink, g_value_get_int (value));
        break;
@@ -490,7 +466,7 @@ index c1e9f64..761e8d5 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_N, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -2255,9 +2350,6 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
+@@ -2255,9 +2338,6 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
      case PROP_FD:
        g_value_set_int (value, sink->fd);
        break;
@@ -500,7 +476,7 @@ index c1e9f64..761e8d5 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -2291,7 +2383,6 @@ gst_kms_sink_init (GstKMSSink * sink)
+@@ -2291,7 +2371,6 @@ gst_kms_sink_init (GstKMSSink * sink)
    gst_poll_fd_init (&sink->pollfd);
    sink->poll = gst_poll_new (TRUE);
    gst_video_info_init (&sink->vinfo);
@@ -508,7 +484,7 @@ index c1e9f64..761e8d5 100644
  
  #ifdef HAVE_DRM_HDR
    sink->no_infoframe = FALSE;
-@@ -2482,20 +2573,6 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+@@ -2482,20 +2561,6 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
        "DRM file descriptor", -1, G_MAXINT, -1,
        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT);
  
@@ -530,7 +506,7 @@ index c1e9f64..761e8d5 100644
  
    gst_video_overlay_install_properties (gobject_class, PROP_N);
 diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
-index 317f789..246fdd1 100644
+index 317f789..9bdd450 100644
 --- a/sys/kms/gstkmssink.h
 +++ b/sys/kms/gstkmssink.h
 @@ -62,13 +62,13 @@ struct _GstKMSSink {
@@ -548,16 +524,15 @@ index 317f789..246fdd1 100644
  
    GstVideoInfo vinfo;
    GstCaps *allowed_caps;
-@@ -78,6 +78,8 @@ struct _GstKMSSink {
+@@ -78,6 +78,7 @@ struct _GstKMSSink {
    guint last_width;
    guint last_height;
    GstBuffer *last_buffer;
-+  GstBuffer *display_queued_buffer;
 +  GstBuffer *flip_done_buffer;
    GstMemory *tmp_kmsmem;
  
    gchar *devname;
-@@ -96,7 +98,9 @@ struct _GstKMSSink {
+@@ -96,7 +97,9 @@ struct _GstKMSSink {
    gboolean reconfigure;
  
    gboolean is_internal_fd;
