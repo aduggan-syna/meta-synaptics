@@ -8,7 +8,6 @@ TEE_TZK= " \
 TEE_OPTEE = " \
     optee-client \
     optee-os-ta \
-    optee-os-tadevkit \
     optee-examples \
     optee-test \
 "
