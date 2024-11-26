@@ -136,7 +136,7 @@ IMAGE_INSTALL:append:platypus = " \
     synasdk-drivers-syna-dvfs \
 "
 
-TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-framework-staticdev"
+TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-framework-staticdev kernel-devsrc"
 
 mount_usb () {
     cat >> ${IMAGE_ROOTFS}/etc/fstab <<EOF
