@@ -1,0 +1,104 @@
+diff --git a/glamor/glamor_xv.c b/glamor/glamor_xv.c
+index 95d337b..5a7098c 100644
+--- a/glamor/glamor_xv.c
++++ b/glamor/glamor_xv.c
+@@ -91,6 +91,39 @@ static const glamor_facet glamor_facet_xv_planar_2 = {
+                 ),
+ };
+ 
++static const glamor_facet glamor_facet_xv_planar_2_300es = {
++    .version = 300,
++    .is_gles = TRUE,
++    .name = "xv_planar_2",
++
++    .source_name = "v_texcoord0",
++    .vs_vars = ("in vec2 position;\n"
++                "in vec2 v_texcoord0;\n"
++                "out vec2 tcs;\n"),
++    .vs_exec = (GLAMOR_POS(gl_Position, position)
++                "        tcs = v_texcoord0;\n"),
++
++    .fs_vars = ("uniform sampler2D y_sampler;\n"
++                "uniform sampler2D u_sampler;\n"
++                "uniform vec4 offsetyco;\n"
++                "uniform vec4 ucogamma;\n"
++                "uniform vec4 vco;\n"
++                "in vec2 tcs;\n"
++                "out vec4 myFragColor;\n"),
++    .fs_exec = (
++                "        float samp;\n"
++                "        vec2 sample_uv;\n"
++                "        vec4 temp1;\n"
++                "        samp = texture(y_sampler, tcs).w;\n"
++                "        temp1.xyz = offsetyco.www * vec3(samp) + offsetyco.xyz;\n"
++                "        sample_uv = texture(u_sampler, tcs).xy;\n"
++                "        temp1.xyz = ucogamma.xyz * vec3(sample_uv.x) + temp1.xyz;\n"
++                "        temp1.xyz = clamp(vco.xyz * vec3(sample_uv.y) + temp1.xyz, 0.0, 1.0);\n"
++                "        temp1.w = 1.0;\n"
++                "        myFragColor = temp1;\n"
++                ),
++};
++
+ static const glamor_facet glamor_facet_xv_planar_3 = {
+     .name = "xv_planar_3",
+ 
+@@ -122,6 +155,40 @@ static const glamor_facet glamor_facet_xv_planar_3 = {
+                 ),
+ };
+ 
++static const glamor_facet glamor_facet_xv_planar_3_300es = {
++    .version = 300,
++    .is_gles = TRUE,
++    .name = "xv_planar_3",
++
++    .source_name = "v_texcoord0",
++    .vs_vars = ("in vec2 position;\n"
++                "in vec2 v_texcoord0;\n"
++                "out vec2 tcs;\n"),
++    .vs_exec = (GLAMOR_POS(gl_Position, position)
++                "        tcs = v_texcoord0;\n"),
++
++    .fs_vars = ("uniform sampler2D y_sampler;\n"
++                "uniform sampler2D u_sampler;\n"
++                "uniform sampler2D v_sampler;\n"
++                "uniform vec4 offsetyco;\n"
++                "uniform vec4 ucogamma;\n"
++                "uniform vec4 vco;\n"
++                "in vec2 tcs;\n"
++                "out vec4 myFragColor;\n"),
++    .fs_exec = (
++                "        float smp;\n"
++                "        vec4 temp1;\n"
++                "        smp = texture(y_sampler, tcs).w;\n"
++                "        temp1.xyz = offsetyco.www * vec3(smp) + offsetyco.xyz;\n"
++                "        smp = texture(u_sampler, tcs).w;\n"
++                "        temp1.xyz = ucogamma.xyz * vec3(smp) + temp1.xyz;\n"
++                "        smp = texture(v_sampler, tcs).w;\n"
++                "        temp1.xyz = clamp(vco.xyz * vec3(smp) + temp1.xyz, 0.0, 1.0);\n"
++                "        temp1.w = 1.0;\n"
++                "        myFragColor = temp1;\n"
++                ),
++};
++
+ #define MAKE_ATOM(a) MakeAtom(a, sizeof(a) - 1, TRUE)
+ 
+ XvAttributeRec glamor_xv_attributes[] = {
+@@ -154,10 +221,16 @@ glamor_init_xv_shader(ScreenPtr screen, int id)
+     switch (id) {
+     case FOURCC_YV12:
+     case FOURCC_I420:
+-        glamor_facet_xv_planar = &glamor_facet_xv_planar_3;
++        if (glamor_priv->is_gles && glamor_priv->glsl_version >= 300)
++            glamor_facet_xv_planar = &glamor_facet_xv_planar_3_300es;
++        else
++            glamor_facet_xv_planar = &glamor_facet_xv_planar_3;
+         break;
+     case FOURCC_NV12:
+-        glamor_facet_xv_planar = &glamor_facet_xv_planar_2;
++        if (glamor_priv->is_gles && glamor_priv->glsl_version >= 300)
++            glamor_facet_xv_planar = &glamor_facet_xv_planar_2_300es;
++        else
++            glamor_facet_xv_planar = &glamor_facet_xv_planar_2;
+         break;
+     default:
+         break;

@@ -14,12 +14,11 @@ SRC_URI += "file://0010-glx-only-support-32-bit-pixmaps-pbuffers-with-Glamor.pat
 SRC_URI += "file://0011-Revert-render-Break-PICT_a4.patch"
 SRC_URI += "file://0012-config-Fix-bus-ID-of-platform-device-with-PCI-parent.patch"
 SRC_URI += "file://0013-meson-pkg-config-was-not-being-used-for-libcrypto.patch"
+SRC_URI += "file://0014-glamor-xv-add-glsl-shaders-for-OpenGLES-3.0.patch"
 
 # changes to pass custom xorg config file for Xserver
 SRC_URI += "file://xorg_conf_override"
 SRC_URI += "file://xorg_conf"
-
-XSERVER:append = " xf86-video-modesetting"
 
 do_install:append() {
     mkdir -p ${D}${sysconfdir}/X11
