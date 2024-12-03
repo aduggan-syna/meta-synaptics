@@ -17,6 +17,7 @@ SRC_URI:append= " \
             file://0001-genx-warm-boot-support.patch \
             file://0002-plat-syna-add-dolphin-platypus-and-myna2-support.patch \
             file://0003-berlin-pm-just-return-if-cpu-idle.patch \
+            file://0004-myna2-add-pvd-support-and-adjust-voltage-in-suspend-.patch \
         "
 
 require recipes-devtools/synasdk/synasdk-config.inc
