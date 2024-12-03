@@ -1,7 +1,7 @@
-From 293dbcf48f139b42976f2f74352d1b07b6da6e1b Mon Sep 17 00:00:00 2001
+From 3874c167d5bfdd23120bf957854f2a37ea531678 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 09:17:01 +0800
-Subject: [PATCH 08/11] plat: syna: add dolphin, platypus and myna2 support
+Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
 
 Change-Id: Iacde6e76f0e8a382adf2ff0c237815bb1d334148
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -32,7 +32,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arm/plat-synaptics/chip/dolphin/include/tsp.h  | 14919 +++++++++++
  .../arm/plat-synaptics/chip/dolphin/mpt_rule.h     |    24 +
  core/arch/arm/plat-synaptics/chip/dolphin/sub.mk   |     2 +
- core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c  |   347 +
+ core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c  |   384 +
  .../chip/myna2/include/Galois_memmap.h             |   665 +
  .../chip/myna2/include/Galois_memmap_sm.h          |    39 +
  .../chip/myna2/include/Galois_memmap_soc.h         |    35 +
@@ -194,7 +194,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../tz/tz_boot_param_value_platypus.c              |   608 +
  core/arch/arm/plat-synaptics/tz/tz_errcode.h       |    44 +
  core/arch/arm/plat-synaptics/tz/tz_perm.h          |    89 +
- 188 files changed, 312824 insertions(+)
+ 188 files changed, 312861 insertions(+)
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap.h
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap_sm.h
@@ -98226,10 +98226,10 @@ index 0000000..aa491b1
 +srcs-y += hal_soc.c
 diff --git a/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c b/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c
 new file mode 100644
-index 0000000..dd990e5
+index 0000000..8e4a83a
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c
-@@ -0,0 +1,347 @@
+@@ -0,0 +1,384 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -98243,6 +98243,10 @@ index 0000000..dd990e5
 +#include "../chip/myna2/include/soc.h"
 +#include "../chip/myna2/include/global.h"
 +#include "../chip/myna2/include/tsp.h"
++#include <kernel/misc.h>
++#include <kernel/boot.h>
++#include "tee_api_types.h"
++#include "apb_timer.h"
 +
 +#define MEMMAP_OTP_DUMP_OFFSET          0x0
 +#define MEMMAP_OTP_DUMP_SIZE            (0xC00)
@@ -98577,6 +98581,39 @@ index 0000000..dd990e5
 +		while(i--);
 +	}
 +}
++
++static void plat_suspend(void)
++{
++	secure_timer_stop();
++}
++
++static void plat_resume(void)
++{
++	secure_timer_setup();
++}
++
++unsigned long thread_cpu_suspend_handler(unsigned long a0 __unused,
++					unsigned long a1 __unused)
++{
++	if (get_core_pos() != 0)
++		return;
++
++	plat_suspend();
++
++	return 0;
++}
++
++unsigned long thread_cpu_resume_handler(unsigned long a0 __unused,
++					unsigned long a1 __unused)
++{
++	if (get_core_pos() != 0)
++		return;
++
++	plat_resume();
++
++	return 0;
++}
++
 diff --git a/core/arch/arm/plat-synaptics/chip/myna2/include/Galois_memmap.h b/core/arch/arm/plat-synaptics/chip/myna2/include/Galois_memmap.h
 new file mode 100644
 index 0000000..fc45aef
@@ -303031,7 +303068,7 @@ index 0000000..1a5d05b
 +CFG_SHMEM_SIZE ?=   0x00300000
 diff --git a/core/arch/arm/plat-synaptics/driver/apb_timer/apb_timer.c b/core/arch/arm/plat-synaptics/driver/apb_timer/apb_timer.c
 new file mode 100644
-index 0000000..959974b
+index 0000000..d3a1d7a
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/apb_timer/apb_timer.c
 @@ -0,0 +1,157 @@
@@ -303116,9 +303153,9 @@ index 0000000..959974b
 +	uint32_t ctrl = timer_readl(base + TMR_CONTROL);
 +
 +	/* clear pending interrupt */
-+	timer_readl(TMR_EOI);
++	timer_readl(base + TMR_EOI);
 +	ctrl &= ~TMR_CONTROL_INT_MASK;
-+	timer_writel(ctrl, TMR_CONTROL);
++	timer_writel(ctrl, base + TMR_CONTROL);
 +}
 +
 +void timer_disable_interrupt(uint32_t base)
