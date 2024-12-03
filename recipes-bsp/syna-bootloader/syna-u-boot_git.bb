@@ -52,6 +52,9 @@ do_compile () {
     security_tools_path="${STAGING_DIR_NATIVE}${prefix}/libexec/syna/"
     security_keys_path="${STAGING_DATADIR_NATIVE}/syna/keys/${syna_chip_name}/${syna_chip_rev}"
 
+    if [ "null${SYNA_SDK_REVISION}" != "null" ]; then
+        export LOCALVERSION=".${SYNA_SDK_REVISION}"
+    fi
     clean=0 . build/module/uboot/build.sh ${CONFIG_FILE}
 
     if [ $? -ne 0 ]; then
