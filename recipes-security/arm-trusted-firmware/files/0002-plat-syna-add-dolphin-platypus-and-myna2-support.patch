@@ -1,7 +1,7 @@
-From f0da723443bf48a5463ca122c099d0df92699e7c Mon Sep 17 00:00:00 2001
+From de610834b319a2f809a9919ad174eea0b56060c1 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 13:18:24 +0800
-Subject: [PATCH 2/4] plat: syna: add dolphin, platypus and myna2 support
+Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
 
 Change-Id: If24e7e822ef930e9338430aae4b22064d93910aa
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -72,7 +72,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/soc/dolphin/suspend.S             |   21 +
  plat/syna/berlin/soc/dolphin/suspend.c             |  100 +
  plat/syna/berlin/soc/myna2/berlin_soc.mk           |   22 +
- plat/syna/berlin/soc/myna2/clock.c                 |   84 +
+ plat/syna/berlin/soc/myna2/clock.c                 |   93 +
  plat/syna/berlin/soc/myna2/mc.c                    |  204 +
  plat/syna/berlin/soc/myna2/plat_pm.c               |  406 +
  plat/syna/berlin/soc/myna2/plat_setup.c            |   24 +
@@ -98,7 +98,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/suspend/sha256_ce.S               |  156 +
  plat/syna/berlin/suspend/suspend.ld.S              |   83 +
  plat/syna/berlin/suspend/suspend_entrypoint.S      |   67 +
- 92 files changed, 53124 insertions(+)
+ 92 files changed, 53133 insertions(+)
  create mode 100644 plat/syna/berlin/common/aarch64/berlin_helpers.S
  create mode 100644 plat/syna/berlin/common/berlin_bl31_setup.c
  create mode 100644 plat/syna/berlin/common/berlin_common.mk
@@ -50488,10 +50488,10 @@ index 0000000..6655700
 +${BUILD_PLAT}/bl31/suspend.o:${BUILD_PLAT}/suspend.bin
 diff --git a/plat/syna/berlin/soc/myna2/clock.c b/plat/syna/berlin/soc/myna2/clock.c
 new file mode 100644
-index 0000000..2f7d591
+index 0000000..1de5495
 --- /dev/null
 +++ b/plat/syna/berlin/soc/myna2/clock.c
-@@ -0,0 +1,84 @@
+@@ -0,0 +1,93 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -50509,6 +50509,10 @@ index 0000000..2f7d591
 +
 +#define MEMMAP_CA7_REG_BASE			0xF7920000
 +#define RA_CPU_WRP_PLL_REG			0x2000
++
++#define MEMMAP_AVIO_REG_BASE		0xF7400000
++#define AVIO_MEMMAP_AVIO_GBL_BASE	0x60000
++#define RA_avioGbl_SWPDWN_CTRL		0x20E8
 +
 +static void pll_bypass_en(clock_config_t *config)
 +{
@@ -50538,10 +50542,15 @@ index 0000000..2f7d591
 +	/* Power on the CPU pll */
 +	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_WRP_PLL_REG, 0x10);
 +
++	/* Power on the APLL0, APLL1, VPLL0, VPLL1 */
++	mmio_write_32(MEMMAP_AVIO_REG_BASE +  AVIO_MEMMAP_AVIO_GBL_BASE+ RA_avioGbl_SWPDWN_CTRL, 0x0);
++
 +}
 +
 +static void pll_power_off(clock_config_t *config)
 +{
++	/* Power off the APLL0, APLL1, VPLL0, VPLL1 */
++	mmio_write_32(MEMMAP_AVIO_REG_BASE+  AVIO_MEMMAP_AVIO_GBL_BASE+ RA_avioGbl_SWPDWN_CTRL, 0xf);
 +	/* Power off the SYS pll0 */
 +	mmio_write_32(MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_sysPll_0, 0x12);
 +
