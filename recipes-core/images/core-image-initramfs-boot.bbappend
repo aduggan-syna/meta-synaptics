@@ -18,3 +18,4 @@ ADBD_RPACKAGES = " initramfs-module-debug \
 
 PACKAGE_INSTALL:append:sl1640usb = " ${ADBD_RPACKAGES} \
                             synasdk-drivers-i2c-dyndmx-pinctrl"
+PACKAGE_INSTALL:append:sl1680spi = " initramfs-module-debug"

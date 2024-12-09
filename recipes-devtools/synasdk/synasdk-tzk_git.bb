@@ -30,7 +30,7 @@ do_compile:append () {
     else
       dst_tz_bin="${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz2_op_en.bin"
       dst_atf_bin="${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz1_op_en.bin"
-	fi
+    fi
 
     if [ -f ${STAGING_BASELIBDIR}/firmware/tz1_en.bin ]; then
       cp ${STAGING_BASELIBDIR}/firmware/tz1_en.bin ${dst_atf_bin}

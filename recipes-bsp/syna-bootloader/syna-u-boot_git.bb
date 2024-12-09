@@ -67,7 +67,7 @@ do_deploy () {
     # bootloader.subimg
     prepend_image_info.sh ${B}/target/release/uboot/uboot_en.bin ${DEPLOYDIR}/bootloader_nopreload.subimg
 
-    if [ "${MACHINE}" != "sl1640usb" ]; then
+    if [ "${MACHINE}" != "sl1640usb" ] && [ "${MACHINE}" != "sl1680spi" ]; then
         # sm_fw_en.bin (only for GenX, i.e PLATYPUS for now)
         if [ -f "${B}/target/release/uboot/sm_fw_en.bin" ]; then
             install -m 0644 "${B}/target/release/uboot/sm_fw_en.bin" ${DEPLOYDIR}
