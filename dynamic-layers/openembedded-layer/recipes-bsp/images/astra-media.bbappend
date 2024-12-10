@@ -3,6 +3,7 @@ IMAGE_INSTALL:append = " \
     android-tools-adbd \
     glmark2 \
     iperf2 \
+    iperf3 \
 "
 
 IMAGE_INSTALL:append:platypus = " \
