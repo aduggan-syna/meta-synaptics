@@ -46,7 +46,9 @@ do_install () {
 
     . ${B}/.config
 
-    install -m 0755 ${S}/configs/product/${SYNA_SDK_CONFIG_NAME}/emmc.pt ${D}${prefix}/share/syna/build
+    if [ "null${SYNA_SDK_PT_FILE}" != "null" ]; then
+        install -m 0755 ${S}/configs/product/${SYNA_SDK_CONFIG_NAME}/${SYNA_SDK_PT_FILE} ${D}${prefix}/share/syna/build
+    fi
 }
 
 PACKAGES = " \
