@@ -28,7 +28,7 @@ IMAGE_INSTALL:append:myna2 = " \
 #ROOTFS_POSTPROCESS_COMMAND in android-tools bb file does not work
 #Add it here to workaround it
 android_tools_enable_devmode() {
-    touch ${IMAGE_ROOTFS}/var/usb-debugging-enabled
+    touch ${IMAGE_ROOTFS}/etc/usb-debugging-enabled
 }
 ROOTFS_POSTPROCESS_COMMAND += "android_tools_enable_devmode; "
 

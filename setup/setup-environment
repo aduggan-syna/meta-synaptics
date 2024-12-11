@@ -157,7 +157,7 @@ _PWD_PREV=$(pwd)
 
 # Warning: Sourcing the oe-init-build-env script changes the current directory.
 
-TEMPLATECONF=${_PWD_PREV}/meta-synaptics/setup/conf source poky/oe-init-build-env ${_BUILDDIR}
+TEMPLATECONF=${_PWD_PREV}/meta-synaptics/conf/templates/astra source poky/oe-init-build-env ${_BUILDDIR}
 
 _CONFIG_UPDATED=0
 _LICENSE_FLAGS_STR="$(grep LICENSE_FLAGS_ACCEPTED conf/local.conf)"

@@ -3,7 +3,7 @@ SECTION = "devtools"
 LICENSE = "CLOSED"
 PR = "r0"
 
-inherit base systemd
+inherit systemd
 
 SRC_URI = " \
    file://eth0mac \

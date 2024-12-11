@@ -1,0 +1,12 @@
+diff --git a/boost/network/protocol/stream_handler.hpp b/boost/network/protocol/stream_handler.hpp
+index 7b824033..497d2e73 100644
+--- a/boost/network/protocol/stream_handler.hpp
++++ b/boost/network/protocol/stream_handler.hpp
+@@ -13,6 +13,7 @@
+ #include <memory>
+ #include <boost/asio/async_result.hpp>
+ #include <boost/asio/basic_socket.hpp>
++#include <boost/asio/basic_stream_socket.hpp>
+ #include <boost/asio/detail/config.hpp>
+ #include <boost/asio/detail/handler_type_requirements.hpp>
+ #include <boost/asio/detail/push_options.hpp>
