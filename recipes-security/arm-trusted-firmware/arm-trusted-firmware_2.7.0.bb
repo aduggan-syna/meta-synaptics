@@ -18,6 +18,7 @@ SRC_URI:append= " \
             file://0002-plat-syna-add-dolphin-platypus-and-myna2-support.patch \
             file://0003-berlin-pm-just-return-if-cpu-idle.patch \
             file://0004-myna2-add-pvd-support-and-adjust-voltage-in-suspend-.patch \
+            file://0005-plat-syna-fix-build-error-with-gcc13.patch \
         "
 
 require recipes-devtools/synasdk/synasdk-config.inc
