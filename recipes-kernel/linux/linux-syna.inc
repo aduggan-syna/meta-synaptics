@@ -16,7 +16,11 @@ do_kernel_configme[depends] += "${EXTRA_KERNEL_CONFIGME_DEPENDS}"
 # No extensions to the linux kernel version
 LINUX_VERSION_EXTENSION = ""
 
-KERNEL_DEVICETREE = "${SYNA_KERNEL_DTS_FILE}"
+KERNEL_DEVICETREE = "${SYNA_KERNEL_DTS_FILE}  \
+                     ${SYNA_KERNEL_DTBO_FILE} \
+                     "
+
+KERNEL_DTC_FLAGS += "-@"
 
 COMPATIBLE_MACHINE = "syna"
 
@@ -82,6 +86,17 @@ genx_secure_image() {
   ### Generate secure image ###
   eval ${exec_cmd} "${exec_args}"
 }
+
+do_compile:append() {
+
+    unset DTC_FLAGS;
+
+    for dtbf in ${SYNA_KERNEL_DTBO_FILE}; do
+        dtb=`normalize_dtb "$dtbf"`
+        oe_runmake $dtb CC="${KERNEL_CC} $cc_extra " LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS}
+    done
+}
+
 
 do_deploy:append() {
 
