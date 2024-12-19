@@ -32,11 +32,11 @@ do_compile:append () {
       dst_atf_bin="${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz1_op_en.bin"
     fi
 
-    if [ -f ${STAGING_BASELIBDIR}/firmware/tz1_en.bin ]; then
-      cp ${STAGING_BASELIBDIR}/firmware/tz1_en.bin ${dst_atf_bin}
+    if [ -f ${STAGING_DIR_HOST}${nonarch_base_libdir}/firmware/tz1_en.bin ]; then
+      cp ${STAGING_DIR_HOST}${nonarch_base_libdir}/firmware/tz1_en.bin ${dst_atf_bin}
     fi
-    if [ -f ${STAGING_BASELIBDIR}/firmware/tz2_en.bin ]; then
-      cp ${STAGING_BASELIBDIR}/firmware/tz2_en.bin ${dst_tz_bin}
+    if [ -f ${STAGING_DIR_HOST}${nonarch_base_libdir}/firmware/tz2_en.bin ]; then
+      cp ${STAGING_DIR_HOST}${nonarch_base_libdir}/firmware/tz2_en.bin ${dst_tz_bin}
     fi
 
     if [ "is${syna_chip_name}" = "isdolphin" ]; then
