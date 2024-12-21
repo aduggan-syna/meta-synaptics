@@ -64,7 +64,9 @@ EXTRA_OECMAKE = "\
 
 require tensorflow-lite_2.15.0_headers.inc
 
-do_install:append () {
+do_install () {
+    DESTDIR='${D}' cmake_runcmake_build --target install
+
     install -d ${D}/${libdir}
     install -m 0755 ${B}/libtensorflow-lite.so ${D}/${libdir}
 
