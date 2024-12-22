@@ -33,6 +33,7 @@ do_install () {
     install -m 0755 -d ${D}${libdir}
     install -m 0755 -d ${D}${bindir}
     install ${S}/lib/libisp_driver.so ${D}${libdir}
+    install ${S}/lib/libcam_common.so ${D}${libdir}
     install ${S}/lib/libmc_media_device.so ${D}${libdir}
     install ${S}/lib/libt_common_c.so* ${D}${libdir}
     install ${S}/lib/libt_json_c.so* ${D}${libdir}
