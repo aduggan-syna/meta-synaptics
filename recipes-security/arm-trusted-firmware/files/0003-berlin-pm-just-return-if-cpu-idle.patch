@@ -1,7 +1,7 @@
-From db94098c49de1e895b7e79a274525c093d9a6899 Mon Sep 17 00:00:00 2001
+From 5f5493c4bbda8093da5cc1b79d519eefe8919de8 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
 Date: Fri, 26 Jul 2024 17:34:09 +0800
-Subject: [PATCH 3/4] berlin: pm: just return if cpu idle
+Subject: [PATCH] berlin: pm: just return if cpu idle
 
 Change-Id: I068228978045af0baa3f83eba6b7ea6dc209fc88
 Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>

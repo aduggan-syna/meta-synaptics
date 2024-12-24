@@ -1,4 +1,4 @@
-From b94db0e15fe0be7376eb179a0c0f1f443dc92a5f Mon Sep 17 00:00:00 2001
+From ae3e40e189955f06bbb9b313d3995ed50b9254be Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
 Date: Tue, 3 Dec 2024 16:38:11 +0800
 Subject: [PATCH] myna2: add pvd support and adjust voltage in suspend/resume

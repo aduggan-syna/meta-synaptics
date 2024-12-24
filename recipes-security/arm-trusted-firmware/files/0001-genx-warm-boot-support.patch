@@ -1,7 +1,7 @@
 From d1c17872fdfc9f995ba95424a60f77a3ebba95fb Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Tue, 16 Jul 2024 15:27:42 +0800
-Subject: [PATCH 1/4] genx warm boot support
+Subject: [PATCH] genx warm boot support
 
 Change-Id: I6834615f75538b1d048669d3bde71ffa5796fcf3
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>

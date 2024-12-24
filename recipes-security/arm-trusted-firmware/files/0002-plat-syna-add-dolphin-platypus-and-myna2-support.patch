@@ -1,4 +1,4 @@
-From de610834b319a2f809a9919ad174eea0b56060c1 Mon Sep 17 00:00:00 2001
+From 86ec93f0595ea5a55bd1e4768576e76809b3a423 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 13:18:24 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -8,8 +8,8 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 ---
  plat/syna/berlin/common/aarch64/berlin_helpers.S   |  186 +
  plat/syna/berlin/common/berlin_bl31_setup.c        |  402 +
- plat/syna/berlin/common/berlin_common.mk           |   42 +
- plat/syna/berlin/common/berlin_pm.c                |  536 ++
+ plat/syna/berlin/common/berlin_common.mk           |   43 +
+ plat/syna/berlin/common/berlin_pm.c                |  534 ++
  plat/syna/berlin/common/berlin_sip_svc.c           |   85 +
  plat/syna/berlin/common/berlin_stack_protector.c   |   25 +
  plat/syna/berlin/common/berlin_topology.c          |   63 +
@@ -23,6 +23,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/common/drivers/tos/tz.c           |  183 +
  .../syna/berlin/common/drivers/tos/tz_boot_param.c |   45 +
  plat/syna/berlin/common/drivers/watchdog/wdt.c     |   98 +
+ plat/syna/berlin/common/gicv2_ext.c                |  102 +
  plat/syna/berlin/include/berlin_private.h          |   47 +
  plat/syna/berlin/include/berlin_sip_svc.h          |   23 +
  plat/syna/berlin/include/drivers/bcm.h             |  101 +
@@ -36,8 +37,9 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/include/drivers/tz_boot_param.h   |   93 +
  plat/syna/berlin/include/drivers/tz_perm.h         |   90 +
  plat/syna/berlin/include/drivers/wdt.h             |   10 +
+ plat/syna/berlin/include/gicv2_ext.h               |   25 +
  plat/syna/berlin/include/plat_macros.S             |   60 +
- plat/syna/berlin/include/platform_def.h            |  117 +
+ plat/syna/berlin/include/platform_def.h            |  119 +
  .../berlin/include/soc/dolphin/Galois_memmap.h     | 2186 +++++
  plat/syna/berlin/include/soc/dolphin/SysMgr.h      | 8534 ++++++++++++++++++++
  plat/syna/berlin/include/soc/dolphin/avpll_regs.h  |  100 +
@@ -98,7 +100,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/suspend/sha256_ce.S               |  156 +
  plat/syna/berlin/suspend/suspend.ld.S              |   83 +
  plat/syna/berlin/suspend/suspend_entrypoint.S      |   67 +
- 92 files changed, 53133 insertions(+)
+ 94 files changed, 53261 insertions(+)
  create mode 100644 plat/syna/berlin/common/aarch64/berlin_helpers.S
  create mode 100644 plat/syna/berlin/common/berlin_bl31_setup.c
  create mode 100644 plat/syna/berlin/common/berlin_common.mk
@@ -116,6 +118,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  create mode 100644 plat/syna/berlin/common/drivers/tos/tz.c
  create mode 100644 plat/syna/berlin/common/drivers/tos/tz_boot_param.c
  create mode 100644 plat/syna/berlin/common/drivers/watchdog/wdt.c
+ create mode 100644 plat/syna/berlin/common/gicv2_ext.c
  create mode 100644 plat/syna/berlin/include/berlin_private.h
  create mode 100644 plat/syna/berlin/include/berlin_sip_svc.h
  create mode 100644 plat/syna/berlin/include/drivers/bcm.h
@@ -129,6 +132,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  create mode 100644 plat/syna/berlin/include/drivers/tz_boot_param.h
  create mode 100644 plat/syna/berlin/include/drivers/tz_perm.h
  create mode 100644 plat/syna/berlin/include/drivers/wdt.h
+ create mode 100644 plat/syna/berlin/include/gicv2_ext.h
  create mode 100644 plat/syna/berlin/include/plat_macros.S
  create mode 100644 plat/syna/berlin/include/platform_def.h
  create mode 100644 plat/syna/berlin/include/soc/dolphin/Galois_memmap.h
@@ -794,10 +798,10 @@ index 0000000..ae399bf
 +}
 diff --git a/plat/syna/berlin/common/berlin_common.mk b/plat/syna/berlin/common/berlin_common.mk
 new file mode 100644
-index 0000000..8d9a923
+index 0000000..199c35e
 --- /dev/null
 +++ b/plat/syna/berlin/common/berlin_common.mk
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,43 @@
 +#
 +# Copyright (c) 2015-2020, ARM Limited and Contributors. All rights reserved.
 +# Copyright (c) 2024, Synaptics Corporation. All rights reserved.
@@ -838,14 +842,15 @@ index 0000000..8d9a923
 +				${COMMON_DIR}/drivers/secure_register/secure_register.c	\
 +				${COMMON_DIR}/berlin_bl31_setup.c		\
 +				${COMMON_DIR}/berlin_pm.c			\
++				${COMMON_DIR}/gicv2_ext.c			\
 +				${COMMON_DIR}/berlin_topology.c		\
 +				${COMMON_DIR}/berlin_sip_svc.c
 diff --git a/plat/syna/berlin/common/berlin_pm.c b/plat/syna/berlin/common/berlin_pm.c
 new file mode 100644
-index 0000000..3536f90
+index 0000000..f996b73
 --- /dev/null
 +++ b/plat/syna/berlin/common/berlin_pm.c
-@@ -0,0 +1,536 @@
+@@ -0,0 +1,534 @@
 +/*
 + * Copyright (c) 2015-2021, ARM Limited and Contributors. All rights reserved.
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
@@ -860,13 +865,13 @@ index 0000000..3536f90
 +#include <platform_def.h>
 +#include <lib/bakery_lock.h>
 +#include <lib/mmio.h>
-+#include <drivers/arm/gicv2.h>
 +#include <string.h>
 +#include <assert.h>
 +#include <berlin_private.h>
 +#include <drivers/delay_timer.h>
 +#include <plat/arm/common/plat_arm.h>
 +#include <bl31/interrupt_mgmt.h>
++#include <gicv2_ext.h>
 +
 +extern unsigned long berlin_percpu_entrypoint[PLATFORM_CORE_COUNT];
 +//unsigned long berlin_percpu_entrypoint[PLATFORM_CORE_COUNT]
@@ -932,6 +937,8 @@ index 0000000..3536f90
 +static int wakeup_irqs[MAX_WAKEUP_IRQS];
 +static int wakeup_irq_num = 0;
 +
++static irq_status_t irq_status[MAX_WAKEUP_IRQS];
++
 +static bool valid_wakeup_irq(int irq)
 +{
 +	if ((wakeup_irq_num < MAX_WAKEUP_IRQS) && irq > 0 && irq < IRQ_TOTAL_IRQ)
@@ -966,34 +973,30 @@ index 0000000..3536f90
 +void berlin_cfg_wakeup_sources(void)
 +{
 +	int i = 0;
-+	int wakeup_irq = 0;
 +	for (i = 0; i < wakeup_irq_num; i++) {
-+		wakeup_irq = wakeup_irqs[i];
-+		INFO("######cfg wakeup irq = 0x%x#######\n", wakeup_irq);
-+#if GICV2_G0_FOR_EL3
-+		plat_ic_set_interrupt_type(wakeup_irq, INTR_TYPE_EL3);
-+#else
-+		plat_ic_set_interrupt_type(wakeup_irq, INTR_TYPE_S_EL1);
-+#endif
-+		plat_ic_set_interrupt_priority(wakeup_irq, 0x10);
-+		plat_ic_clear_interrupt_pending(wakeup_irq);
-+		plat_ic_enable_interrupt(wakeup_irq);
++		INFO("######cfg wakeup irq = 0x%x#######\n", wakeup_irqs[i]);
++		plat_ic_save_interrupt_status(wakeup_irqs[i], &irq_status[i]);
++		plat_ic_setup_wakeup_interrupt(wakeup_irqs[i]);
 +	}
-+
 +}
 +
 +void berlin_resume_wakeup_sources(void)
 +{
 +	int i = 0;
-+	int wakeup_irq = 0;
++	unsigned int id = 0;
 +
-+	for (i = 0; i < wakeup_irq_num; i++) {
-+		wakeup_irq = wakeup_irqs[i];
-+		plat_ic_disable_interrupt(wakeup_irq);
-+		plat_ic_clear_interrupt_pending(wakeup_irq);
-+		plat_ic_set_interrupt_type(wakeup_irq, INTR_TYPE_NS);
-+		plat_ic_set_interrupt_priority(wakeup_irq, 0xA0);
-+	}
++	/* clear all pending interrupt */
++	do {
++		id = plat_ic_get_pending_interrupt_id();
++
++		if (id != INTR_ID_UNAVAILABLE)
++			plat_ic_clear_interrupt_pending(id);
++		else
++			break;
++	} while (1);
++
++	for (i = 0; i < wakeup_irq_num; i++)
++		plat_ic_resume_wakeup_interrupt(wakeup_irqs[i], &irq_status[i]);
 +}
 +
 +void berlin_program_percpu_entrypoint(unsigned long target_cpu,
@@ -2864,6 +2867,114 @@ index 0000000..69ae863
 +		/*nothing*/;
 +
 +}
+diff --git a/plat/syna/berlin/common/gicv2_ext.c b/plat/syna/berlin/common/gicv2_ext.c
+new file mode 100644
+index 0000000..e865f57
+--- /dev/null
++++ b/plat/syna/berlin/common/gicv2_ext.c
+@@ -0,0 +1,102 @@
++/*
++ * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#include <arch.h>
++#include <arch_helpers.h>
++#include <common/debug.h>
++#include <plat/common/platform.h>
++#include <drivers/arm/gicv2.h>
++#include <bl31/interrupt_mgmt.h>
++#include <platform_def.h>
++#include <drivers/arm/gic_common.h>
++#include <drivers/arm/gicv2.h>
++#include <lib/mmio.h>
++#include <gicv2_ext.h>
++
++extern unsigned int gicd_read_ipriorityr(uintptr_t base, unsigned int id);
++
++static unsigned int plat_ic_get_interrupt_priority(unsigned int id)
++{
++	unsigned int ipriorityr = 0;
++	unsigned int priority = 0;
++
++	ipriorityr = gicd_read_ipriorityr(PLAT_ARM_GICD_BASE, id);
++
++	priority = ipriorityr >> (id % 4 * 8) & GIC_PRI_MASK;
++
++	return priority;
++}
++
++static inline uint8_t gicd_get_itargetsr(uintptr_t base, unsigned int id)
++{
++	return mmio_read_8(base + GICD_ITARGETSR + id);
++}
++
++static inline void gicd_set_itargetsr(uintptr_t base, unsigned int id,
++		unsigned int target)
++{
++	uint8_t val = target & GIC_TARGET_CPU_MASK;
++
++	mmio_write_8(base + GICD_ITARGETSR + id, val);
++}
++
++static uint8_t plat_ic_get_interrupt_target(unsigned int id)
++{
++	return gicd_get_itargetsr(PLAT_ARM_GICD_BASE, id);
++}
++
++static void plat_ic_set_spi_target(unsigned int id, unsigned int routing_mode,
++							unsigned int target)
++{
++	switch (routing_mode) {
++	case INTR_ROUTING_MODE_PE:
++		gicd_set_itargetsr(PLAT_ARM_GICD_BASE, id, target);
++		break;
++	case INTR_ROUTING_MODE_ANY:
++		gicd_set_itargetsr(PLAT_ARM_GICD_BASE, id, GIC_TARGET_CPU_MASK);
++		break;
++	default:
++		break;
++	}
++}
++
++void plat_ic_save_interrupt_status(unsigned int id, irq_status_t *is)
++{
++	uint8_t itargetsr = 0;
++
++	is->int_type = plat_ic_get_interrupt_type(id);
++	is->priority = plat_ic_get_interrupt_priority(id);
++
++	itargetsr = plat_ic_get_interrupt_target(id);
++	if (itargetsr == GIC_TARGET_CPU_MASK)
++		is->mode = INTR_ROUTING_MODE_ANY;
++	else {
++		is->mode = INTR_ROUTING_MODE_PE;
++		is->target = itargetsr;
++	}
++}
++
++void plat_ic_setup_wakeup_interrupt(unsigned int id)
++{
++#if GICV2_G0_FOR_EL3
++	plat_ic_set_interrupt_type(id, INTR_TYPE_EL3);
++#else
++	plat_ic_set_interrupt_type(id, INTR_TYPE_S_EL1);
++#endif
++	plat_ic_set_interrupt_priority(id, PLAT_RAS_PRI);
++	plat_ic_clear_interrupt_pending(id);
++	plat_ic_set_spi_routing(id, INTR_ROUTING_MODE_PE, read_mpidr());
++	plat_ic_enable_interrupt(id);
++}
++
++void plat_ic_resume_wakeup_interrupt(unsigned int id, irq_status_t *is)
++{
++	plat_ic_disable_interrupt(id);
++	plat_ic_clear_interrupt_pending(id);
++	plat_ic_set_interrupt_type(id, is->int_type);
++	plat_ic_set_interrupt_priority(id, is->priority);
++	plat_ic_set_spi_target(id, is->mode, is->target);
++}
 diff --git a/plat/syna/berlin/include/berlin_private.h b/plat/syna/berlin/include/berlin_private.h
 new file mode 100644
 index 0000000..2e093e3
@@ -3590,6 +3701,37 @@ index 0000000..0ebf158
 +#define _WDT_H_
 +void reset_soc(void);
 +#endif /* _WDT_H_ */
+diff --git a/plat/syna/berlin/include/gicv2_ext.h b/plat/syna/berlin/include/gicv2_ext.h
+new file mode 100644
+index 0000000..4a58432
+--- /dev/null
++++ b/plat/syna/berlin/include/gicv2_ext.h
+@@ -0,0 +1,25 @@
++/*
++ * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#ifndef GICV2_EXT_H
++#define GICV2_EXT_H
++
++typedef struct {
++	unsigned int int_type;
++	unsigned int priority;
++	struct {
++		unsigned int mode;
++		unsigned int target;
++	};
++} irq_status_t;
++
++void plat_ic_save_interrupt_status(unsigned int id, irq_status_t *is);
++
++void plat_ic_setup_wakeup_interrupt(unsigned int id);
++
++void plat_ic_resume_wakeup_interrupt(unsigned int id, irq_status_t *is);
++
++#endif
 diff --git a/plat/syna/berlin/include/plat_macros.S b/plat/syna/berlin/include/plat_macros.S
 new file mode 100644
 index 0000000..2221651
@@ -3658,10 +3800,10 @@ index 0000000..2221651
 +	.endm
 diff --git a/plat/syna/berlin/include/platform_def.h b/plat/syna/berlin/include/platform_def.h
 new file mode 100644
-index 0000000..f2889a8
+index 0000000..2ac2568
 --- /dev/null
 +++ b/plat/syna/berlin/include/platform_def.h
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,119 @@
 +/*
 + * Copyright (c) 2021, ARM Limited and Contributors. All rights reserved.
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
@@ -3735,6 +3877,8 @@ index 0000000..f2889a8
 +#define PLAT_ARM_GICC_BASE		GIC_CPU_BASE
 +
 +#define ARM_IRQ_SEC_PHY_TIMER		29
++
++#define PLAT_RAS_PRI			U(0x10)
 +
 +#define ARM_IRQ_SEC_SGI_0		8
 +#define ARM_IRQ_SEC_SGI_1		9
