@@ -37,6 +37,32 @@ do_image_synaspiimg[depends] += " \
     ${EXTRA_FW_DEPENDS} \
 "
 
+gen_preboot_subimg() {
+  spi_vt_size=2048
+  spi_header_size=1024
+
+  . ${STAGING_DIR_NATIVE}/usr/share/syna/build/${SYNA_SDK_FLASH_TYPE_CFG_FILE}
+
+  f_input=$1; shift
+
+  ### Fill the gap ###
+  f_len=$(stat -c %s ${f_input})
+  [ ! $( expr $f_len + 2048 ) -gt ${spi_boot_part_size} ]
+
+  fill_length=$( expr ${spi_boot_part_size} - ${spi_vt_size} - ${spi_header_size} - ${f_len} )
+  dd if=/dev/zero bs=$fill_length count=1 >> ${f_input}
+
+  ### Append version table ###
+  cat ${DEPLOY_DIR_IMAGE}/version_table >> ${f_input}
+
+  ### Append to block size ###
+  f_len=$(stat -c %s ${f_input})
+  [ ! $f_len -gt ${spi_boot_part_size} ]
+
+  fill_length=$( expr ${spi_boot_part_size} - ${spi_header_size} - ${f_len} )
+  dd if=/dev/zero bs=$fill_length count=1 >> ${f_input}
+}
+
 genx_spi_suboot_combo() {
   # Parse arguments
   local f_preboot
@@ -93,6 +119,9 @@ IMAGE_CMD:synaspiimg () {
 
 # Add a "tag"
     touch ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/TAG--${IMAGE_NAME}--TAG
+
+#Align preboot subimg
+    gen_preboot_subimg ${DEPLOY_DIR_IMAGE}/preboot.subimg
 
 # Make spi_suboot.bin which including preboot, tee and bootloader subimg
     genx_spi_suboot_combo ${DEPLOY_DIR_IMAGE}/preboot.subimg ${DEPLOY_DIR_IMAGE}/tee.subimg ${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/spi_suboot.bin
