@@ -10,6 +10,7 @@ SRCREV_FORMAT = "taenc"
 DEPENDS:append = " \
     synasdk-tools-native \
     synasdk-security-native \
+    synasdk-vpu-ta \
 "
 
 SYNA_TA_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/ta_enc"
@@ -21,13 +22,13 @@ EARLY_SYNA_TA:platypus=" ${SYNA_TA_PATH}/libfastlogo.ta/platypus/A0/1316a183-894
                          ${SYNA_TA_PATH}/libgfx_img_linux.ta/platypus/A0/1316a183-894d-43fe-9893-bb946ae10436.stripped.elf \
                          ${SYNA_TA_PATH}/libptm.ta/platypus/A0/1316a183-894d-43fe-9893-bb946ae1042d.stripped.elf \
                          ${SYNA_TA_PATH}/libsynap.ta/platypus/A0/1316a183-894d-43fe-9893bb946ae1042f.stripped.elf \
-                         ${SYNA_TA_PATH}/libvmeta.ta/platypus/A0/1316a183-894d-43fe-9893-bb946ae103f0.stripped.elf \
+                         ${STAGING_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f0.stripped.elf \
 "
 EARLY_SYNA_TA:dolphin=" ${SYNA_TA_PATH}/libfastlogo.ta/dolphin/A0/genx/1316a183-894d-43fe-9893-bb946ae103f5.stripped.elf \
                         ${SYNA_TA_PATH}/libgfx_img_linux.ta/dolphin/A0/genx/1316a183-894d-43fe-9893-bb946ae10436.stripped.elf \
                         ${SYNA_TA_PATH}/libptm.ta/dolphin/A0/genx/1316a183-894d-43fe-9893-bb946ae1042d.stripped.elf \
                         ${SYNA_TA_PATH}/libsynap.ta/dolphin/A0/genx/1316a183-894d-43fe-9893bb946ae1042f.stripped.elf \
-                        ${SYNA_TA_PATH}/libvmeta.ta/dolphin/A0/genx/1316a183-894d-43fe-9893-bb946ae103f0.stripped.elf \
+                        ${STAGING_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f0.stripped.elf \
                         ${SYNA_TA_PATH}/libdhub.ta/dolphin/A0/genx/1316a183-894d-43fe-9893-bb946ae103f3.stripped.elf \
 "
 EARLY_TA_CFG = " CFG_EARLY_TA=y EARLY_TA_PATHS="${EARLY_SYNA_TA}""
