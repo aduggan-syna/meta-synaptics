@@ -27,6 +27,7 @@ SRC_URI += "${@bb.utils.contains('KGDB_ENABLE', '1', ' \
     file://0001-kgdb_Fix_incorrect_single_stepping_into_the_irq_handle.patch \
     file://debug_info.cfg \
     file://kgdb.cfg', '', d)}"
+SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://add-docker.cfg', '', d)}"
 
 python () {
     # OpenBMC loads in kernel features via other mechanisms so this check
