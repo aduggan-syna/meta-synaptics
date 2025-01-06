@@ -20,5 +20,5 @@ FILES:${PN} += "/usr/lib/syna-desktop-shell.so"
 
 do_install:append() {
     install -d ${D}${sysconfdir}/xdg/weston/
-    cp -r ${S}/weston.ini ${D}${sysconfdir}/xdg/weston/weston.ini
+    cp -r ${S}/weston-${MACHINE}.ini ${D}${sysconfdir}/xdg/weston/weston.ini
 }
