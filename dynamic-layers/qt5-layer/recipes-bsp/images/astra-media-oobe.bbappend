@@ -1,5 +1,5 @@
 require astra-media-qt5-common.inc
 
 IMAGE_INSTALL:append = " \
-    synasdk-synaexplorer \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' synasdk-synaexplorer', '', d)} \
 "

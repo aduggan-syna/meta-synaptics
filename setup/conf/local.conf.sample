@@ -249,8 +249,7 @@ CONF_VERSION = "2"
 LICENSE_FLAGS_ACCEPTED = "commercial"
 
 # by default these features are not required to build a valid image
-DISTRO_FEATURES:remove = "x11 3g nfc"
-DISTRO_FEATURES_NATIVESDK:remove = "x11"
+DISTRO_FEATURES:remove = "3g nfc"
 
 #Image version
 SYNA_SDK_REVISION = ##BUILD_NUMBER##

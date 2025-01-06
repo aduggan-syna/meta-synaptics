@@ -1,5 +1,9 @@
 IMAGE_FEATURES:append = " debug-tweaks package-management ssh-server-dropbear"
 
+IMAGE_FEATURES:append = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', ' x11-base', '', d)} \
+"
+
 TEE_TZK= " \
     tee-supplicant \
     synasdk-tee \
@@ -10,6 +14,39 @@ TEE_OPTEE = " \
     optee-os-ta \
     optee-examples \
     optee-test \
+"
+XORG_XFCE = " \
+    packagegroup-xfce-base \
+    packagegroup-xfce-extended \
+    parole \
+    vlc \
+    gstreamer1.0-plugins-base-ximagesink \
+    gstreamer1.0-plugins-base-xvimagesink \
+"
+
+XORG_MATCHBOX_DESKTOP = " \
+    matchbox-wm \
+    matchbox-panel \
+    matchbox-session-sato \
+    matchbox-desktop \
+    matchbox-keyboard \
+    matchbox-config-gtk \
+    xcursor-transparent-theme adwaita-icon-theme \
+    settings-daemon shutdown-desktop l3afpad \
+    gstreamer1.0-plugins-base-ximagesink \
+    gstreamer1.0-plugins-base-xvimagesink \
+"
+
+XORG_MINIMAL = " \
+    gstreamer1.0-plugins-base-ximagesink \
+    gstreamer1.0-plugins-base-xvimagesink \
+"
+
+WAYLAND_PACKAGES = " \
+    weston \
+    weston-init \
+    weston-examples \
+    gstreamer1.0-plugins-bad-waylandsink \
 "
 
 SWUPDATE_INSTALL = " \
@@ -29,9 +66,6 @@ IMAGE_INSTALL:append = " \
     curl \
     kernel-modules \
     linux-firmware-syna \
-    weston \
-    weston-init \
-    weston-examples \
     i2c-tools \
     v4l-utils \
     synasdk-drivers-axi-meter \
@@ -68,7 +102,6 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-bad-jpegformat \
     gstreamer1.0-plugins-bad-mpegtsdemux \
     gstreamer1.0-plugins-bad-videoparsersbad \
-    gstreamer1.0-plugins-bad-waylandsink \
     gstreamer1.0-plugins-bad-kms \
     gstreamer1.0-plugins-syna \
     gstreamer1.0-meta-debug \
@@ -96,6 +129,20 @@ IMAGE_INSTALL:append = " \
 "
 
 IMAGE_INSTALL:remove:sl1640usb = "${SWUPDATE_INSTALL}"
+
+# install xfce desktop for X backend in 1680
+IMAGE_INSTALL:append:dolphin = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', '${XORG_XFCE}', '${WAYLAND_PACKAGES}', d)} \
+"
+# install matchbox desktop for X backend in 1640
+IMAGE_INSTALL:append:platypus = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', '${XORG_MATCHBOX_DESKTOP}', '${WAYLAND_PACKAGES}', d)} \
+"
+
+# install matchbox desktop for X backend in 1620
+IMAGE_INSTALL:append:myna2 = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', '${XORG_MATCHBOX_DESKTOP}', '${WAYLAND_PACKAGES}', d)} \
+"
 
 IMAGE_INSTALL:append:myna2 = " \
     ${TEE_OPTEE} \

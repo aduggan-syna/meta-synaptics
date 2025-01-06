@@ -1,18 +1,19 @@
 # Adding QT packages
 IMAGE_INSTALL:append = " \
     qtbase qtdeclarative qtquickcontrols2 qtquickcontrols \
-    qtwayland qt3d qtquick3d \
+    qt3d qtquick3d \
     synasdk-qtrenderingserver \
     qtbase-examples qtdeclarative-examples \
-    synasdk-syna-player-framework \
-    synasdk-syna-video-player \
-    synasdk-syna-capability-demo \
+"
+
+IMAGE_INSTALL:append = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' qtwayland synasdk-syna-player-framework synasdk-syna-video-player synasdk-syna-capability-demo', '', d)} \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
-    synasdk-syna-ai-player \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' synasdk-syna-ai-player', '', d)} \
 "
 
 IMAGE_INSTALL:append:platypus = " \
-    synasdk-syna-ai-player \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' synasdk-syna-ai-player', '', d)} \
 "

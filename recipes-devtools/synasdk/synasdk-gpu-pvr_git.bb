@@ -11,10 +11,12 @@ PROVIDES = " \
     virtual/pvr-fw \
 "
 
+DISPLAY_SERVER_DEPS = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'libx11', 'wayland', d)}"
+
 RDEPENDS:${PN} = " \
     libffi \
     libdrm \
-    wayland \
+    ${DISPLAY_SERVER_DEPS} \
     imgtec-pvr-firmware \
     libglapi libgles1-mesa libegl-mesa libgbm mesa-vulkan-drivers \
     libgles2-mesa \
@@ -26,6 +28,9 @@ SYNAMACH:dolphin = "sl1680"
 SYNAMACH:myna2 = "sl1620"
 
 PREBUILT_PATH = "sysroot/linux-baseline/data/gfx_prebuilt/imagination/${SYNAMACH}"
+DISPLAY_SERVER = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'Xorg', 'wayland', d)}"
+PREBUILT_LIBS = "sysroot/linux-baseline/data/gfx_prebuilt/imagination/${DISPLAY_SERVER}/${SYNAMACH}/${HOST_SYS}/lib/"
+PREBUILT_BINS = "sysroot/linux-baseline/data/gfx_prebuilt/imagination/${DISPLAY_SERVER}/${SYNAMACH}/${HOST_SYS}/bin/"
 
 SRC_URI = " \
    ${SYNA_SRC_LINUX_SYSROOT} \
@@ -52,12 +57,13 @@ do_install () {
 }
 
 do_install:append:aarch64 () {
-    for i in ${S}/${PREBUILT_PATH}/${HOST_SYS}/lib/*\.so*; do
+
+    for i in ${S}/${PREBUILT_LIBS}/*\.so*; do
         file_name=`basename "${i}"`
         install -Dm0644 ${i} ${D}${libdir}/${file_name}
     done
 
-    for i in ${S}/${PREBUILT_PATH}/${HOST_SYS}/bin/*; do
+    for i in ${S}/${PREBUILT_BINS}/*; do
         file_name=`basename "${i}"`
         install -Dm0755 ${i} ${D}${bindir}/${file_name}
     done
