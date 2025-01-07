@@ -128,6 +128,7 @@ IMAGE_INSTALL:append = " \
     synasdk-bootctrl \
     ${SWUPDATE_INSTALL} \
     wlan-connect \
+    synasdk-sysctl-conf \
 "
 
 IMAGE_INSTALL:remove:sl1640usb = "${SWUPDATE_INSTALL}"
