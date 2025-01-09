@@ -29,19 +29,8 @@ do_install () {
     install -m 0755 ${WORKDIR}/build/syna-video-player ${D}${bindir}/
 
     install -d ${D}${qmldir}
-    if [ "${MACHINE}" = "sl1620" ]; then
-        install -m 0644 ${S}/qmls/sl1620.qml  ${D}${qmldir}/
-    fi
-
-    if [ "${MACHINE}" = "sl1640" ]; then
-        install -m 0644 ${S}/qmls/sl1640-ffmpeg.qml  ${D}${qmldir}/
-        install -m 0644 ${S}/qmls/sl1640-v4l2.qml  ${D}${qmldir}/
-    fi
-
-    if [ "${MACHINE}" = "sl1680" ]; then
-        install -m 0644 ${S}/qmls/sl1680-ffmpeg.qml  ${D}${qmldir}/
-        install -m 0644 ${S}/qmls/sl1680-v4l2.qml  ${D}${qmldir}/
-    fi
+    install -m 0644 ${S}/qmls/ffmpegcommands.qml  ${D}${qmldir}/
+    install -m 0644 ${S}/qmls/v4l2commands.qml  ${D}${qmldir}/
 }
 
 FILES:${PN} = " \
