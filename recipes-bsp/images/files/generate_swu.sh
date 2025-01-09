@@ -7,7 +7,8 @@ SW_DESCRIPTION_FILE="${OUTPUT_DIR}/sw-description"
 SWU_IMAGE="${OUTPUT_DIR}/image.swu"
 
 #Mention the image file name
-IMAGE_FILE="astra-media-${MACHINE}.ext4.gz"
+#set env IMAGE_FILE
+#IMAGE_FILE="astra-media-sl1680.ext4.gz" ./generate_swu.sh tmp/deploy/images/sl1680 3
 ROOTFS_FILE=$(basename $(readlink -f "${OUTPUT_DIR}/${IMAGE_FILE}"))
 
 # Wait for ROOTFS_FILE
