@@ -163,6 +163,37 @@ if [ $_SYNA_EULA_ACCEPTED -eq 1 ] && [ "$_LICENSE_FLAGS_STR" != *"$_SYNA_EULA_ST
         _CONFIG_UPDATED=1
     fi
 fi
+
+if [ $DISPLAY_SERVER ]; then
+    # Remove existing config to enable sourcing script with different display server
+    sed -i '/x11/d;/wayland/d;/xf86-video-modesetting/d' conf/local.conf
+
+    if [ "is${DISPLAY_SERVER}" == "isx11" ]; then
+        echo "DISTRO_FEATURES:append = \" x11\"" >> conf/local.conf
+        echo "XSERVER:append = \" xf86-video-modesetting\"" >> conf/local.conf
+        echo "DISTRO_FEATURES:remove = \" wayland\"" >> conf/local.conf
+        if [ "is${MACHINE}" = "issl1680" ]; then
+            sed -i '/meta-xfce/d;/meta-gnome/d;/meta-networking/d' conf/local.conf
+            XFCE_LAYER_DIR=$(readlink -f ../meta-openembedded/meta-xfce)
+            GNOME_LAYER_DIR=$(readlink -f ../meta-openembedded/meta-gnome)
+            NW_LAYER_DIR=$(readlink -f ../meta-openembedded/meta-networking)
+            sed -i "/meta-multimedia /a\ \ ${XFCE_LAYER_DIR}\\\\\n\ \ ${GNOME_LAYER_DIR}\\\\\n\ \ ${NW_LAYER_DIR}\\\\"  conf/bblayers.conf
+        fi
+    else
+        DISPLAY_SERVER="wayland"
+        #Select wayland as default
+        echo "DISTRO_FEATURES:append = \" wayland\"" >> conf/local.conf
+        echo "DISTRO_FEATURES:remove = \" x11\"" >> conf/local.conf
+        echo "DISTRO_FEATURES_NATIVESDK:remove = \"x11\"" >> conf/local.conf
+    fi
+elif [ -z "$_CONFIGS_FOUND" ]; then
+        DISPLAY_SERVER="wayland"
+        #Select wayland as default
+        echo "DISTRO_FEATURES:append = \" wayland\"" >> conf/local.conf
+        echo "DISTRO_FEATURES:remove = \" x11\"" >> conf/local.conf
+        echo "DISTRO_FEATURES_NATIVESDK:remove = \"x11\"" >> conf/local.conf
+fi
+
 unset _SYNA_EULA_STR _SYNA_EULA_FILE _PROMPT_SYNA_EULA _SYNA_EULA_ACCEPTED _LICENSE_FLAGS_STR _UPDATED_LICENSE_ACCEPTED_STR
 
 if [ "$_CONFIGS_FOUND" ]; then
@@ -172,7 +203,7 @@ if [ "$_CONFIGS_FOUND" ]; then
         echo -e "\nConfig files already exist in folder ${_BUILDDIR}/conf/, they were not modified."
     fi
     unset -f usage
-    unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV MACHINE _CONFIG_UPDATED
+    unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV MACHINE _CONFIG_UPDATED DISPLAY_SERVER
     return 0
 fi
 unset _CONFIG_UPDATED
@@ -227,9 +258,10 @@ fi
 cat <<EOF
 Configuration files have been created for the following configuration:
  MACHINE: $MACHINE
+ DISPLAY_SERVER: $DISPLAY_SERVER
  OPTEE_TA_ENC: $OPTEE_TA_ENC
 EOF
 
 # Since this script is sourced, be careful not to pollute caller's environment with temp variables
 unset -f usage
-unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV _VALID_MACHINES MACHINE 
+unset _BUILDDIR _CONFIGS_FOUND _PWD_PREV _VALID_MACHINES MACHINE DISPLAY_SERVER
