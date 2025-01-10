@@ -1,4 +1,4 @@
-From 86ec93f0595ea5a55bd1e4768576e76809b3a423 Mon Sep 17 00:00:00 2001
+From 0d41fedf9f0d2ff56cb37524282d253d922d5c88 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 13:18:24 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -23,7 +23,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/common/drivers/tos/tz.c           |  183 +
  .../syna/berlin/common/drivers/tos/tz_boot_param.c |   45 +
  plat/syna/berlin/common/drivers/watchdog/wdt.c     |   98 +
- plat/syna/berlin/common/gicv2_ext.c                |  102 +
+ plat/syna/berlin/common/gicv2_ext.c                |  119 +
  plat/syna/berlin/include/berlin_private.h          |   47 +
  plat/syna/berlin/include/berlin_sip_svc.h          |   23 +
  plat/syna/berlin/include/drivers/bcm.h             |  101 +
@@ -37,7 +37,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/include/drivers/tz_boot_param.h   |   93 +
  plat/syna/berlin/include/drivers/tz_perm.h         |   90 +
  plat/syna/berlin/include/drivers/wdt.h             |   10 +
- plat/syna/berlin/include/gicv2_ext.h               |   25 +
+ plat/syna/berlin/include/gicv2_ext.h               |   26 +
  plat/syna/berlin/include/plat_macros.S             |   60 +
  plat/syna/berlin/include/platform_def.h            |  119 +
  .../berlin/include/soc/dolphin/Galois_memmap.h     | 2186 +++++
@@ -100,7 +100,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/suspend/sha256_ce.S               |  156 +
  plat/syna/berlin/suspend/suspend.ld.S              |   83 +
  plat/syna/berlin/suspend/suspend_entrypoint.S      |   67 +
- 94 files changed, 53261 insertions(+)
+ 94 files changed, 53279 insertions(+)
  create mode 100644 plat/syna/berlin/common/aarch64/berlin_helpers.S
  create mode 100644 plat/syna/berlin/common/berlin_bl31_setup.c
  create mode 100644 plat/syna/berlin/common/berlin_common.mk
@@ -2869,10 +2869,10 @@ index 0000000..69ae863
 +}
 diff --git a/plat/syna/berlin/common/gicv2_ext.c b/plat/syna/berlin/common/gicv2_ext.c
 new file mode 100644
-index 0000000..e865f57
+index 0000000..6678581
 --- /dev/null
 +++ b/plat/syna/berlin/common/gicv2_ext.c
-@@ -0,0 +1,102 @@
+@@ -0,0 +1,119 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -2937,6 +2937,21 @@ index 0000000..e865f57
 +		break;
 +	}
 +}
++void plat_ic_set_cfg(unsigned int id, unsigned int cfg)
++{
++	gicv2_interrupt_set_cfg(id, cfg);
++}
++
++static unsigned int plat_ic_get_cfg(unsigned int id)
++{
++	/* Interrupt configuration is a 2-bit field */
++	unsigned int bit_num = id & ((1U << ICFGR_SHIFT) - 1U);
++	unsigned int bit_shift = bit_num << 1;
++	unsigned int n = id >> ICFGR_SHIFT;
++	uint32_t reg_val = mmio_read_32(PLAT_ARM_GICD_BASE + GICD_ICFGR + (n << 2));
++
++	return (reg_val & (GIC_CFG_MASK << bit_shift)) >> bit_shift;
++}
 +
 +void plat_ic_save_interrupt_status(unsigned int id, irq_status_t *is)
 +{
@@ -2944,7 +2959,7 @@ index 0000000..e865f57
 +
 +	is->int_type = plat_ic_get_interrupt_type(id);
 +	is->priority = plat_ic_get_interrupt_priority(id);
-+
++	is->icfg = plat_ic_get_cfg(id);
 +	itargetsr = plat_ic_get_interrupt_target(id);
 +	if (itargetsr == GIC_TARGET_CPU_MASK)
 +		is->mode = INTR_ROUTING_MODE_ANY;
@@ -2964,6 +2979,7 @@ index 0000000..e865f57
 +	plat_ic_set_interrupt_priority(id, PLAT_RAS_PRI);
 +	plat_ic_clear_interrupt_pending(id);
 +	plat_ic_set_spi_routing(id, INTR_ROUTING_MODE_PE, read_mpidr());
++	plat_ic_set_cfg(id, GIC_INTR_CFG_EDGE);
 +	plat_ic_enable_interrupt(id);
 +}
 +
@@ -2974,6 +2990,7 @@ index 0000000..e865f57
 +	plat_ic_set_interrupt_type(id, is->int_type);
 +	plat_ic_set_interrupt_priority(id, is->priority);
 +	plat_ic_set_spi_target(id, is->mode, is->target);
++	plat_ic_set_cfg(id, is->icfg);
 +}
 diff --git a/plat/syna/berlin/include/berlin_private.h b/plat/syna/berlin/include/berlin_private.h
 new file mode 100644
@@ -3703,10 +3720,10 @@ index 0000000..0ebf158
 +#endif /* _WDT_H_ */
 diff --git a/plat/syna/berlin/include/gicv2_ext.h b/plat/syna/berlin/include/gicv2_ext.h
 new file mode 100644
-index 0000000..4a58432
+index 0000000..1a83a74
 --- /dev/null
 +++ b/plat/syna/berlin/include/gicv2_ext.h
-@@ -0,0 +1,25 @@
+@@ -0,0 +1,26 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -3719,6 +3736,7 @@ index 0000000..4a58432
 +typedef struct {
 +	unsigned int int_type;
 +	unsigned int priority;
++	unsigned int icfg;
 +	struct {
 +		unsigned int mode;
 +		unsigned int target;
