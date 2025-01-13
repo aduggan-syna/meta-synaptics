@@ -1,7 +1,7 @@
-From 67253fc2b74ee30895e69af5424e5a590561c421 Mon Sep 17 00:00:00 2001
+From 1ac7610d15bbbef7415b32983ce80fbf1b1e4660 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 09:25:31 +0800
-Subject: [PATCH 09/11] libutee: add syna syscalls
+Subject: [PATCH] libutee: add syna syscalls
 
 Change-Id: I7e921d190ba8a5c202901babedd132f845fe21e7
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -30,10 +30,10 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  create mode 100644 lib/libutee/tee_api_syna.c
 
 diff --git a/core/kernel/scall.c b/core/kernel/scall.c
-index 2dc9222..2537f6e 100644
+index 4d8869f..1f7cdeb 100644
 --- a/core/kernel/scall.c
 +++ b/core/kernel/scall.c
-@@ -28,6 +28,10 @@
+@@ -25,6 +25,10 @@
  #include <trace.h>
  #include <util.h>
  
@@ -44,7 +44,7 @@ index 2dc9222..2537f6e 100644
  #if (TRACE_LEVEL == TRACE_FLOW) && defined(CFG_TEE_CORE_TA_TRACE)
  #define TRACE_SYSCALLS
  #endif
-@@ -120,6 +124,9 @@ static const struct syscall_entry tee_syscall_table[] = {
+@@ -117,6 +121,9 @@ static const struct syscall_entry tee_syscall_table[] = {
  	SYSCALL_ENTRY(syscall_not_supported),
  	SYSCALL_ENTRY(syscall_not_supported),
  	SYSCALL_ENTRY(syscall_cache_operation),
@@ -1659,12 +1659,12 @@ index 0000000..4ce292f
 +
 +#endif /* UTEE_SYSCALLS_SYNA_H */
 diff --git a/lib/libutee/sub.mk b/lib/libutee/sub.mk
-index 1a3398e..2cc618e 100644
+index cecd8d3..45656d9 100644
 --- a/lib/libutee/sub.mk
 +++ b/lib/libutee/sub.mk
-@@ -8,6 +8,7 @@ srcs-y += trace_ext.c
+@@ -7,6 +7,7 @@ srcs-y += trace_ext.c
+ 
  ifneq ($(sm),ldelf)
- srcs-y += base64.c
  srcs-y += tee_api.c
 +srcs-$(CFG_SCALL_SYNA) += tee_api_syna.c
  srcs-y += tee_api_arith_mpi.c

@@ -1,4 +1,4 @@
-require optee-os_4.0.0.bb
+require optee-os_${PV}.bb
 
 SUMMARY = "OP-TEE Trusted OS TA devkit"
 DESCRIPTION = "OP-TEE TA devkit for build TAs"

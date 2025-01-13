@@ -1,6 +1,6 @@
 require optee-test.inc
 
-SRCREV = "1c3d6be5eaa6174e3dbabf60928d15628e39b994"
+SRCREV = "a1739a182ebbf0500e54cd313e5591079c36f968"
 
 # Include ffa_spmc test group if the SPMC test is enabled.
 # Supported after op-tee v3.20

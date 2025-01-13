@@ -1,4 +1,4 @@
-From 3874c167d5bfdd23120bf957854f2a37ea531678 Mon Sep 17 00:00:00 2001
+From 37576a2c6e1eec2083f1351f56d10f1ed84d70ea Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 09:17:01 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -92,14 +92,14 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  core/arch/arm/plat-synaptics/common/syna_setup.c   |   246 +
  .../arm/plat-synaptics/common/tee_genx_ta_verify.c |   307 +
  .../arm/plat-synaptics/common/tee_ta_perm_ctrl.c   |  1051 +
- .../arch/arm/plat-synaptics/common/tee_time_syna.c |    30 +
+ .../arch/arm/plat-synaptics/common/tee_time_syna.c |    27 +
  .../arm/plat-synaptics/common/tz_granule_table.c   |   201 +
  .../arm/plat-synaptics/common/tz_granule_table.h   |    14 +
  core/arch/arm/plat-synaptics/common/tz_list.h      |    73 +
  core/arch/arm/plat-synaptics/common/tz_umem_mgr.c  |  1284 +
  core/arch/arm/plat-synaptics/common/tz_umem_mgr.h  |   129 +
- core/arch/arm/plat-synaptics/conf.mk               |    68 +
- .../plat-synaptics/driver/apb_timer/apb_timer.c    |   157 +
+ core/arch/arm/plat-synaptics/conf.mk               |    69 +
+ .../plat-synaptics/driver/apb_timer/apb_timer.c    |   160 +
  .../arm/plat-synaptics/driver/apb_timer/sub.mk     |     2 +
  core/arch/arm/plat-synaptics/driver/bcm/bcmImg.h   |    38 +
  core/arch/arm/plat-synaptics/driver/bcm/bcmREG.h   |   121 +
@@ -151,7 +151,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arch/arm/plat-synaptics/inc/addr_range_check.h |    21 +
  core/arch/arm/plat-synaptics/inc/apb_timer.h       |    31 +
  core/arch/arm/plat-synaptics/inc/apb_timer_reg.h   |    29 +
- core/arch/arm/plat-synaptics/inc/hal_soc.h         |    56 +
+ core/arch/arm/plat-synaptics/inc/hal_soc.h         |    37 +
  core/arch/arm/plat-synaptics/inc/image.h           |    17 +
  core/arch/arm/plat-synaptics/inc/image_gen2.h      |   172 +
  core/arch/arm/plat-synaptics/inc/image_genx.h      |   155 +
@@ -163,9 +163,9 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  core/arch/arm/plat-synaptics/inc/ta_info.h         |    65 +
  .../arch/arm/plat-synaptics/inc/tee_ta_perm_ctrl.h |    38 +
  .../arm/plat-synaptics/inc/tee_ta_perm_rule_def.h  |   120 +
- core/arch/arm/plat-synaptics/kern.ld.S             |   497 +
+ core/arch/arm/plat-synaptics/kern.ld.S             |   505 +
  core/arch/arm/plat-synaptics/main.c                |   220 +
- core/arch/arm/plat-synaptics/platform_config.h     |   117 +
+ core/arch/arm/plat-synaptics/platform_config.h     |   116 +
  core/arch/arm/plat-synaptics/sub.mk                |    28 +
  core/arch/arm/plat-synaptics/syscall/scall_syna.c  |   135 +
  core/arch/arm/plat-synaptics/syscall/sub.mk        |    11 +
@@ -194,7 +194,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../tz/tz_boot_param_value_platypus.c              |   608 +
  core/arch/arm/plat-synaptics/tz/tz_errcode.h       |    44 +
  core/arch/arm/plat-synaptics/tz/tz_perm.h          |    89 +
- 188 files changed, 312861 insertions(+)
+ 188 files changed, 312850 insertions(+)
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap.h
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap_sm.h
@@ -301227,17 +301227,17 @@ index 0000000..f96b572
 +
 diff --git a/core/arch/arm/plat-synaptics/common/tee_time_syna.c b/core/arch/arm/plat-synaptics/common/tee_time_syna.c
 new file mode 100644
-index 0000000..3e6c75b
+index 0000000..a8bcd74
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/common/tee_time_syna.c
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,27 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
 + */
 +
 +
-+#include <kernel/time_source.h>
++#include <kernel/tee_time.h>
 +
 +__weak void syna_get_secure_time(TEE_Time *time)
 +{
@@ -301247,20 +301247,17 @@ index 0000000..3e6c75b
 +	 */
 +}
 +
-+static TEE_Result syna_get_sys_time(TEE_Time *time)
++TEE_Result tee_time_get_sys_time(TEE_Time *time)
 +{
 +	syna_get_secure_time(time);
 +
 +	return TEE_SUCCESS;
 +}
 +
-+static const struct time_source time_source_syna = {
-+	.name = "synaptics secure time",
-+	.protection_level = 1000,
-+	.get_sys_time = syna_get_sys_time,
-+};
-+
-+REGISTER_TIME_SOURCE(time_source_syna)
++uint32_t tee_time_get_sys_time_protection_level(void)
++{
++	return 1000;
++}
 diff --git a/core/arch/arm/plat-synaptics/common/tz_granule_table.c b/core/arch/arm/plat-synaptics/common/tz_granule_table.c
 new file mode 100644
 index 0000000..4feaa19
@@ -302994,10 +302991,10 @@ index 0000000..3143665
 +#endif /* _TZ_UMEM_MGR_H_ */
 diff --git a/core/arch/arm/plat-synaptics/conf.mk b/core/arch/arm/plat-synaptics/conf.mk
 new file mode 100644
-index 0000000..1a5d05b
+index 0000000..4c80149
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/conf.mk
-@@ -0,0 +1,68 @@
+@@ -0,0 +1,69 @@
 +PLATFORM_FLAVOR ?= platypus
 +
 +include core/arch/arm/cpu/cortex-armv8-0.mk
@@ -303060,18 +303057,19 @@ index 0000000..1a5d05b
 +CFG_TEE_CORE_EMBED_INTERNAL_TESTS ?= y
 +CFG_SYSTEM_PTA ?= y
 +
++CFG_CORE_RESERVED_SHM ?= n
 +CFG_SECURE_DATA_PATH ?= y
 +#CFG_DRAM_SIZE_GB ?= 2
 +CFG_TZDRAM_START ?= 0x00160000
-+CFG_TZDRAM_SIZE ?=  0x03CA0000
-+CFG_SHMEM_START ?=  0x03E00000
-+CFG_SHMEM_SIZE ?=   0x00300000
++CFG_TZDRAM_SIZE ?=  0x03DA0000
++CFG_TEE_SDP_MEM_BASE ?=0x03F00000
++CFG_TEE_SDP_MEM_SIZE ?=0x00100000
 diff --git a/core/arch/arm/plat-synaptics/driver/apb_timer/apb_timer.c b/core/arch/arm/plat-synaptics/driver/apb_timer/apb_timer.c
 new file mode 100644
-index 0000000..d3a1d7a
+index 0000000..959e056
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/apb_timer/apb_timer.c
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,160 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -303211,17 +303209,20 @@ index 0000000..d3a1d7a
 +	timer_stop(APB_TIMER1_VIRTBASE);
 +	clock_cycles_base += timer_read_count(APB_TIMER1_VIRTBASE);
 +
-+	itr_disable(timer1_itr_handler->it);
-+	itr_free(timer1_itr_handler);
++	interrupt_disable(timer1_itr_handler->chip, timer1_itr_handler->it);
++	interrupt_remove_free_handler(timer1_itr_handler);
 +
 +	return TEE_SUCCESS;
 +}
 +
 +TEE_Result secure_timer_setup(void)
 +{
-+	timer1_itr_handler = itr_alloc_add_type_prio(CONFIG_TIMER1_ICTL_IRQ,
-+				&timer1_it_handler, 0, NULL, IRQ_TYPE_NONE, 0);
-+	itr_enable(timer1_itr_handler->it);
++	TEE_Result res = TEE_ERROR_GENERIC;
++	res = interrupt_alloc_add_conf_handler(interrupt_get_main_chip(),
++					       CONFIG_TIMER1_ICTL_IRQ, timer1_it_handler, 0, NULL,
++					       IRQ_TYPE_NONE, 0, &timer1_itr_handler);
++
++	interrupt_enable(timer1_itr_handler->chip, timer1_itr_handler->it);
 +
 +	timer_start(APB_TIMER1_VIRTBASE, TIMER_MODE_PERIODIC, CONFIG_SW_TIMER_PERIOD);
 +
@@ -308474,10 +308475,10 @@ index 0000000..fa88c3d
 +#endif /* APB_TIMER_REG_H */
 diff --git a/core/arch/arm/plat-synaptics/inc/hal_soc.h b/core/arch/arm/plat-synaptics/inc/hal_soc.h
 new file mode 100644
-index 0000000..42caf53
+index 0000000..4908099
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/inc/hal_soc.h
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,37 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -308486,24 +308487,7 @@ index 0000000..42caf53
 +#ifndef _HAL_SOC_H_
 +#define _HAL_SOC_H_
 +
-+#ifdef __ASSEMBLY__
-+#if 0
-+#include "asm/Galois_memmap.h"
-+#include "asm/Galois_memmap_soc.h"
-+#include "asm/Galois_memmap_sm.h"
-+#include "asm/ictl_soc.h"
-+#include "asm/ictl_sm.h"
-+#endif
-+#else /* !__ASSEMBLY__ */
 +#include "stdint.h"
-+#include "Galois_memmap.h"
-+#include "Galois_memmap_soc.h"
-+#include "Galois_memmap_sm.h"
-+#include "ictl_soc.h"
-+#include "ictl_sm.h"
-+//#include "pic.h"
-+#include "soc.h"
-+//#include "gic.h"
 +
 +/** get phsical protor id by logical id.
 + *
@@ -308530,8 +308514,6 @@ index 0000000..42caf53
 +
 +int soc_get_otp_raw_data(uint32_t row, uint8_t *buffer);
 +int soc_get_otp_prop(uint32_t index, void* dst, int dst_len);
-+
-+#endif /* __ASSEMBLY__ */
 +
 +#endif /* _HAL_SOC_H_ */
 diff --git a/core/arch/arm/plat-synaptics/inc/image.h b/core/arch/arm/plat-synaptics/inc/image.h
@@ -309424,15 +309406,11 @@ index 0000000..6188e23
 +#endif //_TEE_TA_PERM_RULE_DEF_H_
 diff --git a/core/arch/arm/plat-synaptics/kern.ld.S b/core/arch/arm/plat-synaptics/kern.ld.S
 new file mode 100644
-index 0000000..16a32da
+index 0000000..3a5753b
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/kern.ld.S
-@@ -0,0 +1,497 @@
+@@ -0,0 +1,505 @@
 +/* SPDX-License-Identifier: (BSD-2-Clause AND MIT) */
-+/*
-+ * Copyright (c) 2024, Synaptics Incorporated.
-+ */
-+
 +/*
 + * Copyright (c) 2014, Linaro Limited
 + * All rights reserved.
@@ -309488,14 +309466,6 @@ index 0000000..16a32da
 +#include <util.h>
 +
 +/*
-+ * TEE_RAM_VA_START:            The start virtual address of the TEE RAM
-+ * TEE_TEXT_VA_START:           The start virtual address of the OP-TEE text
-+ */
-+#define TEE_RAM_VA_START        TEE_RAM_START
-+#define TEE_TEXT_VA_START       (TEE_RAM_VA_START + \
-+					(TEE_LOAD_ADDR - TEE_RAM_START))
-+
-+/*
 + * Note:
 + * Clang 11 (ld.lld) generates non-relocatable reference when using ROUNDDOWN()
 + * from <util.h>, which does not work with ASLR.
@@ -309508,17 +309478,13 @@ index 0000000..16a32da
 +ENTRY(syna_entrypoint)
 +SECTIONS
 +{
-+	. = TEE_TEXT_VA_START;
-+#ifdef ARM32
-+	ASSERT(!(TEE_TEXT_VA_START & 31), "text start should align to 32bytes")
-+#endif
-+#ifdef ARM64
-+	ASSERT(!(TEE_TEXT_VA_START & 127), "text start should align to 128bytes")
-+#endif
++	. = TEE_LOAD_ADDR;
++	ASSERT(!(TEE_LOAD_ADDR & (SMALL_PAGE_SIZE - 1)),
++	       "text start should be page aligned")
 +	__text_start = .;
 +
 +	/*
-+	 * Memory between TEE_TEXT_VA_START and page aligned rounded down
++	 * Memory between TEE_LOAD_ADDR and page aligned rounded down
 +	 * value will be mapped with unpaged "text" section attributes:
 +	 * likely to be read-only/executable.
 +	 */
@@ -309528,6 +309494,9 @@ index 0000000..16a32da
 +		KEEP(*(.text.syna_entrypoint))
 +		KEEP(*(.text._start))
 +		__identity_map_init_start = .;
++		__text_data_start = .;
++		*(.identity_map.data)
++		__text_data_end = .;
 +		*(.identity_map .identity_map.* \
 +			/*
 +			 * The one below is needed because it's a weak
@@ -309565,20 +309534,28 @@ index 0000000..16a32da
 +		*(.rodata .rodata.__unpaged .rodata.__unpaged.*)
 +#include <rodata_unpaged.ld.S>
 +#else
-+#ifdef CFG_DT
-+		__rodata_dtdrv_start = .;
-+		KEEP(*(.rodata.dtdrv))
-+		__rodata_dtdrv_end = .;
-+#endif
 +		*(.rodata .rodata.*)
++#ifndef CFG_CORE_ASLR
 +		. = ALIGN(8);
 +		KEEP(*(SORT(.scattered_array*)));
++#endif
 +#endif
 +		. = ALIGN(8);
 +		__rodata_end = .;
 +	}
 +
++#if defined(CFG_CORE_ASLR)
++	.data.rel.ro : {
++#if !defined(CFG_WITH_PAGER)
++		. = ALIGN(8);
++		KEEP(*(SORT(.scattered_array*)));
++#endif
++		*(.data.rel.ro.__unpaged .data.rel.ro.__unpaged.*)
++	}
++#endif
++
 +	.got : { *(.got.plt) *(.got) }
++	.note.gnu.property : { *(.note.gnu.property) }
 +	.plt : { *(.plt) }
 +
 +	.ctors : ALIGN(8) {
@@ -309593,13 +309570,13 @@ index 0000000..16a32da
 +	}
 +
 +	/* .ARM.exidx is sorted, so has to go in its own output section.  */
-+	.ARM.exidx : {
++	.ARM.exidx : ALIGN(8) {
 +		__exidx_start = .;
 +		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
 +		__exidx_end = .;
 +	}
 +
-+	.ARM.extab : {
++	.ARM.extab : ALIGN(8) {
 +		__extab_start = .;
 +		*(.ARM.extab*)
 +		__extab_end = .;
@@ -309611,7 +309588,7 @@ index 0000000..16a32da
 +#endif
 +	__flatmap_unpg_ro_size = . - __flatmap_unpg_ro_start;
 +
-+#ifdef CFG_VIRTUALIZATION
++#ifdef CFG_NS_VIRTUALIZATION
 +	__flatmap_nex_rw_start = . ;
 +	.nex_data : ALIGN(8) {
 +		*(.nex_data .nex_data.*)
@@ -309646,7 +309623,7 @@ index 0000000..16a32da
 +	}
 +	.nex_nozi (NOLOAD) : {
 +		ASSERT(!(ABSOLUTE(.) & (16 * 1024 - 1)), "align nozi to 16kB");
-+		KEEP(*(.nozi.mmu.l1 .nozi.mmu.l2))
++		KEEP(*(.nozi.mmu.base_table .nozi.mmu.l2))
 +	}
 +
 +	. = ALIGN(SMALL_PAGE_SIZE);
@@ -309715,8 +309692,11 @@ index 0000000..16a32da
 +		. = ALIGN(8);
 +		__nozi_stack_end = .;
 +	}
-+
-+#ifdef CFG_WITH_PAGER
++#ifndef CFG_WITH_PAGER
++	. = ALIGN(SMALL_PAGE_SIZE);
++	__flatmap_free_start = .;
++	__flatmap_unpg_rw_size = __flatmap_free_start - __flatmap_unpg_rw_start;
++#else
 +	.heap2 (NOLOAD) : {
 +		__heap2_start = .;
 +		/*
@@ -309739,6 +309719,7 @@ index 0000000..16a32da
 +		"read-write memory is not paged aligned")
 +
 +	.text_init : {
++		__text_init_start = .;
 +/*
 + * Include list of sections needed for boot initialization, this list
 + * overlaps with unpaged.ld.S but since unpaged.ld.S is first all those
@@ -309749,6 +309730,7 @@ index 0000000..16a32da
 +		/* Make sure constructor functions are available during init */
 +		KEEP(*(.text._GLOBAL__sub_*));
 +		. = ALIGN(8);
++		__text_init_end = .;
 +	}
 +
 +#ifdef CFG_CORE_RODATA_NOEXEC
@@ -309758,16 +309740,23 @@ index 0000000..16a32da
 +	__flatmap_init_ro_start = .;
 +
 +	.rodata_init : {
++		__rodata_init_start = .;
 +#include <rodata_init.ld.S>
-+
++#ifndef CFG_CORE_ASLR
 +		. = ALIGN(8);
 +		KEEP(*(SORT(.scattered_array*)));
-+
-+		. = ALIGN(8);
++#endif
 +		__rodata_init_end = .;
 +	}
++#ifdef CFG_CORE_ASLR
++	.data.rel.ro_init : ALIGN(8) {
++		KEEP(*(SORT(.scattered_array*)));
++	}
++#endif
++	. = ALIGN(8);
++	__ro_and_relro_data_init_end = .;
 +
-+	__init_end = ALIGN(__rodata_init_end, SMALL_PAGE_SIZE);
++	__init_end = ALIGN(__ro_and_relro_data_init_end, SMALL_PAGE_SIZE);
 +	__get_tee_init_end = __init_end;
 +	__init_size = __init_end - __init_start;
 +
@@ -309775,12 +309764,9 @@ index 0000000..16a32da
 +	__flatmap_init_ro_size = __init_end - __flatmap_init_ro_start;
 +
 +	.rodata_pageable : ALIGN(8) {
-+#ifdef CFG_DT
-+		__rodata_dtdrv_start = .;
-+		KEEP(*(.rodata.dtdrv))
-+		__rodata_dtdrv_end = .;
-+#endif
++		__rodata_pageable_start = .;
 +		*(.rodata*)
++		__rodata_pageable_end = .;
 +	}
 +
 +#ifdef CFG_CORE_RODATA_NOEXEC
@@ -309788,8 +309774,10 @@ index 0000000..16a32da
 +#endif
 +
 +	.text_pageable : ALIGN(8) {
++		__text_pageable_start = .;
 +		*(.text*)
 +		. = ALIGN(SMALL_PAGE_SIZE);
++		__text_pageable_end = .;
 +	}
 +
 +	__pageable_part_end = .;
@@ -309801,14 +309789,17 @@ index 0000000..16a32da
 +		"Load address before start of physical memory")
 +	ASSERT(TEE_LOAD_ADDR < (TEE_RAM_START + TEE_RAM_PH_SIZE),
 +		"Load address after end of physical memory")
-+	ASSERT((TEE_RAM_VA_START + TEE_RAM_PH_SIZE - __init_end) >
-+		SMALL_PAGE_SIZE, "Too few free pages to initialize paging")
++	ASSERT((TEE_RAM_START + TEE_RAM_PH_SIZE - __init_end) >
++		SMALL_PAGE_SIZE * 2 +
++		(__pageable_end - __pageable_start) / 4096 * 32 +
++		SIZEOF(.rel) / 2 + SIZEOF(.rela) / 3 ,
++		"Too few free pages to initialize paging")
 +
 +
 +#endif /*CFG_WITH_PAGER*/
 +
 +#ifdef CFG_CORE_SANITIZE_KADDRESS
-+	. = TEE_RAM_VA_START + (TEE_RAM_VA_SIZE * 8) / 9 - 8;
++	. = TEE_RAM_START + (TEE_RAM_VA_SIZE * 8) / 9 - 8;
 +	. = ALIGN(8);
 +	.asan_shadow : {
 +		__asan_shadow_start = .;
@@ -309821,21 +309812,21 @@ index 0000000..16a32da
 +	__end = .;
 +
 +#ifndef CFG_WITH_PAGER
-+	__init_size = __data_end - TEE_TEXT_VA_START;
++	__init_size = __data_end - TEE_LOAD_ADDR;
 +#endif
 +	/*
 +	 * Guard against moving the location counter backwards in the assignment
 +	 * below.
 +	 */
-+	ASSERT(. <= (TEE_RAM_VA_START + TEE_RAM_VA_SIZE),
++	ASSERT(. <= (TEE_RAM_START + TEE_RAM_VA_SIZE),
 +		"TEE_RAM_VA_SIZE is too small")
-+	. = TEE_RAM_VA_START + TEE_RAM_VA_SIZE;
++	. = TEE_RAM_START + TEE_RAM_VA_SIZE;
 +
 +	_end_of_ram = .;
 +
 +#ifndef CFG_WITH_PAGER
-+	__flatmap_unpg_rw_size = _end_of_ram - __flatmap_unpg_rw_start;
 +	__get_tee_init_end = .;
++	__flatmap_free_size = _end_of_ram - __flatmap_free_start;
 +#endif
 +
 +	/*
@@ -309854,7 +309845,7 @@ index 0000000..16a32da
 +	.rela : {
 +		*(.rela.*)
 +	}
-+#ifndef CFG_CORE_ASLR
++#if !defined(CFG_CORE_ASLR) && !defined(CFG_CORE_PHYS_RELOCATABLE)
 +	ASSERT(SIZEOF(.rel) == 0, "Relocation entries not expected")
 +	ASSERT(SIZEOF(.rela) == 0, "Relocation entries not expected")
 +#endif
@@ -309886,7 +309877,13 @@ index 0000000..16a32da
 +__vcore_unpg_rw_size = __flatmap_unpg_rw_size;
 +__vcore_unpg_rw_end = __vcore_unpg_rw_start + __vcore_unpg_rw_size;
 +
-+#ifdef CFG_VIRTUALIZATION
++#ifndef CFG_WITH_PAGER
++__vcore_free_start = __flatmap_free_start;
++__vcore_free_size = __flatmap_free_size;
++__vcore_free_end = __flatmap_free_start + __flatmap_free_size;
++#endif
++
++#ifdef CFG_NS_VIRTUALIZATION
 +/* Nexus read-write memory */
 +__vcore_nex_rw_start = __flatmap_nex_rw_start;
 +__vcore_nex_rw_size = __flatmap_nex_rw_size;
@@ -309894,28 +309891,21 @@ index 0000000..16a32da
 +#endif
 +
 +#ifdef CFG_WITH_PAGER
-+/*
-+ * Core init mapping shall cover up to end of the physical RAM.
-+ * This is required since the hash table is appended to the
-+ * binary data after the firmware build sequence.
-+ */
-+#define __FLATMAP_PAGER_TRAILING_SPACE	\
-+	(TEE_RAM_START + TEE_RAM_PH_SIZE - \
-+		(__flatmap_init_ro_start + __flatmap_init_ro_size))
-+
 +/* Paged/init read-only memories */
 +__vcore_init_rx_start = __flatmap_init_rx_start;
-+__vcore_init_ro_start = __flatmap_init_ro_start;
 +#ifdef CFG_CORE_RODATA_NOEXEC
 +__vcore_init_rx_size = __flatmap_init_rx_size;
-+__vcore_init_ro_size = __flatmap_init_ro_size + __FLATMAP_PAGER_TRAILING_SPACE;
++__vcore_init_ro_start = __flatmap_init_ro_start;
++__vcore_init_ro_size = __flatmap_init_ro_size;
 +#else
-+__vcore_init_rx_size = __flatmap_init_rx_size + __flatmap_init_ro_size +
-+		       __FLATMAP_PAGER_TRAILING_SPACE;
++__vcore_init_rx_size = __flatmap_init_rx_size + __flatmap_init_ro_size;
++__vcore_init_ro_start = __vcore_init_rx_end;
 +__vcore_init_ro_size = 0;
 +#endif /* CFG_CORE_RODATA_NOEXEC */
 +__vcore_init_rx_end = __vcore_init_rx_start + __vcore_init_rx_size;
 +__vcore_init_ro_end = __vcore_init_ro_start + __vcore_init_ro_size;
++ASSERT(__vcore_init_ro_start == __vcore_init_rx_end,
++       "__vcore_init_ro_start should follow __vcore_init_rx_end")
 +#endif /* CFG_WITH_PAGER */
 +
 +#ifdef CFG_CORE_SANITIZE_KADDRESS
@@ -309927,7 +309917,7 @@ index 0000000..16a32da
 +#endif /*CFG_CORE_SANITIZE_KADDRESS*/
 diff --git a/core/arch/arm/plat-synaptics/main.c b/core/arch/arm/plat-synaptics/main.c
 new file mode 100644
-index 0000000..fe55459
+index 0000000..ab1597d
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/main.c
 @@ -0,0 +1,220 @@
@@ -309989,10 +309979,10 @@ index 0000000..fe55459
 +
 +void boot_secondary_init_intc(void)
 +{
-+	gic_cpu_init();
++	gic_init_per_cpu();
 +}
 +
-+void console_init(void)
++void plat_console_init(void)
 +{
 +	serial8250_uart_init(&console_data, CONSOLE_UART_BASE,
 +		CONSOLE_UART_CLK_IN_HZ, CONSOLE_BAUDRATE);
@@ -310153,10 +310143,10 @@ index 0000000..fe55459
 +#endif
 diff --git a/core/arch/arm/plat-synaptics/platform_config.h b/core/arch/arm/plat-synaptics/platform_config.h
 new file mode 100644
-index 0000000..79eae74
+index 0000000..1e9576d
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/platform_config.h
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,116 @@
 +/* SPDX-License-Identifier: BSD-2-Clause */
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -310268,9 +310258,8 @@ index 0000000..79eae74
 +#define CONFIG_TIMER_CLOCK		(200 * 1000000)
 +#define CONFIG_TIMER1_ICTL_IRQ	GIC_IID_SPI(IRQ_apbPerif_timers_1_Intr0_irq)
 +
-+
 +#ifdef CFG_WITH_LPAE
-+#define MAX_XLAT_TABLES		16
++#define MAX_XLAT_TABLES		24
 +#endif
 +
 +#endif /*PLATFORM_CONFIG_H*/

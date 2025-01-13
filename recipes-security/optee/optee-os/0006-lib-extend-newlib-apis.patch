@@ -1,7 +1,7 @@
-From 9fe043c0c9631dc914753dd0a6166e76da574e2d Mon Sep 17 00:00:00 2001
+From 59904fd6cc84aa8d542e36ecaaa9cd005e9a2d50 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Mon, 17 Jun 2024 19:30:32 +0800
-Subject: [PATCH 06/11] lib: extend newlib apis
+Subject: [PATCH] lib: extend newlib apis
 
 Change-Id: I66d85c3b2c0a9a24128c96d9891bc8042afd93ef
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>

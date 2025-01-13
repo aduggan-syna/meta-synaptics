@@ -1,7 +1,7 @@
-From 6ea38fd4830d08a6550a2c3f4ee8b74e35d56afa Mon Sep 17 00:00:00 2001
+From 7199a4557d050aed4e410a4773e95d9080f154c9 Mon Sep 17 00:00:00 2001
 From: Jerome Forissier <jerome.forissier@linaro.org>
 Date: Fri, 5 Aug 2022 09:48:03 +0200
-Subject: [PATCH 04/11] core: link: add --no-warn-rwx-segments
+Subject: [PATCH] core: link: add --no-warn-rwx-segments
 
 Signed-off-by: Anton Antonov <Anton.Antonov@arm.com>
 Upstream-Status: Backport [https://github.com/OP-TEE/optee_os/pull/5474]
@@ -24,7 +24,7 @@ Acked-by: Jens Wiklander <jens.wiklander@linaro.org>
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/core/arch/arm/kernel/link.mk b/core/arch/arm/kernel/link.mk
-index 49e9f4f..9e1cc17 100644
+index 11fe79d..1d09638 100644
 --- a/core/arch/arm/kernel/link.mk
 +++ b/core/arch/arm/kernel/link.mk
 @@ -37,6 +37,7 @@ link-ldflags += --sort-section=alignment

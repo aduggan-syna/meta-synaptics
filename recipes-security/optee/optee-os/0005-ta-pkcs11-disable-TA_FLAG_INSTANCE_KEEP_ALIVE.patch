@@ -1,7 +1,7 @@
-From 7637cdad6d0a7b85053ac03dfb3eab1832918cc9 Mon Sep 17 00:00:00 2001
+From f19b8ba1024a0336ef6a3e53a57e0b683b32f19d Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Tue, 9 Jul 2024 17:20:58 +0800
-Subject: [PATCH 05/11] ta: pkcs11: disable TA_FLAG_INSTANCE_KEEP_ALIVE
+Subject: [PATCH] ta: pkcs11: disable TA_FLAG_INSTANCE_KEEP_ALIVE
 
 https://synaptics.atlassian.net/browse/CSMVV-27
 

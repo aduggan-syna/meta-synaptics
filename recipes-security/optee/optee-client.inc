@@ -34,6 +34,7 @@ do_install:append() {
            -e s:@sbindir@:${sbindir}:g \
               ${D}${systemd_system_unitdir}/tee-supplicant@.service \
               ${D}${sysconfdir}/init.d/tee-supplicant
+    rm ${D}/usr/lib/systemd/ -rf
 }
 
 SYSTEMD_SERVICE:${PN} = "tee-supplicant@.service"
