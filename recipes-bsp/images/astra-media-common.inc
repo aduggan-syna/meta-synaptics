@@ -127,6 +127,7 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-rtsp-server \
     synasdk-bootctrl \
     ${SWUPDATE_INSTALL} \
+    wlan-connect \
 "
 
 IMAGE_INSTALL:remove:sl1640usb = "${SWUPDATE_INSTALL}"

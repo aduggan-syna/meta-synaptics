@@ -1,0 +1,139 @@
+#!/bin/sh
+
+stty erase ^H
+
+# Function to check if a command is successful
+check_command() {
+    if [ $? -ne 0 ]; then
+        echo "Error: $1 failed. Output: $2"
+        exit 1
+    fi
+}
+
+# Function to print messages
+message() {
+    echo "$1"
+}
+
+INTERFACE=$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1)
+if [ -z "$INTERFACE" ];  then
+        echo "Error: No wireless interface found."
+           exit 1
+fi
+
+python3 /usr/bin/ssid.py
+
+# Prompt user for SSID and password
+read -p "Enter your Wi-Fi SSID: " SSID
+read -sp "Enter your Wi-Fi password (leave empty for open Auth Networks): " PASSWORD
+echo
+
+# Validate SSID input
+if [ -z "$SSID" ]; then
+    echo "Error: SSID cannot be empty."
+    exit 1
+fi
+
+# Create the WPA Supplicant configuration directory if it doesn't exist
+message "Creating the WPA Supplicant configuration directory..."
+out=$(mkdir -p /etc/wpa_supplicant 2>&1)
+check_command "mkdir -p /etc/wpa_supplicant" "$out"
+
+CONFIG_FILE="/etc/wpa_supplicant/wpa_supplicant-$INTERFACE.conf"
+
+if [ -n "$PASSWORD" ]; then
+    # Generate the WPA Pre-shared Key (PSK) using wpa_passphrase
+    WPA_OUTPUT=$(wpa_passphrase "$SSID" "$PASSWORD")
+    check_command "wpa_passphrase generation"
+
+    # Extract PSK from WPA output
+    RES=$(echo "$WPA_OUTPUT" | grep 'psk=' | grep -v '^#' | sed 's/psk=//g' | tr -d '[:space:]')
+    PSK=$(echo "$RES" | awk -F'"' '{print $3}')
+    if [ -z "$PSK" ]; then
+        echo "Error: Failed to extract PSK."
+        exit 1
+    fi
+
+    # Create WPA Supplicant configuration file for secured networks
+    message "Creating the WPA Supplicant configuration file..."
+    cat <<EOF > "$CONFIG_FILE"
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+update_config=1
+
+network={
+    ssid="$SSID"
+    psk=$PSK
+    key_mgmt=WPA-PSK
+    scan_ssid=1
+}
+EOF
+else
+    # Create WPA Supplicant configuration file for open networks
+    message "Creating the WPA Supplicant configuration file for open authentication..."
+    cat <<EOF > "$CONFIG_FILE"
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+update_config=1
+
+network={
+    ssid="$SSID"
+    key_mgmt=NONE
+    scan_ssid=1
+}
+EOF
+fi
+
+# Prompt user to review and edit the file
+echo "Configuration file created at $CONFIG_FILE."
+read -p "Do you want to edit the file before applying? (y/n): " EDIT_CHOICE
+if [[ "$EDIT_CHOICE" == "y" || "$EDIT_CHOICE" == "Y" ]]; then
+    # Open the file with vi editor
+    vi "$CONFIG_FILE"
+    cat $CONFIG_FILE
+    echo "Please review your changes. Press Enter to continue."
+    read
+fi
+
+# Bring up the interface
+message "Bringing up the interface..."
+out=$(ifconfig $INTERFACE up 2>&1)
+check_command "ifconfig $INTERFACE up" "$out"
+
+# Configure systemd-networkd to use DHCP for the interface
+message "Creating the systemd network configuration for $INTERFACE ..."
+out=$(cat <<EOF > /etc/systemd/network/25-wlan.network
+[Match]
+Name=$INTERFACE
+
+[Network]
+DHCP=ipv4
+EOF
+2>&1)
+check_command "Creating systemd network configuration" "$out"
+
+# Restart the wpa_supplicant service
+message "Restarting network services..."
+out=$(systemctl restart systemd-networkd.service 2>&1)
+check_command "systemctl restart systemd-networkd.service" "$out"
+out=$(systemctl restart wpa_supplicant@$INTERFACE.service 2>&1)
+check_command "systemctl restart wpa_supplicant@$INTERFACE.service" "$out"
+
+# Enable the service to start on boot
+#systemctl enable wpa_supplicant@$INTERFACE.service
+#check_command "systemctl enable wpa_supplicant@$INTERFACE.service"
+
+RETRIES=0
+while [[ $(iw dev $INTERFACE link) == *"Not connected."* ]]; do
+	if [ $RETRIES -ge 5 ]; then
+		echo "Error: Failed to connect to the network after multiple attempts."
+		exit 1
+	fi
+	echo "Waiting for network connection....."
+	sleep 3
+	RETRIES=$((RETRIES +1))
+done
+
+sleep 12
+echo "Successfully connected to the network. "
+iw dev $INTERFACE link
