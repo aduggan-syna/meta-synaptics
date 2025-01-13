@@ -173,7 +173,7 @@ if [ $DISPLAY_SERVER ]; then
         echo "XSERVER:append = \" xf86-video-modesetting\"" >> conf/local.conf
         echo "DISTRO_FEATURES:remove = \" wayland\"" >> conf/local.conf
         if [ "is${MACHINE}" = "issl1680" ]; then
-            sed -i '/meta-xfce/d;/meta-gnome/d;/meta-networking/d' conf/local.conf
+            sed -i '/meta-xfce/d;/meta-gnome/d;/meta-networking/d' conf/bblayers.conf
             XFCE_LAYER_DIR=$(readlink -f ../meta-openembedded/meta-xfce)
             GNOME_LAYER_DIR=$(readlink -f ../meta-openembedded/meta-gnome)
             NW_LAYER_DIR=$(readlink -f ../meta-openembedded/meta-networking)
