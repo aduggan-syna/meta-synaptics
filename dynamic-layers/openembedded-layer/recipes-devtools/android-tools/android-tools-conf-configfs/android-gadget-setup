@@ -42,5 +42,7 @@ echo "$model" > strings/0x409/product
 echo "Conf 1" > configs/c.1/strings/0x409/configuration
 ln -s functions/ffs.usb0 configs/c.1
 
+echo 10 > /sys/bus/usb/devices/usb3/power/autosuspend
+
 mkdir -p /dev/usb-ffs/adb
 mount -t functionfs usb0 /dev/usb-ffs/adb
