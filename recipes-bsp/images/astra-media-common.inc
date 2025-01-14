@@ -176,14 +176,12 @@ IMAGE_INSTALL:append:dolphin = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-v4l2isp-daemon \
     synasdk-drivers-hrx-v4l2 \
-    synasdk-vpu-plugin \
 "
 
 IMAGE_INSTALL:append:platypus = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-drivers-sunplus \
     synasdk-drivers-syna-dvfs \
-    synasdk-vpu-plugin \
 "
 
 TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-framework-staticdev kernel-devsrc"
