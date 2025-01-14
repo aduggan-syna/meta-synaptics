@@ -10,8 +10,10 @@ SRCREV_FORMAT = "taenc"
 DEPENDS:append = " \
     synasdk-tools-native \
     synasdk-security-native \
-    synasdk-vpu-ta \
 "
+
+DEPENDS:append:dolphin = "synasdk-vpu-ta"
+DEPENDS:append:platypus = "synasdk-vpu-ta"
 
 SYNA_TA_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/ta_enc"
 
