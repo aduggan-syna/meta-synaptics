@@ -2,6 +2,8 @@ require astra-media-common.inc
 
 IMAGE_INSTALL:append = " \
     synasdk-oobe-resources \
+"
+IMAGE_INSTALL:append:dolphin = " \
     python3-pip \
     gstreamer1.0-python \
     python3-venv \
