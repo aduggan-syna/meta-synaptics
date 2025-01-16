@@ -21,6 +21,11 @@ if [ -z "$INTERFACE" ];  then
            exit 1
 fi
 
+# Bring up the interface
+message "Bringing up the interface..."
+out=$(ifconfig $INTERFACE up 2>&1)
+check_command "ifconfig $INTERFACE up" "$out"
+
 python3 /usr/bin/ssid.py
 
 # Prompt user for SSID and password
@@ -94,11 +99,6 @@ if [[ "$EDIT_CHOICE" == "y" || "$EDIT_CHOICE" == "Y" ]]; then
     echo "Please review your changes. Press Enter to continue."
     read
 fi
-
-# Bring up the interface
-message "Bringing up the interface..."
-out=$(ifconfig $INTERFACE up 2>&1)
-check_command "ifconfig $INTERFACE up" "$out"
 
 # Configure systemd-networkd to use DHCP for the interface
 message "Creating the systemd network configuration for $INTERFACE ..."
