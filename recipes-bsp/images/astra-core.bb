@@ -89,7 +89,7 @@ do_swuimage() {
 
     # Run the script to generate the .swu image and sw-description
     chmod +x generate_swu.sh
-    MACHINE=${MACHINE} IMAGE_FILE="${PN}-${MACHINE}.ext4.gz" ./generate_swu.sh ${DEPLOY_DIR_IMAGE} 3
+    MACHINE=${MACHINE} IMAGE_FILE="${PN}-${MACHINE}.rootfs.ext4.gz" ./generate_swu.sh ${DEPLOY_DIR_IMAGE} 3
 
     # Copy the output .swu file to the deployment directory
     # install -d ${DEPLOY_DIR_IMAGE}
