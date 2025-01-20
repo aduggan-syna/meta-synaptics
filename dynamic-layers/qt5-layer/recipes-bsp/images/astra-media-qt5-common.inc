@@ -7,13 +7,5 @@ IMAGE_INSTALL:append = " \
 "
 
 IMAGE_INSTALL:append = " \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' qtwayland synasdk-syna-player-framework synasdk-syna-video-player synasdk-syna-capability-demo', '', d)} \
-"
-
-IMAGE_INSTALL:append:dolphin = " \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' synasdk-syna-ai-player', '', d)} \
-"
-
-IMAGE_INSTALL:append:platypus = " \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' synasdk-syna-ai-player', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' qtwayland synasdk-syna-player-framework synasdk-syna-video-player synasdk-syna-capability-demo synasdk-syna-ai-player', '', d)} \
 "
