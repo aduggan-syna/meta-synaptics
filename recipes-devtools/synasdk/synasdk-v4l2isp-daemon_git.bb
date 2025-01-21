@@ -25,6 +25,7 @@ SRC_URI:append:dolphin = " \
     file://ISP_Manual_IMX258.json \
     file://ISP_Manual_IMX415.json \
     file://ISP_Auto.json \
+    file://ISP_Auto_OV5647.json \
     file://IMX258.xml \
     file://IMX415.xml \
     file://IMX258_2K.xml \
@@ -66,6 +67,7 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/ISP_Manual_IMX258.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/ISP_Manual_IMX415.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/ISP_Auto.json ${D}${datadir}
+    install -m 0644 ${WORKDIR}/ISP_Auto_OV5647.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX258.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX415.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX258_2K.xml ${D}${datadir}
