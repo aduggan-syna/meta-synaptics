@@ -1,0 +1,83 @@
+diff --git a/src/pcm/pcm_plug.c b/src/pcm/pcm_plug.c
+index abf6f1a..5934947 100644
+--- a/src/pcm/pcm_plug.c
++++ b/src/pcm/pcm_plug.c
+@@ -55,6 +55,8 @@ typedef struct {
+ 	snd_pcm_route_ttable_entry_t *ttable;
+ 	int ttable_ok;
+ 	unsigned int tt_ssize, tt_cused, tt_sused;
++	int period_size;
++	int buffer_size;
+ } snd_pcm_plug_t;
+ 
+ #endif
+@@ -726,6 +728,17 @@ static int snd_pcm_plug_hw_refine_sprepare(snd_pcm_t *pcm, snd_pcm_hw_params_t *
+ 	if (plug->srate > 0)
+ 		_snd_pcm_hw_param_set_minmax(sparams, SND_PCM_HW_PARAM_RATE,
+ 					      plug->srate, 0, plug->srate + 1, -1);
++
++	if (plug->period_size > 0){
++		_snd_pcm_hw_param_set_minmax(sparams, SND_PCM_HW_PARAM_PERIOD_SIZE,
++					      plug->period_size, 0, plug->period_size + 1, -1);
++	}
++
++	if (plug->buffer_size > 0){
++		_snd_pcm_hw_param_set_minmax(sparams, SND_PCM_HW_PARAM_BUFFER_SIZE,
++					      plug->buffer_size, 0, plug->buffer_size + 1, -1);
++	}
++
+ 	/* reduce the available configurations */
+ 	err = snd_pcm_hw_refine(plug->req_slave, sparams);
+ 	if (err < 0)
+@@ -1110,7 +1123,8 @@ int snd_pcm_plug_open(snd_pcm_t **pcmp,
+ 		      snd_pcm_route_ttable_entry_t *ttable,
+ 		      unsigned int tt_ssize,
+ 		      unsigned int tt_cused, unsigned int tt_sused,
+-		      snd_pcm_t *slave, int close_slave)
++		      snd_pcm_t *slave, int close_slave,
++			  int psize, int bsize)
+ {
+ 	snd_pcm_t *pcm;
+ 	snd_pcm_plug_t *plug;
+@@ -1130,6 +1144,8 @@ int snd_pcm_plug_open(snd_pcm_t **pcmp,
+ 	plug->tt_ssize = tt_ssize;
+ 	plug->tt_cused = tt_cused;
+ 	plug->tt_sused = tt_sused;
++	plug->period_size = psize;
++	plug->buffer_size = bsize;
+ 	
+ 	err = snd_pcm_new(&pcm, SND_PCM_TYPE_PLUG, name, slave->stream, slave->mode);
+ 	if (err < 0) {
+@@ -1236,6 +1252,8 @@ int _snd_pcm_plug_open(snd_pcm_t **pcmp, const char *name,
+ 	snd_pcm_format_t sformat = SND_PCM_FORMAT_UNKNOWN;
+ 	int schannels = -1, srate = -1;
+ 	const snd_config_t *rate_converter = NULL;
++	int psize = -1;
++	int bsize = -1;
+ 
+ 	snd_config_for_each(i, next, conf) {
+ 		snd_config_t *n = snd_config_iterator_entry(i);
+@@ -1290,10 +1308,12 @@ int _snd_pcm_plug_open(snd_pcm_t **pcmp, const char *name,
+ 		SNDERR("slave is not defined");
+ 		return -EINVAL;
+ 	}
+-	err = snd_pcm_slave_conf(root, slave, &sconf, 3,
++	err = snd_pcm_slave_conf(root, slave, &sconf, 5,
+ 				 SND_PCM_HW_PARAM_FORMAT, SCONF_UNCHANGED, &sformat,
+ 				 SND_PCM_HW_PARAM_CHANNELS, SCONF_UNCHANGED, &schannels,
+-				 SND_PCM_HW_PARAM_RATE, SCONF_UNCHANGED, &srate);
++				 SND_PCM_HW_PARAM_RATE, SCONF_UNCHANGED, &srate,
++				 SND_PCM_HW_PARAM_PERIOD_SIZE, SCONF_MANDATORY, &psize,
++				 SND_PCM_HW_PARAM_BUFFER_SIZE, SCONF_MANDATORY, &bsize);
+ 	if (err < 0)
+ 		return err;
+ #ifdef BUILD_PCM_PLUGIN_ROUTE
+@@ -1326,7 +1346,7 @@ int _snd_pcm_plug_open(snd_pcm_t **pcmp, const char *name,
+ 	if (err < 0)
+ 		return err;
+ 	err = snd_pcm_plug_open(pcmp, name, sformat, schannels, srate, rate_converter,
+-				route_policy, ttable, ssize, cused, sused, spcm, 1);
++				route_policy, ttable, ssize, cused, sused, spcm, 1, psize, bsize);
+ 	if (err < 0)
+ 		snd_pcm_close(spcm);
+ 	return err;
