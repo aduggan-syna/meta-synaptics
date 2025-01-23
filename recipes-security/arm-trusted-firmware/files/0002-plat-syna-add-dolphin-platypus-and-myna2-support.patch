@@ -1,4 +1,4 @@
-From 0d41fedf9f0d2ff56cb37524282d253d922d5c88 Mon Sep 17 00:00:00 2001
+From 20f3faf9c25a9fec2522ea4033aaa5076fb8bef2 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 13:18:24 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -9,7 +9,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/common/aarch64/berlin_helpers.S   |  186 +
  plat/syna/berlin/common/berlin_bl31_setup.c        |  402 +
  plat/syna/berlin/common/berlin_common.mk           |   43 +
- plat/syna/berlin/common/berlin_pm.c                |  534 ++
+ plat/syna/berlin/common/berlin_pm.c                |  539 ++
  plat/syna/berlin/common/berlin_sip_svc.c           |   85 +
  plat/syna/berlin/common/berlin_stack_protector.c   |   25 +
  plat/syna/berlin/common/berlin_topology.c          |   63 +
@@ -23,7 +23,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/common/drivers/tos/tz.c           |  183 +
  .../syna/berlin/common/drivers/tos/tz_boot_param.c |   45 +
  plat/syna/berlin/common/drivers/watchdog/wdt.c     |   98 +
- plat/syna/berlin/common/gicv2_ext.c                |  119 +
+ plat/syna/berlin/common/gicv2_ext.c                |  120 +
  plat/syna/berlin/include/berlin_private.h          |   47 +
  plat/syna/berlin/include/berlin_sip_svc.h          |   23 +
  plat/syna/berlin/include/drivers/bcm.h             |  101 +
@@ -100,7 +100,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/suspend/sha256_ce.S               |  156 +
  plat/syna/berlin/suspend/suspend.ld.S              |   83 +
  plat/syna/berlin/suspend/suspend_entrypoint.S      |   67 +
- 94 files changed, 53279 insertions(+)
+ 94 files changed, 53285 insertions(+)
  create mode 100644 plat/syna/berlin/common/aarch64/berlin_helpers.S
  create mode 100644 plat/syna/berlin/common/berlin_bl31_setup.c
  create mode 100644 plat/syna/berlin/common/berlin_common.mk
@@ -847,10 +847,10 @@ index 0000000..199c35e
 +				${COMMON_DIR}/berlin_sip_svc.c
 diff --git a/plat/syna/berlin/common/berlin_pm.c b/plat/syna/berlin/common/berlin_pm.c
 new file mode 100644
-index 0000000..f996b73
+index 0000000..cef8c2b
 --- /dev/null
 +++ b/plat/syna/berlin/common/berlin_pm.c
-@@ -0,0 +1,534 @@
+@@ -0,0 +1,539 @@
 +/*
 + * Copyright (c) 2015-2021, ARM Limited and Contributors. All rights reserved.
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
@@ -939,6 +939,10 @@ index 0000000..f996b73
 +
 +static irq_status_t irq_status[MAX_WAKEUP_IRQS];
 +
++#define LEVEL_SENSITIVE_MASK	(0x10000)
++#define IRQ_NUM(x)				(x & 0xFFFF)
++#define IS_LEVLE_SENSITIVE(x)	(x & LEVEL_SENSITIVE_MASK)
++
 +static bool valid_wakeup_irq(int irq)
 +{
 +	if ((wakeup_irq_num < MAX_WAKEUP_IRQS) && irq > 0 && irq < IRQ_TOTAL_IRQ)
@@ -946,22 +950,23 @@ index 0000000..f996b73
 +	else
 +		return false;
 +}
++
 +int berlin_set_wakeup_sources(u_register_t x1, u_register_t x2, u_register_t x3, u_register_t x4)
 +{
 +	int irq1 = x1, irq2 = x2, irq3 = x3, irq4 = x4;
 +
 +	INFO("wakeup irq %d, %d, %d, %d.\n", irq1, irq2, irq3, irq4);
 +
-+	if (valid_wakeup_irq(irq1))
++	if (valid_wakeup_irq(IRQ_NUM(irq1)))
 +		wakeup_irqs[wakeup_irq_num++] = irq1 + 32;
 +
-+	if (valid_wakeup_irq(irq2))
++	if (valid_wakeup_irq(IRQ_NUM(irq2)))
 +		wakeup_irqs[wakeup_irq_num++] = irq2 + 32;
 +
-+	if (valid_wakeup_irq(irq3))
++	if (valid_wakeup_irq(IRQ_NUM(irq3)))
 +		wakeup_irqs[wakeup_irq_num++] = irq3 + 32;
 +
-+	if (valid_wakeup_irq(irq4))
++	if (valid_wakeup_irq(IRQ_NUM(irq4)))
 +		wakeup_irqs[wakeup_irq_num++] = irq4 + 32;
 +
 +	INFO("wakeup irq num %d.\n", wakeup_irq_num);
@@ -975,8 +980,8 @@ index 0000000..f996b73
 +	int i = 0;
 +	for (i = 0; i < wakeup_irq_num; i++) {
 +		INFO("######cfg wakeup irq = 0x%x#######\n", wakeup_irqs[i]);
-+		plat_ic_save_interrupt_status(wakeup_irqs[i], &irq_status[i]);
-+		plat_ic_setup_wakeup_interrupt(wakeup_irqs[i]);
++		plat_ic_save_interrupt_status(IRQ_NUM(wakeup_irqs[i]), &irq_status[i]);
++		plat_ic_setup_wakeup_interrupt(IRQ_NUM(wakeup_irqs[i]), IS_LEVLE_SENSITIVE(wakeup_irqs[i]));
 +	}
 +}
 +
@@ -996,7 +1001,7 @@ index 0000000..f996b73
 +	} while (1);
 +
 +	for (i = 0; i < wakeup_irq_num; i++)
-+		plat_ic_resume_wakeup_interrupt(wakeup_irqs[i], &irq_status[i]);
++		plat_ic_resume_wakeup_interrupt(IRQ_NUM(wakeup_irqs[i]), &irq_status[i]);
 +}
 +
 +void berlin_program_percpu_entrypoint(unsigned long target_cpu,
@@ -1064,7 +1069,7 @@ index 0000000..f996b73
 +#endif
 +
 +#ifdef CFG_UART_WAKEUP_INTR
-+	berlin_set_wakeup_sources(CFG_UART_WAKEUP_INTR, -1, -1, -1);
++	berlin_set_wakeup_sources(CFG_UART_WAKEUP_INTR | LEVEL_SENSITIVE_MASK, -1, -1, -1);
 +#endif
 +}
 +
@@ -2869,10 +2874,10 @@ index 0000000..69ae863
 +}
 diff --git a/plat/syna/berlin/common/gicv2_ext.c b/plat/syna/berlin/common/gicv2_ext.c
 new file mode 100644
-index 0000000..6678581
+index 0000000..11077e8
 --- /dev/null
 +++ b/plat/syna/berlin/common/gicv2_ext.c
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,120 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -2969,7 +2974,7 @@ index 0000000..6678581
 +	}
 +}
 +
-+void plat_ic_setup_wakeup_interrupt(unsigned int id)
++void plat_ic_setup_wakeup_interrupt(unsigned int id, unsigned int level)
 +{
 +#if GICV2_G0_FOR_EL3
 +	plat_ic_set_interrupt_type(id, INTR_TYPE_EL3);
@@ -2979,7 +2984,8 @@ index 0000000..6678581
 +	plat_ic_set_interrupt_priority(id, PLAT_RAS_PRI);
 +	plat_ic_clear_interrupt_pending(id);
 +	plat_ic_set_spi_routing(id, INTR_ROUTING_MODE_PE, read_mpidr());
-+	plat_ic_set_cfg(id, GIC_INTR_CFG_EDGE);
++	if (!level)
++		plat_ic_set_cfg(id, GIC_INTR_CFG_EDGE);
 +	plat_ic_enable_interrupt(id);
 +}
 +
@@ -3720,7 +3726,7 @@ index 0000000..0ebf158
 +#endif /* _WDT_H_ */
 diff --git a/plat/syna/berlin/include/gicv2_ext.h b/plat/syna/berlin/include/gicv2_ext.h
 new file mode 100644
-index 0000000..1a83a74
+index 0000000..a474b95
 --- /dev/null
 +++ b/plat/syna/berlin/include/gicv2_ext.h
 @@ -0,0 +1,26 @@
@@ -3745,7 +3751,7 @@ index 0000000..1a83a74
 +
 +void plat_ic_save_interrupt_status(unsigned int id, irq_status_t *is);
 +
-+void plat_ic_setup_wakeup_interrupt(unsigned int id);
++void plat_ic_setup_wakeup_interrupt(unsigned int id, unsigned int level);
 +
 +void plat_ic_resume_wakeup_interrupt(unsigned int id, irq_status_t *is);
 +
