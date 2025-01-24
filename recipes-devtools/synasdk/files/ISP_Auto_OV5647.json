@@ -36,7 +36,7 @@
       "enable": true,
       "mode": 0,
       "useCcoffset": true,
-      "useCcmatrix": false,
+      "useCcmatrix": true,
       "useDamping": true,
       "roiNumber": 0,
       "roiWindow": [
