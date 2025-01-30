@@ -3,6 +3,7 @@
     {
       "antiBandingMode": 1,
       "classname": "AdaptiveAe",
+      "state": 2,
       "antiFlickerMode": 1,
       "dampOver": 0.7,
       "dampOverGain": 1,
@@ -32,16 +33,31 @@
       "wdrContrast.min": 10
     },
     {
-      "avg": 0.01,
       "classname": "Awbv2",
+      "state": 2,
       "enable": true,
-      "illuorder": "A, D50, D65, D75, TL84, F12, CWF",
-      "indoor": [0.3, 1, 0, 0, 1, 1, 1],
-      "outdoor": [0, 1, 1, 1, 1, 1, 0],
-      "overExposureWeight": [
-        0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0.8, 0.6, 0.4, 0.2
-      ],
-      "transition": [0, 1, 1, 1, 1, 1, 0]
+      "mode": 1,
+      "useCcoffset": true,
+      "useCcmatrix": true,
+      "useDamping": true,
+      "roiNumber": 0,
+      "roiWindow": [
+            [
+                0.0000, 0.0000, 100.0000, 100.0000, 1.0000
+            ],
+            [
+                0.0000, 0.0000, 100.0000, 100.0000, 1.0000
+            ],
+            [
+                0.0000, 0.0000, 100.0000, 100.0000, 1.0000
+            ],
+            [
+                0.0000, 0.0000, 100.0000, 100.0000, 1.0000
+            ],
+            [
+                0.0000, 0.0000, 100.0000, 100.0000, 1.0000
+            ]
+       ]
     }
   ]
 }

@@ -9,6 +9,7 @@
           "bypass": 0,
           "bypass_select": 0,
           "class": "CHdrv13",
+          "state": 1,
           "color_weight": [254, 1, 0],
           "dgain": [
             [1, 1, 1, 1],
@@ -31,6 +32,7 @@
         },
         {
           "class": "CWdrv3_1",
+          "state": 1,
           "max_global_strength": 72,
           "enable": true,
           "max_gain": 3,
@@ -38,6 +40,7 @@
         },
         {
           "class": "C2dnrv3",
+          "state": 1,
           "enable": true,
           "pregamma_strength": false,
           "sigma": 4,
@@ -45,6 +48,7 @@
         },
         {
           "class": "C3dnrv1_2",
+          "state":1,
           "enable": 1,
           "delta_factor": 48,
           "motion_factor": 512,
@@ -52,11 +56,13 @@
         },
         {
           "class": "Bls",
+          "state": 1,
           "bls": [256, 256, 256, 256]
         },
         {
           "bit": 14,
           "class": "CManualWb",
+          "state": 1,
           "enable": 1,
           "gain": [1.68, 1, 1, 2.25]
         },
@@ -69,6 +75,7 @@
           ],
           "ccoffset": [0, 0, 0],
           "class": "CCcm",
+          "state": 1,
           "enable": true
         },
         {
@@ -76,6 +83,7 @@
           "bls": [128, 128, 128, 128],
           "bls_enable": true,
           "class": "CCpdv1",
+          "state": 0,
           "compress_curve_x": [
             21, 20, 18, 14, 20, 18, 14, 13, 20, 18, 14, 13, 20, 18, 14, 20, 18,
             14, 20, 18, 14, 13, 20, 18, 14, 20, 18, 14, 13, 20, 18, 14, 20, 18,
@@ -110,6 +118,7 @@
         },
         {
           "class": "CGamma64",
+          "state": 1,
           "curve": [
             154, 211, 254, 290, 321, 349, 374, 397, 419, 440, 459, 478, 496,
             513, 529, 545, 560, 575, 589, 603, 617, 630, 643, 655, 667, 679,
@@ -129,6 +138,7 @@
           "bpt_pos_y": [10, 20, 8],
           "bypass": false,
           "class": "CDpcc",
+          "state": 1,
           "enable": true,
           "line_mad_fac": [
             [4, 24, 4],
@@ -164,6 +174,7 @@
         },
         {
           "class": "CDpf",
+          "state": 1,
           "div": 64,
           "enable": 1,
           "gain": 24,
@@ -179,6 +190,7 @@
         },
         {
           "class": "CLsc1_1",
+          "state": 0,
           "enable": 0,
           "matrix": [
             [
@@ -269,6 +281,7 @@
           "bright": -4.8000030517578125,
           "chroma_out": 2,
           "class": "CCproc",
+          "state": 0,
           "contrast": 1.2,
           "enable": 0,
           "hue": 0,
@@ -288,6 +301,7 @@
           "ca_en": 1,
           "ca_mode": 1,
           "class": "CEEv1",
+          "state": 0,
           "curve_en": 1,
           "dci_curve": [
             0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224,
@@ -316,6 +330,7 @@
           "center_h_offs": 0,
           "center_v_offs": 0,
           "class": "CDmscv1",
+          "state": 1,
           "enable": true
         },
         {
@@ -324,6 +339,7 @@
           "cac_enable": 0,
           "cc_enable": 1,
           "class": "C3Av2Interface",
+          "state": 1,
           "enable": 1,
           "integration_time": 0.001,
           "lsc_enable": 0,
