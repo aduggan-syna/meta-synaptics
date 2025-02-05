@@ -29,6 +29,8 @@ do_install () {
     install -m 0755 ${WORKDIR}/build/syna-capability-demo ${D}${bindir}/
     install -d ${D}${qmldir}
 
+    install -m 0644 ${S}/qmls/CustomFileDialog.qml ${D}${qmldir}/
+
     if [ "${MACHINE}" = "sl1620" ]; then
         install -m 0644 ${S}/qmls/sl1620-capability-demo.qml ${D}${qmldir}/
     fi
