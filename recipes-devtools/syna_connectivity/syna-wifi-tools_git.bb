@@ -19,9 +19,13 @@ do_install () {
     install -d ${D}/${sbindir}
     install -m 0755 ${S}/sysroot/linux-baseline/data/wifi_tools/syna_csi_retriever ${D}/${sbindir}/syna_csi_retriever
     install -m 0755 ${S}/sysroot/linux-baseline/data/wifi_tools/syna_csi_decoder ${D}/${sbindir}/syna_csi_decoder
+    install -m 0755 ${S}/sysroot/linux-baseline/data/wifi_tools/dhd.wet ${D}/${sbindir}/dhd.wet
+    install -m 0755 ${S}/sysroot/linux-baseline/data/wifi_tools/wl.wet ${D}/${sbindir}/wl.wet
 }
 
 INSANE_SKIP:${PN} += "already-stripped"
 
 FILES:${PN} = "${sbindir}/syna_csi_retriever \
-               ${sbindir}/syna_csi_decoder"
+               ${sbindir}/syna_csi_decoder \
+               ${sbindir}/dhd.wet \
+               ${sbindir}/wl.wet"
