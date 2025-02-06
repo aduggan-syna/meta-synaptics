@@ -2,6 +2,41 @@
 
 stty erase ^H
 
+AUTO_CONNECT_FILE="/etc/.wifi_autoconnect"
+USAGE_FILE="/etc/.wifi_usage"
+SERVICE_MODE=false
+
+# Check if running as a service
+if [ "$1" = "--service" ]; then
+    SERVICE_MODE=true
+    echo "Setting the service mode flag"
+fi
+
+echo "Stopping services managing wlan0..."
+systemctl stop wpa_supplicant@wlan0.service 2>/dev/null
+systemctl stop systemd-networkd 2>/dev/null
+systemctl stop NetworkManager 2>/dev/null
+systemctl stop wpa_supplicant 2>/dev/null
+
+# Check the status of wlan_start.service
+SERVICE_NAME="wlan_start.service"
+SERVICE_STATUS=$(systemctl is-enabled "$SERVICE_NAME" 2>/dev/null)
+
+if [[ "$SERVICE_STATUS" == "disabled" ]]; then
+    echo "The $SERVICE_NAME is currently disabled. Enabling it now..."
+    systemctl enable "$SERVICE_NAME"
+    if [[ $? -eq 0 ]]; then
+        echo "$SERVICE_NAME has been successfully enabled."
+    else
+        echo "Failed to enable $SERVICE_NAME. Please check for issues."
+    fi
+elif [[ "$SERVICE_STATUS" == "enabled" ]]; then
+    echo "$SERVICE_NAME is already enabled. No action required."
+else
+    echo "$SERVICE_NAME is not found or an error occurred. Please verify the service name."
+    exit 1
+fi
+
 # Function to check if a command is successful
 check_command() {
     if [ $? -ne 0 ]; then
@@ -18,7 +53,7 @@ message() {
 INTERFACE=$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1)
 if [ -z "$INTERFACE" ];  then
         echo "Error: No wireless interface found."
-           exit 1
+            exit 1
 fi
 
 # Bring up the interface
@@ -26,7 +61,64 @@ message "Bringing up the interface..."
 out=$(ifconfig $INTERFACE up 2>&1)
 check_command "ifconfig $INTERFACE up" "$out"
 
+# Create the WPA Supplicant configuration directory if it doesn't exist
+message "Creating the WPA Supplicant configuration directory..."
+out=$(mkdir -p /etc/wpa_supplicant 2>&1)
+check_command "mkdir -p /etc/wpa_supplicant" "$out"
+
+# Check for an auto-connect SSID
+AUTO_CONNECT_SSID=""
+if [ -f "$AUTO_CONNECT_FILE" ]; then
+    echo "Inside the auto_connect_file: $AUTO_CONNECT_FILE"
+    TO_CONNECT_CREDENTIALS=$(cat "$AUTO_CONNECT_FILE")
+    AUTO_CONNECT_SSID=$(echo "$TO_CONNECT_CREDENTIALS" | cut -d: -f1)
+    AUTO_CONNECT_PSK=$(echo "$TO_CONNECT_CREDENTIALS" | cut -d: -f2)
+fi
+
+
+if [ "$SERVICE_MODE" = true ]; then
+    # If running as a service, only auto-connect if SSID is configured
+    echo "Outer if condition: service mode == true"
+    if [ -n "$AUTO_CONNECT_SSID" ]; then
+        CONFIG_FILE="/etc/wpa_supplicant/wpa_supplicant-$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1).conf"
+cat <<EOF > "$CONFIG_FILE"
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+update_config=1
+
+network={
+    ssid="$AUTO_CONNECT_SSID"
+    psk=$AUTO_CONNECT_PSK
+    key_mgmt=WPA-PSK
+    scan_ssid=1
+}
+EOF
+
+        # Restart network services
+        message "Restarting network services..."
+        out=$(systemctl restart systemd-networkd.service 2>&1)
+        check_command "systemctl restart systemd-networkd.service" "$out"
+        out=$(systemctl restart wpa_supplicant@$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1).service 2>&1)
+        check_command "systemctl restart wpa_supplicant@<interface>.service" "$out"
+
+        echo "Auto-connect successful to $AUTO_CONNECT_SSID."
+        exit 0
+    else
+        echo "Service mode: No auto-connect SSID configured. Exiting."
+        echo "AUTO_CONNECT_FILE: $AUTO_CONNECT_FILE"
+        exit 0
+    fi
+fi
+
+# Interactive Mode: Display all SSIDs and prompt user
 python3 /usr/bin/ssid.py
+AVAILABLE_SSIDS=$(python3 -c "
+from ssid import scan_ssids
+print('\n'.join(scan_ssids()))
+")
+
+echo "Available Networks:"
+echo "$AVAILABLE_SSIDS"
 
 # Prompt user for SSID and password
 read -p "Enter your Wi-Fi SSID: " SSID
@@ -39,28 +131,31 @@ if [ -z "$SSID" ]; then
     exit 1
 fi
 
-# Create the WPA Supplicant configuration directory if it doesn't exist
-message "Creating the WPA Supplicant configuration directory..."
-out=$(mkdir -p /etc/wpa_supplicant 2>&1)
-check_command "mkdir -p /etc/wpa_supplicant" "$out"
+# Prompt for enabling auto-connect
+read -p "Do you want to enable auto-connect for $SSID? (yes/no): " AUTOCONNECT_CHOICE
 
-CONFIG_FILE="/etc/wpa_supplicant/wpa_supplicant-$INTERFACE.conf"
+# Create WPA Supplicant configuration file
+CONFIG_FILE="/etc/wpa_supplicant/wpa_supplicant-$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1).conf"
 
 if [ -n "$PASSWORD" ]; then
     # Generate the WPA Pre-shared Key (PSK) using wpa_passphrase
     WPA_OUTPUT=$(wpa_passphrase "$SSID" "$PASSWORD")
     check_command "wpa_passphrase generation"
 
-    # Extract PSK from WPA output
-    RES=$(echo "$WPA_OUTPUT" | grep 'psk=' | grep -v '^#' | sed 's/psk=//g' | tr -d '[:space:]')
-    PSK=$(echo "$RES" | awk -F'"' '{print $3}')
+    PSK=$(echo "$WPA_OUTPUT" | sed -n '/^\s*psk=/s/.*psk=//p' | tail -n 1)
     if [ -z "$PSK" ]; then
         echo "Error: Failed to extract PSK."
         exit 1
     fi
 
-    # Create WPA Supplicant configuration file for secured networks
-    message "Creating the WPA Supplicant configuration file..."
+#Auto-connect Save the PSK to a file
+if [[ "$AUTOCONNECT_CHOICE" == "yes" || "$AUTOCONNECT_CHOICE" == "y" ]]; then
+    echo "$SSID:$PSK" > "$AUTO_CONNECT_FILE"
+    echo "Auto-connect enabled for SSID: $SSID."
+else
+    echo "Auto-connect disabled."
+fi
+
     cat <<EOF > "$CONFIG_FILE"
 ctrl_interface=/var/run/wpa_supplicant
 ctrl_interface_group=0
@@ -74,8 +169,7 @@ network={
 }
 EOF
 else
-    # Create WPA Supplicant configuration file for open networks
-    message "Creating the WPA Supplicant configuration file for open authentication..."
+# Create WPA Supplicant configuration file for open networks
     cat <<EOF > "$CONFIG_FILE"
 ctrl_interface=/var/run/wpa_supplicant
 ctrl_interface_group=0
@@ -100,6 +194,27 @@ if [[ "$EDIT_CHOICE" == "y" || "$EDIT_CHOICE" == "Y" ]]; then
     read
 fi
 
+# Update connection frequency
+USAGE_FILE="/etc/.wifi_usage"
+SSID_CONNECTED="$SSID"
+#echo "USAGE FILE: $USAGE_FILE"
+
+if [ -f "$USAGE_FILE" ]; then
+    usage=$(cat "$USAGE_FILE")
+else
+    usage="{}"
+fi
+
+# Increment the frequency for the connected SSID
+updated_usage=$(python3 -c "
+import json
+usage = json.loads('''$usage''')
+usage['$SSID_CONNECTED'] = usage.get('$SSID_CONNECTED', 0) + 1
+print(json.dumps(usage))
+")
+
+echo "$updated_usage" > "$USAGE_FILE"
+
 # Configure systemd-networkd to use DHCP for the interface
 message "Creating the systemd network configuration for $INTERFACE ..."
 out=$(cat <<EOF > /etc/systemd/network/25-wlan.network
@@ -113,25 +228,20 @@ EOF
 check_command "Creating systemd network configuration" "$out"
 
 # Restart the wpa_supplicant service
-message "Restarting network services..."
 out=$(systemctl restart systemd-networkd.service 2>&1)
 check_command "systemctl restart systemd-networkd.service" "$out"
-out=$(systemctl restart wpa_supplicant@$INTERFACE.service 2>&1)
-check_command "systemctl restart wpa_supplicant@$INTERFACE.service" "$out"
-
-# Enable the service to start on boot
-#systemctl enable wpa_supplicant@$INTERFACE.service
-#check_command "systemctl enable wpa_supplicant@$INTERFACE.service"
+out=$(systemctl restart wpa_supplicant@wlan0.service 2>&1)
+check_command "systemctl restart wpa_supplicant@wlan0.service" "$out"
 
 RETRIES=0
 while [[ $(iw dev $INTERFACE link) == *"Not connected."* ]]; do
-	if [ $RETRIES -ge 5 ]; then
-		echo "Error: Failed to connect to the network after multiple attempts."
-		exit 1
-	fi
-	echo "Waiting for network connection....."
-	sleep 3
-	RETRIES=$((RETRIES +1))
+    if [ $RETRIES -ge 5 ]; then
+        echo "Error: Failed to connect to the network after multiple attempts."
+        exit 1
+    fi
+    echo "Waiting for network connection....."
+    sleep 3
+    RETRIES=$((RETRIES +1))
 done
 
 sleep 12

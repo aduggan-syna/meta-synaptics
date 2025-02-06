@@ -1,0 +1,17 @@
+#!/bin/sh
+
+ssid=$(iw dev wlan0 link | grep 'SSID' | sed 's/SSID: //')
+echo "$ssid"
+ssid=$(echo "$ssid" | sed 's/^[[:space:]]*//')
+AUTO_CONNECT_FILE="/etc/.wifi_autoconnect"
+
+AUTO_CONNECT_SSID=""
+if [ -f "$AUTO_CONNECT_FILE" ]; then
+    AUTO_CONNECT_CREDENTIALS=$(cat "$AUTO_CONNECT_FILE")
+    AUTO_CONNECT_SSID=$(echo "$AUTO_CONNECT_CREDENTIALS" | cut -d: -f1)
+    if [[ "$AUTO_CONNECT_SSID" == "$ssid" ]]; then
+        #remove the .wifi_autoconnect file
+        rm /etc/.wifi_autoconnect
+    fi
+fi
+ifconfig wlan0 down
