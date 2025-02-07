@@ -142,6 +142,7 @@ do_deploy:append() {
 KERNEL_MODULE_AUTOLOAD:append = " \
     amp_bm \
     vpu \
+    panel-waveshare-dsi \
     syna_drm \
     pvrsrvkm \
     bcmdhd \
@@ -158,12 +159,13 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
 
 KERNEL_MODULE_PROBECONF:append = "bcmdhd "
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
+KERNEL_MODULE_PROBECONF:append = "panel-waveshare-dsi "
 KERNEL_MODULE_PROBECONF:append = "amp_bm "
 KERNEL_MODULE_PROBECONF:append = "pvrsrvkm "
 KERNEL_MODULE_PROBECONF:append = "syna-vpu "
 KERNEL_MODULE_PROBECONF:append = "vpu "
 
-module_conf_syna_drm = "softdep syna_drm pre: amp_bm fxl6408"
+module_conf_syna_drm = "softdep syna_drm pre: amp_bm fxl6408 panel-waveshare-dsi"
 module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
 
 module_conf_syna-vpu = "softdep syna-vpu pre: amp_bm"
