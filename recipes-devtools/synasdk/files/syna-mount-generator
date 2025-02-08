@@ -2,9 +2,20 @@
 
 mount_location=$1
 
-factory_dev=`fdisk -lx|grep factory_setting|awk '{print $1}'`
+if cat /proc/cmdline| grep mmcblk1; then
+  root_block=mmcblk1
+  root_device=/dev/${root_block}
+elif cat /proc/cmdline| grep mmcblk0; then
+  root_block=mmcblk0
+  root_device=/dev/${root_block}
+else
+  echo "Not boot from mmc!"
+  exit 1
+fi
+
+factory_dev=`fdisk -lx|grep factory_setting|grep $root_block|awk '{print $1}'`
 factory_dev_service_name=`echo ${factory_dev}|cut -c2-|sed 's/\//-/'`
-home_dev=`fdisk -lx|grep home|awk '{print $1}'`
+home_dev=`fdisk -lx|grep home|grep $root_block|awk '{print $1}'`
 home_dev_service_name=`echo ${home_dev}|cut -c2-|sed 's/\//-/'`
 
 echo "\
