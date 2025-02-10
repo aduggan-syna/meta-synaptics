@@ -8,5 +8,9 @@ IMAGE_INSTALL:append = " \
 "
 
 IMAGE_INSTALL:append = " \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' qtwayland synasdk-syna-player-framework synasdk-syna-video-player synasdk-syna-capability-demo synasdk-syna-ai-player', '', d)} \
+    synasdk-syna-player-framework synasdk-syna-video-player synasdk-syna-capability-demo synasdk-syna-ai-player \
+"
+
+IMAGE_INSTALL:append = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'qtwayland', '', d)} \
 "
