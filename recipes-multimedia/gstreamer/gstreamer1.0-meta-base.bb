@@ -41,7 +41,8 @@ RDEPENDS:gstreamer1.0-meta-base = "\
 
 RRECOMMENDS:gstreamer1.0-meta-x11-base = "\
     gstreamer1.0-plugins-base-ximagesink \
-    gstreamer1.0-plugins-base-xvimagesink"
+    gstreamer1.0-plugins-base-xvimagesink \
+    gstreamer1.0-plugins-base-opengl"
 
 RDEPENDS:gstreamer1.0-meta-audio = "\
     gstreamer1.0-meta-base \

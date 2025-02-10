@@ -5,6 +5,10 @@ LICENSE = "Apache-2.0"
 DEPENDS += "qtbase qtdeclarative glib-2.0 gstreamer1.0 \
             gstreamer1.0-plugins-base gstreamer1.0-plugins-bad udev \
             synasdk-demos"
+
+# Add X11 and Wayland specific dependencies based on DISTRO_FEATURES
+DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', '', d)}"
+
 RDEPENDS_${PN} += "gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
         gstreamer1.0-plugins-bad udev"
 
@@ -20,6 +24,10 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=4158a261ca7f2525513e31ba9c50ae98"
 
 inherit pkgconfig
 inherit qmake5
+
+# Add custom QMake configuration based on DISTRO_FEATURES
+EXTRA_QMAKEVARS_PRE += "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'CONFIG+=x11', '', d)}"
+EXTRA_QMAKEVARS_PRE += "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'CONFIG+=wayland', '', d)}"
 
 do_install () {
     install -d ${D}${libdir}
@@ -49,3 +57,4 @@ FILES:${PN}-dev = " \
     ${libdir}/pkgconfig/syna-player-framework.pc \
 "
 PACKAGES = "${PN} ${PN}-dbg ${PN}-dev"
+
