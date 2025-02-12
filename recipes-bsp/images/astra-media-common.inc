@@ -231,6 +231,5 @@ do_swuimage() {
     # install -d ${DEPLOY_DIR_IMAGE}
     cp ${DEPLOY_DIR_IMAGE}/image.swu ${DEPLOY_DIR_IMAGE}/astra-media.swu
 }
-# Ensure swu image is built after do_image_synaimg task
-SYNA_IMAGE = '${@bb.utils.contains_any("MACHINE", "sl1620usb sl1640usb sl1680usb", "synausbimg", "synaimg", d)}'
-addtask swuimage after do_image_${SYNA_IMAGE}
+# Ensure swu image is built after do_image_complete task
+addtask do_swuimage after do_image_complete

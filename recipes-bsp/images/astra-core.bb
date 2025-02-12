@@ -108,5 +108,5 @@ do_swuimage() {
     # install -d ${DEPLOY_DIR_IMAGE}
     cp ${DEPLOY_DIR_IMAGE}/image.swu ${DEPLOY_DIR_IMAGE}/astra-media-${PV}.swu
 }
-# Ensure swu image is built after do_image_synaimg task
-addtask swuimage after do_image_synaimg
+# Ensure swu image is built after do_image_complete task
+addtask do_swuimage after do_image_complete
