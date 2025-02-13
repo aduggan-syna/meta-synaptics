@@ -131,7 +131,9 @@ IMAGE_INSTALL:append = " \
     synasdk-sysctl-conf \
 "
 
+IMAGE_INSTALL:remove:sl1620usb = "${SWUPDATE_INSTALL}"
 IMAGE_INSTALL:remove:sl1640usb = "${SWUPDATE_INSTALL}"
+IMAGE_INSTALL:remove:sl1680usb = "${SWUPDATE_INSTALL}"
 
 # install xfce desktop for X backend in 1680
 IMAGE_INSTALL:append:dolphin = " \
@@ -215,7 +217,7 @@ inherit swupdate
 SRC_URI = "file://generate_swu.sh"
 
 do_swuimage() {
-    if [ ${MACHINE} == "sl1640usb" ]; then
+    if [ ${MACHINE} == "sl1620usb" ] || [ ${MACHINE} == "sl1640usb" ] || [ ${MACHINE} == "sl1680usb" ]; then
         return
     fi
     # Change to build directory (or wherever your images are generated)
@@ -230,5 +232,5 @@ do_swuimage() {
     cp ${DEPLOY_DIR_IMAGE}/image.swu ${DEPLOY_DIR_IMAGE}/astra-media.swu
 }
 # Ensure swu image is built after do_image_synaimg task
-SYNA_IMAGE = '${@bb.utils.contains("MACHINE", "sl1640usb", "synausbimg", "synaimg",d)}'
+SYNA_IMAGE = '${@bb.utils.contains_any("MACHINE", "sl1620usb sl1640usb sl1680usb", "synausbimg", "synaimg", d)}'
 addtask swuimage after do_image_${SYNA_IMAGE}

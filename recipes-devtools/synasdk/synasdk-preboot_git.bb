@@ -41,7 +41,7 @@ do_compile () {
 }
 
 do_deploy() {
-    if [ ${MACHINE} == "sl1640usb" ]; then
+    if [ ${MACHINE} == "sl1620usb" ] || [ ${MACHINE} == "sl1640usb" ] || [ ${MACHINE} == "sl1680usb" ]; then
         cat target/preboot/intermediate/release/K0_BOOT_store.bin > ${DEPLOYDIR}/gen3_scs.bin.usb
         cat target/preboot/intermediate/release/K0_TEE_store.bin >> ${DEPLOYDIR}/gen3_scs.bin.usb
         cat target/preboot/intermediate/release/K1_BOOT_A_store.bin >> ${DEPLOYDIR}/gen3_scs.bin.usb
