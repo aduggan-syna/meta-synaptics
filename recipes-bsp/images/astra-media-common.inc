@@ -184,6 +184,7 @@ IMAGE_INSTALL:append:dolphin = " \
     synasdk-v4l2isp-daemon \
     synasdk-drivers-hrx-v4l2 \
     synasdk-vpu-plugin \
+    synasdk-drivers-isp \
 "
 
 IMAGE_INSTALL:append:platypus = " \
