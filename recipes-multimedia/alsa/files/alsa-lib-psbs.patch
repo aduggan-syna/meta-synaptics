@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/src/pcm/pcm_plug.c b/src/pcm/pcm_plug.c
 index abf6f1a..5934947 100644
 --- a/src/pcm/pcm_plug.c
