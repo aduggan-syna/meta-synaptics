@@ -154,7 +154,6 @@ IMAGE_INSTALL:append:myna2 = " \
     synasdk-drivers-tlc5917 \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
-    syna-trusted-app \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
