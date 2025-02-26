@@ -43,10 +43,16 @@ rootfs=$(swupdate -g)
 rootfs_num=$(echo "$rootfs" | grep -o '[0-9]*$')
 
 if (( rootfs_num % 2 == 0 )); then
+    e2fsck -f /dev/mmcblk0p13
+    resize2fs /dev/mmcblk0p13
+    e2fsck -f /dev/mmcblk0p13
     bootctrl set-active-boot-slot 1
     fw_setenv boot_slot 2
     echo "Switching to Partition B"
 else
+    e2fsck -f /dev/mmcblk0p12
+    resize2fs /dev/mmcblk0p12
+    e2fsck -f /dev/mmcblk0p12
     bootctrl set-active-boot-slot 0
     fw_setenv boot_slot 1
     echo "Switching to Partition A"
@@ -280,7 +286,7 @@ software =
 			 {
 				filename = "post.sh"
 				type = "postinstall";
-				sha256 = "aacfcd21e6656ec326b3578c78ecd5f9e39a7274afa6a2b76ab5fd6a63487c1b";
+				sha256 = "7776d8075c6c67cd724c4c579f0181ecf19f6f0b81094a2a302187e523e08c32";
 			 }
 			 );
                 };
@@ -357,7 +363,7 @@ software =
 			{
 				filename = "post.sh"
 				type = "postinstall";
-				sha256 = "aacfcd21e6656ec326b3578c78ecd5f9e39a7274afa6a2b76ab5fd6a63487c1b";
+				sha256 = "7776d8075c6c67cd724c4c579f0181ecf19f6f0b81094a2a302187e523e08c32";
 			}
 			);
                 }
