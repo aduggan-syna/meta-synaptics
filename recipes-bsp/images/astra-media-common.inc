@@ -133,6 +133,8 @@ IMAGE_INSTALL:append = " \
     wget \
     vim \
     synasdk-syna-settings-framework \
+    bridge-utils \
+    synasdk-syna-compositor \
 "
 
 IMAGE_INSTALL:remove:sl1620usb = "${SWUPDATE_INSTALL}"

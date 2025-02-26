@@ -1,0 +1,5 @@
+Name: syna-compositor
+Description: SYNA Compositor Libraries
+Version: @@PV@@
+Requires:
+Libs: -l:libsynacompositor.so -lm

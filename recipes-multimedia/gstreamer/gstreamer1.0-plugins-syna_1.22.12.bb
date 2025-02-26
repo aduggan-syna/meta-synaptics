@@ -6,7 +6,7 @@ LICENSE_FLAGS = "Synaptics-EULA"
 
 require recipes-multimedia/gstreamer/gstreamer1.0-plugins-common.inc
 
-DEPENDS += "gstreamer1.0-plugins-base synasdk-synap-framework json-glib opencv"
+DEPENDS += "gstreamer1.0-plugins-base synasdk-synap-framework synasdk-syna-compositor json-glib opencv"
 
 EXTRA_OEMESON += " \
    -Dexamples=enabled \
