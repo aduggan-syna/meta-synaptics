@@ -1,3 +1,8 @@
-do_compile:prepend() {
-    sed -ie 's/$(MAKE) $(AM_MAKEFLAGS) all-recursive/$(MAKE) -j1 $(AM_MAKEFLAGS) all-recursive/' ${B}/Makefile
-}
+PACKAGECONFIG:remove = "gdkpixbuf"
+PACKAGECONFIG:append = " gdkpixbuf"
+
+FILESEXTRAPATHS:append := "${THISDIR}/files:"
+
+SRC_URI += "file://0001-add-has_argument-ref-meson-1.3.1-version.patch \
+            "
+
