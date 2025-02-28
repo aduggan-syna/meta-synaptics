@@ -129,6 +129,8 @@ IMAGE_INSTALL:append = " \
     ${SWUPDATE_INSTALL} \
     wlan-connect \
     synasdk-sysctl-conf \
+    wget \
+    vim \
 "
 
 IMAGE_INSTALL:remove:sl1620usb = "${SWUPDATE_INSTALL}"
