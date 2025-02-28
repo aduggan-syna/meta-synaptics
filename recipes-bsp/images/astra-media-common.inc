@@ -20,8 +20,7 @@ XORG_XFCE = " \
     packagegroup-xfce-extended \
     parole \
     vlc \
-    gstreamer1.0-plugins-base-ximagesink \
-    gstreamer1.0-plugins-base-xvimagesink \
+    ${XORG_MINIMAL} \
 "
 
 XORG_MATCHBOX_DESKTOP = " \
@@ -33,13 +32,14 @@ XORG_MATCHBOX_DESKTOP = " \
     matchbox-config-gtk \
     xcursor-transparent-theme adwaita-icon-theme \
     settings-daemon shutdown-desktop l3afpad \
-    gstreamer1.0-plugins-base-ximagesink \
-    gstreamer1.0-plugins-base-xvimagesink \
+    ${XORG_MINIMAL} \
 "
 
 XORG_MINIMAL = " \
     gstreamer1.0-plugins-base-ximagesink \
     gstreamer1.0-plugins-base-xvimagesink \
+    python3-pip \
+    python3-venv \
 "
 
 WAYLAND_PACKAGES = " \
