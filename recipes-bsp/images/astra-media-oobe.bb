@@ -12,6 +12,8 @@ IMAGE_INSTALL:append:dolphin = " \
     git \
     libgomp \
     libgomp-dev \
+    sqlite3 \
+    python3-sqlite3 \
 "
 IMAGE_INSTALL:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'syna-weston-desktop', '', d)} \
