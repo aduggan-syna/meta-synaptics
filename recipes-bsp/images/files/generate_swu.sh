@@ -58,6 +58,10 @@ else
     echo "Switching to Partition A"
 fi
 
+EOF
+
+POST_HASH=$(sha256sum "${POST_SCRIPT_FILE}" | awk '{ print $1 }')
+
 # File paths
 SW_DESCRIPTION="/tmp/sw-description"
 SW_VERSIONS_FILE="/etc/sw-versions"
@@ -286,7 +290,7 @@ software =
 			 {
 				filename = "post.sh"
 				type = "postinstall";
-				sha256 = "7776d8075c6c67cd724c4c579f0181ecf19f6f0b81094a2a302187e523e08c32";
+				sha256 = "${POST_HASH}";
 			 }
 			 );
                 };
@@ -363,7 +367,7 @@ software =
 			{
 				filename = "post.sh"
 				type = "postinstall";
-				sha256 = "7776d8075c6c67cd724c4c579f0181ecf19f6f0b81094a2a302187e523e08c32";
+				sha256 = "${POST_HASH}";
 			}
 			);
                 }
