@@ -11,6 +11,9 @@ DEPENDS = "optee-os-tadevkit optee-client"
 
 SRC_URI = "${SYNA_SRC_OPTEE_DEV}"
 
+SRCREV = "${SYNA_SRCREV_OPTEE_DEV}"
+PV = "${ASTRA_VERSION}+git${SRCPV}"
+
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee/optee_dev/ta/vpu/plugin"
 
 do_compile() {

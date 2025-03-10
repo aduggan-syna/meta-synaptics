@@ -11,6 +11,9 @@ DEPENDS = "python3-cryptography-native optee-os-tadevkit"
 
 SRC_URI = "${SYNA_SRC_OPTEE_DEV}"
 
+SRCREV = "${SYNA_SRCREV_OPTEE_DEV}"
+PV = "${ASTRA_VERSION}+git${SRCPV}"
+
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee/optee_dev/ta/vpu"
 B = "${S}/ta"
 OUT = "${WORKDIR}/OUT"
