@@ -259,7 +259,7 @@ INHERIT += "image-buildinfo"
 IMAGE_BUILDINFO_VARS:append = " SYNA_SDK_REVISION"
 
 #Use systemd
-DISTRO_FEATURES:append = " systemd sysvinit"
+DISTRO_FEATURES:append = " systemd"
 VIRTUAL-RUNTIME_init_manager = "systemd"
 DISTRO_FEATURES_BACKFILL_CONSIDERED += "sysvinit"
 VIRTUAL-RUNTIME_initscripts = ""
