@@ -1,0 +1,1 @@
+ALTERNATIVE_PRIORITY[resolv-conf] = "20"
