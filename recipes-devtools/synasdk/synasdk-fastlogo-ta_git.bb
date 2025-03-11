@@ -1,0 +1,54 @@
+DESCRIPTION = "Synaptic FASTLOGO TA"
+SECTION = "devtools"
+LICENSE = "CLOSED"
+LICENSE_FLAGS = "Synaptics-EULA"
+PR = "r1"
+
+inherit python3native
+require recipes-security/optee/optee.inc
+require synasdk-config.inc
+
+DEPENDS = "optee-client optee-os-tadevkit python3-cryptography-native"
+DEPENDS += " synasdk-config-native"
+
+SRC_URI = "${SYNA_SRC_OPTEE_DEV}"
+
+SRCREV = "${SYNA_SRCREV_OPTEE_DEV}"
+PV = "${ASTRA_VERSION}+git${SRCPV}"
+
+S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee/optee_dev/ta/display/ta/fastlogo"
+B = "${WORKDIR}/build"
+
+MODELS_DIR:dolphin = "dolphin"
+MODELS_DIR:platypus = "platypus"
+SOC_VER:platypus = "platypus"
+SOC_VER:dolphin = "dolphin"
+
+do_configure () {
+    source ${CONFIG_FILE}
+    source ${CHIP_RC_FILE}
+}
+
+do_compile() {
+    source ${CONFIG_FILE}
+    source ${CHIP_RC_FILE}
+
+    export CFLAGS="${CFLAGS} --sysroot=${STAGING_DIR_HOST}"
+    export LIBGCC_LOCATE_CFLAGS=--sysroot=${STAGING_DIR_HOST}
+    export TA_CROSS_COMPILE=${HOST_PREFIX}
+    export TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR}
+
+    cd ${S}
+    make -f Makefile.op TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} CROSS_COMPILE=${HOST_PREFIX} SoC_Ver=${SOC_VER} O=${B}/out
+}
+
+do_install() {
+    mkdir -p ${D}${nonarch_base_libdir}/optee_armtz
+    install -D -p -m0444 ${B}/out/*.ta ${D}${nonarch_base_libdir}/optee_armtz/
+    install -D -p -m0444 ${B}/out/*.elf ${D}${nonarch_base_libdir}/optee_armtz
+}
+
+do_deploy () {
+}
+
+FILES:${PN} += "${nonarch_base_libdir}/optee_armtz/"
