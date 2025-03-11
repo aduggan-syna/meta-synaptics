@@ -50,31 +50,6 @@ FILES:${PN} = " \
 "
 
 do_deploy () {
-
-    security_tools_path="${STAGING_DIR_NATIVE}${prefix}/libexec/syna/"
-    security_keys_path="${STAGING_DATADIR_NATIVE}/syna/keys/${syna_chip_name}/${syna_chip_rev}"
-
-    input_ta_path="${S}/ta_enc"
-    input_sub_path="${syna_chip_name}/${syna_chip_rev}"
-
-    # Use genimg to pack all preload TAs
-    params=""
-
-    if [ "is${syna_chip_name}" = "isdolphin" -a "is${CONFIG_GENX_ENABLE}" == "isy" ]; then
-	    input_sub_path="${syna_chip_name}/${syna_chip_rev}/genx"
-    fi
-
-    if [ "is${CONFIG_BL_TA_FASTLOGO}" = "isy" ]; then
-	    if [ -f ${input_ta_path}/libfastlogo.ta/${input_sub_path}/1316a183-894d-43fe-9893-bb946ae103f5.ta ]; then
-		    params="$params -i 03F5 -d ${input_ta_path}/libfastlogo.ta/${input_sub_path}/1316a183-894d-43fe-9893-bb946ae103f5.ta"
-	    else
-		    echo "no 1316a183-894d-43fe-9893-bb946ae103f5.ta under ${input_ta_path}/libfastlogo.ta/${input_sub_path}!!!"
-			    exit 1
-	    fi
-    fi
-
-    genimg -n preload_ta -A 4096 $params -o ${DEPLOYDIR}/preload_ta.subimg
-    rm ${DEPLOYDIR}/*.header
 }
 
 addtask deploy before do_package after do_install
