@@ -131,6 +131,7 @@ IMAGE_INSTALL:append = " \
     synasdk-sysctl-conf \
     wget \
     vim \
+    synasdk-syna-settings-framework \
 "
 
 IMAGE_INSTALL:remove:sl1620usb = "${SWUPDATE_INSTALL}"

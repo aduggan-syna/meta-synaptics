@@ -4,6 +4,7 @@ IMAGE_INSTALL:append = " \
     qt3d qtquick3d \
     synasdk-qtrenderingserver \
     qtbase-examples qtdeclarative-examples \
+    synasdk-syna-settings \
 "
 
 IMAGE_INSTALL:append = " \
