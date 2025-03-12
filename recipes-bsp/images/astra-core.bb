@@ -18,15 +18,6 @@ IMAGE_INSTALL:append = " \
     kernel-modules \
     linux-firmware-syna \
     i2c-tools \
-    synasdk-drivers-axi-meter \
-    synasdk-drivers-bluetooth-lpm \
-    synasdk-drivers-bluetooth-rfkill \
-    synasdk-drivers-hl7593 \
-    synasdk-drivers-rt5739 \
-    synasdk-drivers-tps6286x \
-    synasdk-drivers-dwc3-syna \
-    synasdk-drivers-phy-syna-usb \
-    synasdk-drivers-berlin-chipid \
     synasdk-macaddr \
     ethtool \
     syna-mount-generator \
@@ -55,12 +46,6 @@ IMAGE_INSTALL:append:myna2 = " \
 
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
-    synasdk-drivers-sm \
-    synasdk-drivers-i2c-dyndmx-pinctrl \
-    synasdk-drivers-phy-berlin-pcie \
-    synasdk-drivers-pcie-berlin \
-    synasdk-drivers-berlin-ir \
-    synasdk-drivers-syna-hwmon \
     synasdk-brcm-bt-start \
     syna-trusted-app \
     pciutils \

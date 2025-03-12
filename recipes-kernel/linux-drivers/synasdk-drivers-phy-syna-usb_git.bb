@@ -18,7 +18,7 @@ SRCREV = "${SYNA_SRCREV_LINUX_5_15_MODULES}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-S = "${WORKDIR}/${SYNA_MODULES_SOURCE_PREFIX}/drivers/phy/synaptics/phy-syna-usb"
+S = "${WORKDIR}/${SYNA_MODULES_SOURCE_PREFIX}/phy/synaptics"
 
 
 do_install:append() {

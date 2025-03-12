@@ -18,7 +18,7 @@ SRCREV = "${SYNA_SRCREV_LINUX_5_15_MODULES}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-S = "${WORKDIR}/${SYNA_MODULES_SOURCE_PREFIX}/drivers/i2c/muxes/i2c-dyndmx-pinctrl"
+S = "${WORKDIR}/${SYNA_MODULES_SOURCE_PREFIX}/i2c/muxes"
 
 
 do_install:append() {

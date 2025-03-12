@@ -18,7 +18,7 @@ SRCREV = "${SYNA_SRCREV_LINUX_5_15_MODULES}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-S = "${WORKDIR}/${SYNA_MODULES_SOURCE_PREFIX}/drivers/devfreq"
+S = "${WORKDIR}/${SYNA_MODULES_SOURCE_PREFIX}/devfreq"
 
 do_install:append() {
     rm -f ${D}/lib/modules/${KERNEL_VERSION}/extra/modules.order.*
