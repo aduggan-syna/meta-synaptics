@@ -1,0 +1,76 @@
+/* General Window Background */
+QWidget {
+    background-color: #007DC3;
+    color: #007DC3;
+    font-family: "Ubuntu", "DejaVu Sans", "Noto Sans", sans-serif;
+    font-size: 16px;
+}
+
+/* Left Panel (SSID List) */
+QListWidget {
+    background-color: #007DC3;
+    border: 2px solid #4C566A;
+    color: #ECEFF4;
+    font-size: 18px;
+}
+
+QListWidget::item {
+    padding: 10px;
+}
+
+QListWidget::item:selected {
+    background-color: #5E81AC;
+    color: #ECEFF4;
+}
+
+/* Search Box */
+QLineEdit {
+    background-color: #434C5E;
+    border: 2px solid #4C566A;
+    padding: 8px;
+    font-size: 16px;
+    color: #D8DEE9;
+    border-radius: 5px;
+}
+
+/* Password Label & Input */
+QLabel {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+QLineEdit {
+    background-color: #434C5E;
+    border: 2px solid #4C566A;
+    padding: 8px;
+    font-size: 16px;
+    color: #D8DEE9;
+    min-width: 250px;
+}
+
+/* Radio Button */
+QRadioButton {
+    font-size: 16px;
+    padding: 5px;
+    color: #ECEFF4;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #5E81AC;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    color: #ECEFF4;
+    border-radius: 5px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1;
+}
+
+QPushButton:pressed {
+    background-color: #4C566A;
+}
+
+

@@ -14,6 +14,7 @@ IMAGE_INSTALL:append:dolphin = " \
     libgomp-dev \
     sqlite3 \
     python3-sqlite3 \
+    wlan-gui \
 "
 IMAGE_INSTALL:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'syna-weston-desktop', '', d)} \
