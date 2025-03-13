@@ -15,6 +15,7 @@ SRC_URI:append = " \
 
 do_install:append(){
     if [ -f ${S}/src/main.conf ]; then
-		install -m 0644 ${S}/src/main.conf ${D}/${sysconfdir}/bluetooth/
-	fi
+        install -d ${D}/${sysconfdir}/bluetooth
+        install -m 0644 ${S}/src/main.conf ${D}/${sysconfdir}/bluetooth/
+    fi
 }
