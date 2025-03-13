@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/init b/init
 index fb31c635be..1fd7ce4d38 100644
 --- a/init

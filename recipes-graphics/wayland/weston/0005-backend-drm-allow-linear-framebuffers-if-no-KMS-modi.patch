@@ -28,6 +28,8 @@ The change that prompted this one was:
  libweston/backend-drm/fb.c | 9 +++++++++
  1 file changed, 9 insertions(+)
 
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
 index 3c664779..c59e0a99 100644
 --- a/libweston/backend-drm/fb.c

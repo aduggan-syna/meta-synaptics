@@ -16,6 +16,8 @@ compositor.
  compositor/meson.build | 1 +
  1 file changed, 1 insertion(+)
 
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/compositor/meson.build b/compositor/meson.build
 index 8a54ea99..11a6c59b 100644
 --- a/compositor/meson.build

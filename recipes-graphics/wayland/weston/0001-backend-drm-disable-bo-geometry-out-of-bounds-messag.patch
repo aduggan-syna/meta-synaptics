@@ -10,6 +10,8 @@ framebuffer dimension limits.
  libweston/backend-drm/fb.c | 2 ++
  1 file changed, 2 insertions(+)
 
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
 index ba0c177e..3c664779 100644
 --- a/libweston/backend-drm/fb.c

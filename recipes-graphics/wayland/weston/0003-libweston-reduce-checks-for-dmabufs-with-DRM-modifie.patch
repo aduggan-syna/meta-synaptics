@@ -13,6 +13,8 @@ equivalent linear framebuffer.
  libweston/linux-dmabuf.c | 33 ++++++++++++++++++---------------
  1 file changed, 18 insertions(+), 15 deletions(-)
 
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/libweston/linux-dmabuf.c b/libweston/linux-dmabuf.c
 index 21de498d..6d1c3ee4 100644
 --- a/libweston/linux-dmabuf.c

@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/src/main.conf b/src/main.conf
 index 2796f15..490abef 100644
 --- a/src/main.conf

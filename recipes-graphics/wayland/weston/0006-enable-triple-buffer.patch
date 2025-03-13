@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
 index 4860088..8bebe16 100644
 --- a/libweston/backend-drm/drm-internal.h

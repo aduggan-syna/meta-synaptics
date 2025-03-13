@@ -8,6 +8,8 @@ Source file weston-test-fixture-compositor.c includes libudev.h.
  tests/meson.build | 1 +
  1 file changed, 1 insertion(+)
 
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/tests/meson.build b/tests/meson.build
 index d8e96e77..195366bb 100644
 --- a/tests/meson.build

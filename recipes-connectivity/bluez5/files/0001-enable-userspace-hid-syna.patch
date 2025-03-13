@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/profiles/input/input.conf b/profiles/input/input.conf
 index d8645f3..1e1e2dd 100644
 --- a/profiles/input/input.conf

@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/profiles/input/hog.c b/profiles/input/hog.c
 index d50b823..33b2a23 100644
 --- a/profiles/input/hog.c

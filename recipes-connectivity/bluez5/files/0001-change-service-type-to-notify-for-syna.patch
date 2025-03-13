@@ -1,3 +1,5 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/src/bluetooth.service.in b/src/bluetooth.service.in
 index beb98ce..6e413b7 100644
 --- a/src/bluetooth.service.in
