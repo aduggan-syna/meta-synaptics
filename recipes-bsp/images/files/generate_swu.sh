@@ -425,7 +425,7 @@ echo "Creating SWU image with cpio..."
 	(echo sw-description; echo sw-description.sig; echo post.sh; find . -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO") | cpio -o --format=newc > $SWU_IMAGE
     elif [ $2 -eq 3 ]; then
         if [ ! -f mycert.cert.pem ]; then
-            openssl req -x509 -newkey rsa:4096 -nodes -keyout mycert.key.pem \
+            openssl req -days +3650 -x509 -newkey rsa:4096 -nodes -keyout mycert.key.pem \
                 -out mycert.cert.pem -subj "/O=SWUpdate /CN=target"
         fi
         openssl cms -sign -in  sw-description -out sw-description.sig -signer mycert.cert.pem \
