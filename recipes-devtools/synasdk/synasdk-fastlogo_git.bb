@@ -44,8 +44,8 @@ do_compile:append () {
         basedir_script_subimg="${imagedir}/lib/subimage"
         script_dir="${imagedir}/lib/boot_type/emmc"
 
-        source ${basedir_script_subimg}/fastlogo/common.bashrc
-        source ${basedir_script_subimg}/fastlogo/emmc.bashrc
+        . ${basedir_script_subimg}/fastlogo/common.bashrc
+        . ${basedir_script_subimg}/fastlogo/emmc.bashrc
         if [ -f ${outdir_subimg_intermediate}/fastlogo.subimg ]; then
             cat ${outdir_subimg_intermediate}/fastlogo.subimg | gzip -c > ${outdir_subimg_intermediate}/fastlogo.subimg.gz
         fi

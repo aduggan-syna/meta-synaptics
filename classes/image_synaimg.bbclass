@@ -116,18 +116,20 @@ IMAGE_CMD:synaimg () {
 
 # Check files required for firmware.subimg, and create it (GenX only!)
 # From synasdk-fw-enc
-    if [[ ${SYNAREALMACH} =~ sl16[2|4|8]0 ]]; then
-        firmware_sub_args=""
-        [ -f ${DEPLOY_DIR_IMAGE}/tsp.fw ] && firmware_sub_args="${firmware_sub_args} -i TSPF -d ${DEPLOY_DIR_IMAGE}/tsp.fw"
-        [ -f ${DEPLOY_DIR_IMAGE}/dsp.fw ] && firmware_sub_args="${firmware_sub_args} -i DSPF -d ${DEPLOY_DIR_IMAGE}/dsp.fw"
-        [ -f ${DEPLOY_DIR_IMAGE}/gpu.fw ] && firmware_sub_args="${firmware_sub_args} -i GPUF -d ${DEPLOY_DIR_IMAGE}/gpu.fw"
-        [ -f ${DEPLOY_DIR_IMAGE}/sm_fw_en.bin ] && firmware_sub_args="${firmware_sub_args} -i SMFW -d ${DEPLOY_DIR_IMAGE}/sm_fw_en.bin"
+    case "${SYNAREALMACH}" in
+        sl1620|sl1640|sl1680)
+            firmware_sub_args=""
+            [ -f "${DEPLOY_DIR_IMAGE}/tsp.fw" ] && firmware_sub_args="${firmware_sub_args} -i TSPF -d ${DEPLOY_DIR_IMAGE}/tsp.fw"
+            [ -f "${DEPLOY_DIR_IMAGE}/dsp.fw" ] && firmware_sub_args="${firmware_sub_args} -i DSPF -d ${DEPLOY_DIR_IMAGE}/dsp.fw"
+            [ -f "${DEPLOY_DIR_IMAGE}/gpu.fw" ] && firmware_sub_args="${firmware_sub_args} -i GPUF -d ${DEPLOY_DIR_IMAGE}/gpu.fw"
+            [ -f "${DEPLOY_DIR_IMAGE}/sm_fw_en.bin" ] && firmware_sub_args="${firmware_sub_args} -i SMFW -d ${DEPLOY_DIR_IMAGE}/sm_fw_en.bin"
 
-        (cd ${WORKDIR} && genimg -n firmware ${firmware_sub_args} -o ${DEPLOY_DIR_IMAGE}/firmware_pack.bin )
+            (cd "${WORKDIR}" && genimg -n firmware ${firmware_sub_args} -o "${DEPLOY_DIR_IMAGE}/firmware_pack.bin")
 
-        prepend_image_info.sh ${DEPLOY_DIR_IMAGE}/firmware_pack.bin ${DEPLOY_DIR_IMAGE}/firmware.subimg
-        rm ${DEPLOY_DIR_IMAGE}/firmware_pack.bin*
-    fi
+            prepend_image_info.sh "${DEPLOY_DIR_IMAGE}/firmware_pack.bin" "${DEPLOY_DIR_IMAGE}/firmware.subimg"
+            rm "${DEPLOY_DIR_IMAGE}/firmware_pack.bin"*
+            ;;
+    esac
 
 # Append the preload_ta to the bootloader
     # Align bootloader.subimg to 512B
@@ -314,7 +316,7 @@ IMAGE_CMD:synaimg () {
                         sed -i 's/^'$i'.subimg.gz/'$i'_s.subimg.'$j'/' ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/emmc_image_list
                     else
                         #workaround to avoid last two lines obsoleted
-                        echo -e "\n\n\n\n\n\n" >> ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/emmc_image_list
+                        printf '\n\n\n\n\n\n' >> ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/emmc_image_list
                         sed -i '/./{/^'$i'_s.subimg.'$last_j'/H};x; s/^'$i'_s.subimg.'$last_j'/'$i'_s.subimg.'$j'/' ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/emmc_image_list
                     fi
                     last_j=$j
