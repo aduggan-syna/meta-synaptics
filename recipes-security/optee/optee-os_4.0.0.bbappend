@@ -32,6 +32,7 @@ EARLY_SYNA_TA:dolphin=" ${SYNA_TA_PATH}/libfastlogo.ta/dolphin/A0/genx/1316a183-
 "
 EARLY_TA_CFG = " CFG_EARLY_TA=y EARLY_TA_PATHS="${EARLY_SYNA_TA}""
 EARLY_TA_CFG:sl1680spi = ""
+EARLY_TA_CFG:sl1620spi = ""
 EXTRA_OEMAKE += "${EARLY_TA_CFG}"
 
 do_install:append() {
