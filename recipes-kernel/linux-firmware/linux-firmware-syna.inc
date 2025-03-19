@@ -19,12 +19,13 @@ do_install() {
     if [ -f ${D}${nonarch_base_libdir}/firmware/bcm/brcmbt ]; then
         rm ${D}${nonarch_base_libdir}/firmware/bcm/brcmbt
     fi
-    pushd ${D}${nonarch_base_libdir}/firmware/bcm
-    for f in *\.{bin,blob,cal}
-    do
-      mv $f ..
-    done
-    popd
+    cd ${D}${nonarch_base_libdir}/firmware/bcm || exit 1
+        for ext in bin blob cal; do
+            for f in *.$ext; do
+                [ -e "$f" ] && mv "$f" ..
+            done
+        done
+    cd - || exit 1
 
     install -d ${D}${nonarch_base_libdir}/firmware/mrvl
     install -m 0644 ${STAGING_KERNEL_DIR}/firmware/mrvl/* ${D}${nonarch_base_libdir}/firmware/mrvl

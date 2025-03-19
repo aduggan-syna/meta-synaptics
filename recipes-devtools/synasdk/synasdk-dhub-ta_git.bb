@@ -25,13 +25,13 @@ SOC_VER:platypus = "platypus"
 SOC_VER:dolphin = "dolphin"
 
 do_configure () {
-    source ${CONFIG_FILE}
-    source ${CHIP_RC_FILE}
+    . ${CONFIG_FILE}
+    . ${CHIP_RC_FILE}
 }
 
 do_compile() {
-    source ${CONFIG_FILE}
-    source ${CHIP_RC_FILE}
+    . ${CONFIG_FILE}
+    . ${CHIP_RC_FILE}
 
     export CFLAGS="${CFLAGS} --sysroot=${STAGING_DIR_HOST}"
     export LIBGCC_LOCATE_CFLAGS=--sysroot=${STAGING_DIR_HOST}

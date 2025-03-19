@@ -85,7 +85,8 @@ do_deploy () {
                   ${DEPLOYDIR}/version_table \
                   ${DEPLOYDIR}/subimglayout "
         if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ] && [ "${MACHINE}" != "sl1640spi" ]; then
-                      exec_args+="${DEPLOYDIR}/emmc_part_table \
+                      exec_args="${exec_args} \
+                                  ${DEPLOYDIR}/emmc_part_table \
                                   ${DEPLOYDIR}/emmc_part_list \
                                   ${DEPLOYDIR}/emmc_image_list "
         fi

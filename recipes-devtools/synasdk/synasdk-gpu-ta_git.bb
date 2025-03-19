@@ -23,8 +23,8 @@ SOC_VER:dolphin = "dolphin"
 
 do_configure() {
     # For encryption.
-    source ${CONFIG_FILE}
-    source ${CHIP_RC_FILE}
+    . ${CONFIG_FILE}
+    . ${CHIP_RC_FILE}
 }
 
 do_compile() {
