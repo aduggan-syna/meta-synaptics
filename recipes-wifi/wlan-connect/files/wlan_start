@@ -112,10 +112,7 @@ fi
 
 # Interactive Mode: Display all SSIDs and prompt user
 python3 /usr/bin/ssid.py
-AVAILABLE_SSIDS=$(python3 -c "
-from ssid import scan_ssids
-print('\n'.join(scan_ssids()))
-")
+AVAILABLE_SSIDS=$(python3 -c "import sys; sys.path.append('/usr/bin'); from ssid import scan_ssids; print('\n'.join(scan_ssids()))")
 
 echo "Available Networks:"
 echo "$AVAILABLE_SSIDS"
