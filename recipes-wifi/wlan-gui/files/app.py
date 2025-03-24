@@ -330,6 +330,7 @@ class WiFiManager(QWidget):
 
 if __name__ == "__main__":
     result = subprocess.run(["systemctl", "enable", "wlan_start.service"], check=True, text=True, capture_output=True)
+    subprocess.run("echo 1 > /sys/class/rfkill/rfkill1/state", shell=True)
     bring_up_wlan0()
     if "QT_QPA_PLATFORM" not in os.environ:
         os.environ["QT_QPA_PLATFORM"] = "wayland"

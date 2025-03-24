@@ -6,6 +6,9 @@ AUTO_CONNECT_FILE="/etc/.wifi_autoconnect"
 USAGE_FILE="/etc/.wifi_usage"
 SERVICE_MODE=false
 
+out=$(echo 1 > /sys/class/rfkill/rfkill1/state 2>&1)
+check_command "echo 1 > /sys/class/rfkill/rfkill1/state" "$out"
+
 # Check if running as a service
 if [ "$1" = "--service" ]; then
     SERVICE_MODE=true
