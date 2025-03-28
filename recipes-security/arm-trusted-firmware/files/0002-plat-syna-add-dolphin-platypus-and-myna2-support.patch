@@ -1,4 +1,4 @@
-From 20f3faf9c25a9fec2522ea4033aaa5076fb8bef2 Mon Sep 17 00:00:00 2001
+From 7a49b5f37c4e23b63af8ecefb8ac87ef4039a7ca Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 13:18:24 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -51611,7 +51611,7 @@ index 0000000..291b060
 +}
 diff --git a/plat/syna/berlin/soc/platypus/berlin_soc.mk b/plat/syna/berlin/soc/platypus/berlin_soc.mk
 new file mode 100644
-index 0000000..00a2134
+index 0000000..beadfae
 --- /dev/null
 +++ b/plat/syna/berlin/soc/platypus/berlin_soc.mk
 @@ -0,0 +1,21 @@
@@ -51631,7 +51631,7 @@ index 0000000..00a2134
 +USE_COHERENT_MEM := 0
 +ERRATA_A55_1530923 := 1
 +
-+BERLIN_LP_MMU_ENABLE := 1
++BERLIN_LP_MMU_ENABLE := 0
 +
 +BL31_CPPFLAGS +=-DSUSPEND_BIN='"${BUILD_PLAT}/suspend.bin"'
 +
