@@ -15,7 +15,8 @@ DEPENDS:append = " \
 
 DEPENDS:append:dolphin = "synasdk-vpu-ta \
                           synasdk-fastlogo-ta  \
-                          synasdk-ptm-ta"
+                          synasdk-ptm-ta \
+                          synasdk-dhub-ta"
 
 DEPENDS:append:platypus = "synasdk-vpu-ta \
                            synasdk-fastlogo-ta \
@@ -34,7 +35,7 @@ EARLY_SYNA_TA:dolphin=" ${STAGING_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-989
                         ${STAGING_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae1042d.stripped.elf \
                         ${SYNA_TA_PATH}/libsynap.ta/dolphin/A0/genx/1316a183-894d-43fe-9893bb946ae1042f.stripped.elf \
                         ${STAGING_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f0.stripped.elf \
-                        ${SYNA_TA_PATH}/libdhub.ta/dolphin/A0/genx/1316a183-894d-43fe-9893-bb946ae103f3.stripped.elf \
+                        ${STAGING_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f3.stripped.elf \
 "
 EARLY_TA_CFG = " CFG_EARLY_TA=y EARLY_TA_PATHS="${EARLY_SYNA_TA}""
 EARLY_TA_CFG:sl1680spi = ""
