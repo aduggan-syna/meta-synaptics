@@ -36,12 +36,12 @@ IMAGE_INSTALL:append = " \
 
 IMAGE_INSTALL:append:myna2 = " \
     ${TEE_OPTEE} \
-    synasdk-drivers-tlc5917 \
+    kernel-module-leds-tlc5917 \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
     syna-trusted-app \
-    synasdk-drivers-syna-dvfs \
-    synasdk-drivers-syna-hwmon \
+    kernel-module-syna-dvfs \
+    kernel-module-dolphin-hwmon \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
@@ -53,7 +53,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
 
 IMAGE_INSTALL:append:platypus = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
-    synasdk-drivers-sunplus \
+    kernel-module-sunplus \
 "
 
 mount_usb () {

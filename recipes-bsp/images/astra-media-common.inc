@@ -75,7 +75,7 @@ IMAGE_INSTALL:append = " \
     synasdk-drivers-rt5739 \
     synasdk-drivers-tps6286x \
     synasdk-drivers-dwc3-syna \
-    synasdk-drivers-phy-syna-usb \
+    kernel-module-phy-syna-usb \
     synasdk-drivers-berlin-chipid \
     synasdk-drivers-rpi-panel-attiny-regulator \
     synasdk-drivers-rogue-ws \
@@ -155,21 +155,21 @@ IMAGE_INSTALL:append:myna2 = " \
 
 IMAGE_INSTALL:append:myna2 = " \
     ${TEE_OPTEE} \
-    synasdk-drivers-tlc5917 \
+    kernel-module-leds-tlc5917 \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
-    synasdk-drivers-syna-dvfs \
-    synasdk-drivers-syna-hwmon \
+    kernel-module-syna-dvfs \
+    kernel-module-dolphin-hwmon \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
     synasdk-drivers-sm \
-    synasdk-drivers-i2c-dyndmx-pinctrl \
+    kernel-module-i2c-dyndmx-pinctrl \
     synasdk-drivers-phy-berlin-pcie \
     synasdk-drivers-pcie-berlin \
     synasdk-drivers-berlin-ir \
-    synasdk-drivers-syna-hwmon \
+    kernel-module-dolphin-hwmon \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
     syna-trusted-app \
@@ -191,8 +191,8 @@ IMAGE_INSTALL:append:dolphin = " \
 
 IMAGE_INSTALL:append:platypus = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
-    synasdk-drivers-sunplus \
-    synasdk-drivers-syna-dvfs \
+    kernel-module-sunplus \
+    kernel-module-syna-dvfs \
     synasdk-vpu-plugin \
 "
 
