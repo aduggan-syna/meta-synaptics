@@ -68,17 +68,17 @@ IMAGE_INSTALL:append = " \
     linux-firmware-syna \
     i2c-tools \
     v4l-utils \
-    synasdk-drivers-axi-meter \
-    synasdk-drivers-bluetooth-lpm \
-    synasdk-drivers-bluetooth-rfkill \
-    synasdk-drivers-hl7593 \
-    synasdk-drivers-rt5739 \
-    synasdk-drivers-tps6286x \
-    synasdk-drivers-dwc3-syna \
+    kernel-module-syna-axi-meter \
+    kernel-module-bluetooth-lpm \
+    kernel-module-bluetooth-rfkill \
+    kernel-module-hl7593 \
+    kernel-module-rt5739-regulator \
+    kernel-module-tps6286x-regulator \
+    kernel-module-dwc3-syna \
     kernel-module-phy-syna-usb \
-    synasdk-drivers-berlin-chipid \
-    synasdk-drivers-rpi-panel-attiny-regulator \
-    synasdk-drivers-rogue-ws \
+    kernel-module-berlin-chipid \
+    kernel-module-rpi-panel-attiny-regulator \
+    kernel-module-pvrsrvkm \
     synasdk-demos \
     alsa-utils \
     gstreamer1.0-meta-base \
@@ -164,11 +164,11 @@ IMAGE_INSTALL:append:myna2 = " \
 
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
-    synasdk-drivers-sm \
+    kernel-module-sm \
     kernel-module-i2c-dyndmx-pinctrl \
-    synasdk-drivers-phy-berlin-pcie \
-    synasdk-drivers-pcie-berlin \
-    synasdk-drivers-berlin-ir \
+    kernel-module-phy-berlin-pcie \
+    kernel-module-pcie-berlin \
+    kernel-module-berlin-ir \
     kernel-module-dolphin-hwmon \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
@@ -183,7 +183,6 @@ PLATYPUS_DOLPHIN_INSTALL = " \
 IMAGE_INSTALL:append:dolphin = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-v4l2isp-daemon \
-    synasdk-drivers-hrx-v4l2 \
     synasdk-vpu-plugin \
     synasdk-drivers-isp \
     synasdk-v4l2isp-qtapp \
