@@ -43,24 +43,20 @@ rootfs=$(swupdate -g)
 rootfs_num=$(echo "$rootfs" | grep -o '[0-9]*$')
 
 if (( rootfs_num % 2 == 0 )); then
-    e2fsck -f /dev/mmcblk0p13
-    resize2fs /dev/mmcblk0p13
-    e2fsck -f /dev/mmcblk0p13
+    e2fsck -f /dev/mmcblk0p13 > /dev/null 2>&1
+    resize2fs /dev/mmcblk0p13 > /dev/null 2>&1
+    e2fsck -f /dev/mmcblk0p13 > /dev/null 2>&1
     bootctrl set-active-boot-slot 1
     fw_setenv boot_slot 2
     echo "Switching to Partition B"
 else
-    e2fsck -f /dev/mmcblk0p12
-    resize2fs /dev/mmcblk0p12
-    e2fsck -f /dev/mmcblk0p12
+    e2fsck -f /dev/mmcblk0p12 > /dev/null 2>&1
+    resize2fs /dev/mmcblk0p12 > /dev/null 2>&1
+    e2fsck -f /dev/mmcblk0p12 > /dev/null 2>&1
     bootctrl set-active-boot-slot 0
     fw_setenv boot_slot 1
     echo "Switching to Partition A"
 fi
-
-EOF
-
-POST_HASH=$(sha256sum "${POST_SCRIPT_FILE}" | awk '{ print $1 }')
 
 # File paths
 SW_DESCRIPTION="/tmp/sw-description"
@@ -205,6 +201,7 @@ fi
 
 EOF
 
+POST_HASH=$(sha256sum "${POST_SCRIPT_FILE}" | awk '{ print $1 }')
 
 # content of sw-description file (Must be modified as per needs)
 cat << EOF > $SW_DESCRIPTION_FILE
