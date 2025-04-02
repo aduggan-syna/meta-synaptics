@@ -24,12 +24,14 @@ SYSTEMD_AUTO_ENABLE = "enable"
 SRC_URI:append:dolphin = " \
     file://ISP_Manual_IMX258.json \
     file://ISP_Manual_IMX415.json \
+    file://ISP_Manual_IMX477.json \
     file://ISP_Auto.json \
     file://IMX258.xml \
     file://IMX415.xml \
     file://IMX258_2K.xml \
     file://IMX415_2K.xml \
     file://OV5647_480p.xml \
+    file://IMX477_3840x2160.xml \
     file://isp_media_server.service \
     file://isp_media_server.sh \
     file://isp_media_server.env \
@@ -65,10 +67,12 @@ do_install:append() {
     install -d ${D}${datadir}
     install -m 0644 ${WORKDIR}/ISP_Manual_IMX258.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/ISP_Manual_IMX415.json ${D}${datadir}
+    install -m 0644 ${WORKDIR}/ISP_Manual_IMX477.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/ISP_Auto.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX258.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX415.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX258_2K.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/IMX415_2K.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/OV5647_480p.xml ${D}${datadir}
+    install -m 0644 ${WORKDIR}/IMX477_3840x2160.xml ${D}${datadir}
 }
