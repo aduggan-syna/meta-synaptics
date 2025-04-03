@@ -73,7 +73,7 @@ do_deploy () {
         fi
         exec_cmd="parse_pt_emmc 101 101 \
                   ${CONFIG_EMMC_BLOCK_SIZE} ${CONFIG_EMMC_TOTAL_SIZE}"
-        if [ "${MACHINE}" = "sl1680spi" ] || [ "${MACHINE}" = "sl1620spi" ]; then
+        if [ "${MACHINE}" = "sl1680spi" ] || [ "${MACHINE}" = "sl1620spi" ] || [ "${MACHINE}" = "sl1640spi" ]; then
             . ${STAGING_DIR_NATIVE}/usr/share/syna/build/${SYNA_SDK_FLASH_TYPE_CFG_FILE}
             exec_cmd="parse_pt 0 0 \
                       ${spi_block_size} ${spi_total_size}"
@@ -83,7 +83,7 @@ do_deploy () {
                   ${DEPLOYDIR}/linux_params_mtdparts \
                   ${DEPLOYDIR}/version_table \
                   ${DEPLOYDIR}/subimglayout "
-        if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ]; then
+        if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ] && [ "${MACHINE}" != "sl1640spi" ]; then
                       exec_args+="${DEPLOYDIR}/emmc_part_table \
                                   ${DEPLOYDIR}/emmc_part_list \
                                   ${DEPLOYDIR}/emmc_image_list "
@@ -94,7 +94,7 @@ do_deploy () {
 
         # Update the CRC of the version table
         crc -a ${DEPLOYDIR}/version_table
-        if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ]; then
+        if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ] && [ "${MACHINE}" != "sl1640spi" ]; then
             # Change the subimage files to .gz
             sed -i -e 's:\([a-zA-Z0-9]\+\)\(_[a|b]\)\?\.subimg,:\1.subimg.gz,:' ${DEPLOYDIR}/emmc_image_list
         fi
