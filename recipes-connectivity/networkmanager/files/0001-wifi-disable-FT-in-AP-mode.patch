@@ -1,0 +1,128 @@
+From e74cfd00ac7852b6797569269c0c57ae25eee438 Mon Sep 17 00:00:00 2001
+From: Rajashekar Mathivaanan <Rajashekar.Mathivaanan@synaptics.com>
+Date: Thu, 15 May 2025 22:06:59 +0530
+Subject: [PATCH] wifi: disable FT in AP mode
+
+---
+ src/core/devices/wifi/nm-device-wifi.c          |  1 +
+ src/core/supplicant/nm-supplicant-config.c      | 17 +++++++++++------
+ src/core/supplicant/nm-supplicant-config.h      |  1 +
+ .../supplicant/tests/test-supplicant-config.c   |  1 +
+ 4 files changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/src/core/devices/wifi/nm-device-wifi.c b/src/core/devices/wifi/nm-device-wifi.c
+index 010cee0..55406d8 100644
+--- a/src/core/devices/wifi/nm-device-wifi.c
++++ b/src/core/devices/wifi/nm-device-wifi.c
+@@ -2940,6 +2940,7 @@ build_supplicant_config(NMDeviceWifi *self,
+                                                                 s_wireless_sec,
+                                                                 s_8021x,
+                                                                 con_uuid,
++                                                                nm_setting_wireless_get_mode(s_wireless),
+                                                                 mtu,
+                                                                 pmf,
+                                                                 fils,
+diff --git a/src/core/supplicant/nm-supplicant-config.c b/src/core/supplicant/nm-supplicant-config.c
+index 96c2357..1dbb0c1 100644
+--- a/src/core/supplicant/nm-supplicant-config.c
++++ b/src/core/supplicant/nm-supplicant-config.c
+@@ -805,6 +805,7 @@ nm_supplicant_config_add_setting_wireless_security(NMSupplicantConfig
+                                                    NMSettingWirelessSecurity    *setting,
+                                                    NMSetting8021x               *setting_8021x,
+                                                    const char                   *con_uuid,
++                                                   const char                   *mode,
+                                                    guint32                       mtu,
+                                                    NMSettingWirelessSecurityPmf  pmf,
+                                                    NMSettingWirelessSecurityFils fils,
+@@ -815,12 +816,16 @@ nm_supplicant_config_add_setting_wireless_security(NMSupplicantConfig
+     const char                   *key_mgmt, *auth_alg;
+     const char                   *psk;
+     gboolean                      set_pmf, wps_disabled;
++    gboolean                      is_ap;
++
+
+     g_return_val_if_fail(NM_IS_SUPPLICANT_CONFIG(self), FALSE);
+     g_return_val_if_fail(setting != NULL, FALSE);
+     g_return_val_if_fail(con_uuid != NULL, FALSE);
+     g_return_val_if_fail(!error || !*error, FALSE);
+
++    is_ap = nm_streq0(mode, NM_SETTING_WIRELESS_MODE_AP);
++
+     /* Check if we actually support FILS */
+     if (!_get_capability(priv, NM_SUPPL_CAP_TYPE_FILS)) {
+         if (fils == NM_SETTING_WIRELESS_SECURITY_FILS_REQUIRED) {
+@@ -852,11 +857,11 @@ nm_supplicant_config_add_setting_wireless_security(NMSupplicantConfig
+             g_string_append(key_mgmt_conf, "WPA-PSK");
+         if (_get_capability(priv, NM_SUPPL_CAP_TYPE_PMF))
+             g_string_append(key_mgmt_conf, " WPA-PSK-SHA256");
+-        if (_get_capability(priv, NM_SUPPL_CAP_TYPE_FT))
++        if (!is_ap && _get_capability(priv, NM_SUPPL_CAP_TYPE_FT))
+             g_string_append(key_mgmt_conf, " FT-PSK");
+         if (_get_capability(priv, NM_SUPPL_CAP_TYPE_SAE)) {
+             g_string_append(key_mgmt_conf, " SAE");
+-            if (_get_capability(priv, NM_SUPPL_CAP_TYPE_FT))
++            if (!is_ap && _get_capability(priv, NM_SUPPL_CAP_TYPE_FT))
+                 g_string_append(key_mgmt_conf, " FT-SAE");
+         }
+
+@@ -864,13 +869,13 @@ nm_supplicant_config_add_setting_wireless_security(NMSupplicantConfig
+         pmf = NM_SETTING_WIRELESS_SECURITY_PMF_REQUIRED;
+
+         g_string_append(key_mgmt_conf, "SAE");
+-        if (_get_capability(priv, NM_SUPPL_CAP_TYPE_FT))
++        if (!is_ap && _get_capability(priv, NM_SUPPL_CAP_TYPE_FT))
+             g_string_append(key_mgmt_conf, " FT-SAE");
+
+     } else if (nm_streq(key_mgmt, "wpa-eap")) {
+         if (pmf != NM_SETTING_WIRELESS_SECURITY_PMF_REQUIRED)
+             g_string_append(key_mgmt_conf, "WPA-EAP");
+-        if (_get_capability(priv, NM_SUPPL_CAP_TYPE_FT)) {
++        if (!is_ap && _get_capability(priv, NM_SUPPL_CAP_TYPE_FT)) {
+             g_string_append(key_mgmt_conf, " FT-EAP");
+             if (_get_capability(priv, NM_SUPPL_CAP_TYPE_SHA384))
+                 g_string_append(key_mgmt_conf, " FT-EAP-SHA384");
+@@ -891,7 +896,7 @@ nm_supplicant_config_add_setting_wireless_security(NMSupplicantConfig
+         case NM_SETTING_WIRELESS_SECURITY_FILS_OPTIONAL:
+             if (_get_capability(priv, NM_SUPPL_CAP_TYPE_PMF)) {
+                 g_string_append(key_mgmt_conf, " FILS-SHA256 FILS-SHA384");
+-                if (_get_capability(priv, NM_SUPPL_CAP_TYPE_FT)) {
++                if (!is_ap && _get_capability(priv, NM_SUPPL_CAP_TYPE_FT)) {
+                     g_string_append(key_mgmt_conf, " FT-FILS-SHA256");
+                     if (_get_capability(priv, NM_SUPPL_CAP_TYPE_SHA384))
+                         g_string_append(key_mgmt_conf, " FT-FILS-SHA384");
+@@ -907,7 +912,7 @@ nm_supplicant_config_add_setting_wireless_security(NMSupplicantConfig
+         pmf = NM_SETTING_WIRELESS_SECURITY_PMF_REQUIRED;
+
+         g_string_append(key_mgmt_conf, "WPA-EAP-SUITE-B-192");
+-        if (_get_capability(priv, NM_SUPPL_CAP_TYPE_FT)
++        if (!is_ap && _get_capability(priv, NM_SUPPL_CAP_TYPE_FT)
+             && _get_capability(priv, NM_SUPPL_CAP_TYPE_SHA384))
+             g_string_append(key_mgmt_conf, " FT-EAP-SHA384");
+     }
+diff --git a/src/core/supplicant/nm-supplicant-config.h b/src/core/supplicant/nm-supplicant-config.h
+index 349c310..ee7f4dc 100644
+--- a/src/core/supplicant/nm-supplicant-config.h
++++ b/src/core/supplicant/nm-supplicant-config.h
+@@ -51,6 +51,7 @@ gboolean nm_supplicant_config_add_setting_wireless_security(NMSupplicantConfig
+                                                             NMSettingWirelessSecurity *setting,
+                                                             NMSetting8021x *setting_8021x,
+                                                             const char     *con_uuid,
++                                                            const char     *mode,
+                                                             guint32         mtu,
+                                                             NMSettingWirelessSecurityPmf  pmf,
+                                                             NMSettingWirelessSecurityFils fils,
+diff --git a/src/core/supplicant/tests/test-supplicant-config.c b/src/core/supplicant/tests/test-supplicant-config.c
+index 53c5f70..237b1a9 100644
+--- a/src/core/supplicant/tests/test-supplicant-config.c
++++ b/src/core/supplicant/tests/test-supplicant-config.c
+@@ -116,6 +116,7 @@ build_supplicant_config(NMConnection  *connection,
+                                                                s_wsec,
+                                                                s_8021x,
+                                                                nm_connection_get_uuid(connection),
++                                                               nm_setting_wireless_get_mode(s_wifi),
+                                                                mtu,
+                                                                pmf,
+                                                                fils,
+--
+2.25.1
+
