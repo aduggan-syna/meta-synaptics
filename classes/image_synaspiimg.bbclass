@@ -76,12 +76,18 @@ genx_spi_suboot_combo() {
   f_bl=$1; shift
   f_spi_combo=$1; shift
 
+  #Dynamic partition size calculation
+  f_spi_pt="${STAGING_DIR_NATIVE}/usr/share/syna/build/${SYNA_SDK_PT_FILE}"
+  spi_preboot_end=$(awk '$2 == "preboot_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
+  spi_tzk_end=$[$spi_preboot_end + $(awk '$2 == "tzk_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")]
+  spi_bl_end=$[$spi_tzk_end + $(awk '$2 == "bl_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")]
+
   # Pack preboot
   dd if=/dev/zero bs=1024 count=1 > $f_spi_combo
   cat $f_preboot >> $f_spi_combo
 
   preboot_size=`stat -c %s ${f_spi_combo}`
-  padding_size=$[524288 - $preboot_size]
+  padding_size=$[$spi_preboot_end - $preboot_size]
 
   f_PADDING=${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/dummy.bin
   dd if=/dev/zero of=$f_PADDING bs=1 count=$padding_size
@@ -91,7 +97,7 @@ genx_spi_suboot_combo() {
   cat $f_tee >> $f_spi_combo
 
   tee_size=`stat -c %s ${f_spi_combo}`
-  padding_size=$[1114112 - $tee_size]
+  padding_size=$[$spi_tzk_end - $tee_size]
 
   f_PADDING=${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/dummy.bin
   dd if=/dev/zero of=$f_PADDING bs=1 count=$padding_size
@@ -101,7 +107,7 @@ genx_spi_suboot_combo() {
   cat $f_bl >> $f_spi_combo
 
   bl_size=`stat -c %s ${f_spi_combo}`
-  padding_size=$[2031616 - $bl_size]
+  padding_size=$[$spi_bl_end - $bl_size]
 
   f_PADDING=${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/dummy.bin
   dd if=/dev/zero of=$f_PADDING bs=1 count=$padding_size
