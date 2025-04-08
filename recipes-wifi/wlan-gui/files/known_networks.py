@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QSize
 import json, os
 import sys
 
-SAVED_PASSWORD_FILE = os.path.expanduser("/etc/.wifi_saved_password")
+SAVED_PASSWORD_FILE = os.path.expanduser("/etc/wifi_saved_password")
 
 def load_saved_password_file():
     return json.load(open(SAVED_PASSWORD_FILE, 'r')) if os.path.exists(SAVED_PASSWORD_FILE) else {}

@@ -16,9 +16,10 @@ def is_authenticated():
     return "wpa_state=COMPLETED" in status_output
 
 
-def wifi_connection(ssid, psk):
-    print("Bringing up the wlan0 interface...")
+def wifi_connection(ssid, psk, auth, password):
     run_command("ifconfig wlan0 up")
+    run_command("killall udhcpc")
+    run_command("killall wpa_supplicant")
 
     print("Creating the WPA Supplicant configuration directory...")
     os.makedirs("/etc/wpa_supplicant", exist_ok=True)
@@ -29,32 +30,47 @@ def wifi_connection(ssid, psk):
     config_file = f"/etc/wpa_supplicant/wpa_supplicant-{interface}.conf"
 
     ssid_t = '"' + ssid + '"'
-    if psk == "":
+    if 'PSK' in auth or len(psk) == 0:
+        if psk == "":
+                config_content = f"""ctrl_interface=/var/run/wpa_supplicant
+        ctrl_interface_group=0
+        update_config=1
+
+
+        network={{
+            ssid={ssid_t}
+            key_mgmt=NONE
+            scan_ssid=1
+        }}
+        """
+        else:
             config_content = f"""ctrl_interface=/var/run/wpa_supplicant
-    ctrl_interface_group=0
+            ctrl_interface_group=0
     update_config=1
 
 
-    network={{
-        ssid={ssid_t}
-        key_mgmt=NONE
-        scan_ssid=1
-    }}
-    """
+        network={{
+            ssid={ssid_t}
+            psk={psk}
+            key_mgmt=WPA-PSK
+            scan_ssid=1
+        }}
+        """
     else:
-        config_content = f"""ctrl_interface=/var/run/wpa_supplicant
-        ctrl_interface_group=0
-update_config=1
+        config_content = f"""
+            ctrl_interface=/var/run/wpa_supplicant
+            ctrl_interface_group=0
+            update_config=1
 
-
-    network={{
-        ssid={ssid_t}
-        psk={psk}
-        key_mgmt=WPA-PSK
-        scan_ssid=1
-    }}
-    """
-
+            network={{
+                ssid={ssid_t}
+                psk="{psk}"
+                key_mgmt=SAE
+                scan_ssid=1
+                ieee80211w=2
+            }}
+        """
+    print("config file: ", config_content)
     with open(config_file, "w") as f:
         f.write(config_content)
 
@@ -67,6 +83,7 @@ update_config=1
             print("Error: Failed to authenticate with the network.")
             return False
         print("Waiting for authentication...")
-        time.sleep(2)
+        time.sleep(4)
         retries += 1
+    run_command("udhcpc -i wlan0")
     return True
