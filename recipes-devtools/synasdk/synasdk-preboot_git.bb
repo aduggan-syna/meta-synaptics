@@ -63,6 +63,11 @@ do_deploy() {
         install -m 0644 target/preboot/intermediate/release/scs_data_param.sign ${DEPLOYDIR}/gen3_scs_param.bin.usb
         install -m 0644 target/preboot/intermediate/release/sysinit_en.bin ${DEPLOYDIR}/gen3_sysinit.bin.usb
         install -m 0644 target/preboot/intermediate/release/miniloader_en.bin ${DEPLOYDIR}/gen3_miniloader.bin.usb
+
+        if [ ${MACHINE} == "sl1680usb" ]; then
+             install -m 0644 target/preboot/intermediate/release/gen3_ddr_phy_fw_0.bin ${DEPLOYDIR}/gen3_ddr_phy_fw_0.bin.usb
+             install -m 0644 target/preboot/intermediate/release/gen3_ddr_phy_fw_1.bin ${DEPLOYDIR}/gen3_ddr_phy_fw_1.bin.usb
+        fi
     else
         install -m 0644 target/preboot/preboot_esmt.bin ${DEPLOYDIR}/preboot.subimg
     fi

@@ -87,4 +87,9 @@ IMAGE_CMD:synausbimg () {
     done
     cp ${DEPLOY_DIR_IMAGE}/core-image-initramfs-boot-${MACHINE}.cpio.gz ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/ramdisk.cpio.gz
 
+    if [ ${MACHINE} == "sl1680usb" ]; then
+        cp ${DEPLOY_DIR_IMAGE}/gen3_ddr_phy_fw_0.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
+        cp ${DEPLOY_DIR_IMAGE}/gen3_ddr_phy_fw_1.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
+    fi
+
 }
