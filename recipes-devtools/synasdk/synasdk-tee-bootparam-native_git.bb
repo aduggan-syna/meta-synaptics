@@ -86,8 +86,8 @@ do_compile:append () {
         . ${S}/build/module/tee/script/parse_addr.rc
 
         ${security_tools_path}in_extras.py "TZK_BOOT_PARAMETER" ${S}/boot_param_extras.bin 0x00000000 ${tzbp_addr}
-        genx_secure_image "TZK_BOOT_PARAMETER" ${S}/boot_param_extras.bin 0x0 ${S}/bootparam.bin ${dst_tee_dir}/bootparam_en.bin
-        genx_secure_image "TZK_BOOT_PARAMETER" ${S}/boot_param_extras.bin 0x0 ${S}/bootparam_recovery.bin ${dst_tee_dir}/bootparam_recovery_en.bin
+        genx_secure_image "TZK_BOOT_PARAMETER_OPEN" ${S}/boot_param_extras.bin 0x0 ${S}/bootparam.bin ${dst_tee_dir}/bootparam_en.bin
+        genx_secure_image "TZK_BOOT_PARAMETER_OPEN" ${S}/boot_param_extras.bin 0x0 ${S}/bootparam_recovery.bin ${dst_tee_dir}/bootparam_recovery_en.bin
 
     fi
 }
