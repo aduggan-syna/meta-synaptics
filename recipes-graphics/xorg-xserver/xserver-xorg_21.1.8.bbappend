@@ -18,10 +18,26 @@ SRC_URI += "file://0014-glamor-xv-add-glsl-shaders-for-OpenGLES-3.0.patch"
 
 # changes to pass custom xorg config file for Xserver
 SRC_URI += "file://xorg_conf_override"
-SRC_URI += "file://xorg_conf"
+
+python __anonymous() {
+    import os
+    machine = d.getVar("MACHINE")
+    if machine == "sl1640":
+        d.appendVar("SRC_URI", " file://xorg_conf")
+        d.setVar("XORG_CONF_FILE", "xorg_conf")
+    elif machine == "sl1680":
+        d.appendVar("SRC_URI", " file://xorg_conf_sl1680")
+        d.setVar("XORG_CONF_FILE", "xorg_conf_sl1680")
+    elif machine == "sl1620":
+        d.appendVar("SRC_URI", " file://xorg_conf")
+        d.setVar("XORG_CONF_FILE", "xorg_conf")
+    else:
+        bb.warn("No specific xorg_conf provided for MACHINE: %s" % machine)
+        d.setVar("XORG_CONF_FILE", "xorg_conf")  # fallback
+}
 
 do_install:append() {
     mkdir -p ${D}${sysconfdir}/X11
     install -m 0755 ${WORKDIR}/xorg_conf_override ${D}${sysconfdir}/X11/xserver-common
-    install -m 0755 ${WORKDIR}/xorg_conf ${D}${sysconfdir}/X11/xorg.conf
+    install -m 0755 ${WORKDIR}/${XORG_CONF_FILE} ${D}${sysconfdir}/X11/xorg.conf
 }

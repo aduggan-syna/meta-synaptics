@@ -1,0 +1,59 @@
+# X.Org X server configuration file for SL1680
+
+Section "Device"
+    Identifier  "Video Device"
+    Driver      "modesetting"
+    Option      "Monitor-HDMI-1" "Monitor0"
+    Option      "Monitor-DSI-1"  "Monitor1"
+    # Option    "Atomic"        "true"
+    # Option    "NoCursor"      "true"
+EndSection
+
+Section "OutputClass"
+    Identifier  "synaptics display"
+    MatchDriver "synaptics"
+    Option      "PrimaryGPU"    "true"
+EndSection
+
+Section "Monitor"
+    Identifier  "Monitor0"
+    Option      "PreferredMode" "1920x1080"
+    Option      "Primary"       "true"
+    # Option    "DPMS"          "false"
+EndSection
+
+Section "Monitor"
+    Identifier  "Monitor1"
+    Option      "PreferredMode" "800x1280"
+    Option      "RightOf"       "Monitor0"
+    Option      "Rotate"        "left"
+EndSection
+
+Section "Screen"
+    Identifier  "Screen"
+    Monitor     "Monitor0"
+    Device      "Video Device"
+    SubSection "Display"
+        Modes   "1920x1080" "800x1280"
+        Virtual 3200 1080  # 1920x1080 (HDMI-1) + 800x1280 (DSI-1)
+    EndSubSection
+EndSection
+
+Section "ServerLayout"
+    Identifier  "Server Layout"
+    Screen      "Screen"
+EndSection
+
+Section "ServerFlags"
+    Option      "DefaultServerLayout" "Server Layout"
+    Option      "AutoAddGPU"          "false"
+
+    # Enable support for DRM format modifiers
+    # Option    "Debug"               "dmabuf_capable"
+
+    # Disable screen blanking. Disable DPMS in the Monitor section as well.
+    # Option    "BlankTime"          "35790"
+    # Option    "StandbyTime"        "35790"
+    # Option    "SuspendTime"        "35790"
+    # Option    "OffTime"            "35790"
+EndSection
