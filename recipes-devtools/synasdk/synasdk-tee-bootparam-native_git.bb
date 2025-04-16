@@ -86,9 +86,31 @@ do_compile:append () {
         . ${S}/build/module/tee/script/parse_addr.rc
 
         ${security_tools_path}in_extras.py "TZK_BOOT_PARAMETER" ${S}/boot_param_extras.bin 0x00000000 ${tzbp_addr}
-        genx_secure_image "TZK_BOOT_PARAMETER_OPEN" ${S}/boot_param_extras.bin 0x0 ${S}/bootparam.bin ${dst_tee_dir}/bootparam_en.bin
-        genx_secure_image "TZK_BOOT_PARAMETER_OPEN" ${S}/boot_param_extras.bin 0x0 ${S}/bootparam_recovery.bin ${dst_tee_dir}/bootparam_recovery_en.bin
 
+        in_bin=${S}/bootparam.bin
+        out_bin=${dst_tee_dir}/bootparam_en.bin
+        # Generate image
+        gen_x_secure_image --chip-name=${syna_chip_name} \
+                       --chip-rev=${syna_chip_rev} \
+                       --img_type="TZK_BOOT_PARAMETER_OPEN" \
+                       --key_type="ree" \
+                       --length=0x0 --extras=${S}/boot_param_extras.bin \
+                       --workdir-security-tools=${security_tools_path} \
+                       --workdir-security-keys=${security_keys_path} \
+                       --in_payload=${in_bin} \
+                       --out_store=${out_bin}
+
+        in_bin=${S}/bootparam_recovery.bin
+        out_bin=${dst_tee_dir}/bootparam_recovery_en.bin
+        gen_x_secure_image --chip-name=${syna_chip_name} \
+                       --chip-rev=${syna_chip_rev} \
+                       --img_type="TZK_BOOT_PARAMETER_OPEN" \
+                       --key_type="ree" \
+                       --length=0x0 --extras=${S}/boot_param_extras.bin \
+                       --workdir-security-tools=${security_tools_path} \
+                       --workdir-security-keys=${security_keys_path} \
+                       --in_payload=${in_bin} \
+                       --out_store=${out_bin}
     fi
 }
 
