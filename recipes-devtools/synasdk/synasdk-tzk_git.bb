@@ -25,12 +25,16 @@ do_compile:append () {
     security_tools_path="${STAGING_DIR_NATIVE}${prefix}/libexec/syna/"
     security_keys_path="${STAGING_DATADIR_NATIVE}/syna/keys/${syna_chip_name}/${syna_chip_rev}"
     if [ "is${syna_chip_name}" = "isdolphin" ]; then
-      dst_tz_bin="${S}/tee/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz2_op_en.bin"
-      dst_atf_bin="${S}/tee/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz1_op_en.bin"
+      dst_dir="${S}/tee/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/"
+      dst_tz_bin="${dst_dir}/tz2_op_en.bin"
+      dst_atf_bin="${dst_dir}/tz1_op_en.bin"
     else
-      dst_tz_bin="${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz2_op_en.bin"
-      dst_atf_bin="${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/tz1_op_en.bin"
+      dst_dir="${S}/tee/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/${syna_chip_rev}/"
+      dst_tz_bin="${dst_dir}/tz2_op_en.bin"
+      dst_atf_bin="${dst_dir}/tz1_op_en.bin"
     fi
+
+    mkdir -p ${dst_dir}
 
     if [ -f ${STAGING_DIR_HOST}${nonarch_base_libdir}/firmware/tz1_en.bin ]; then
       cp ${STAGING_DIR_HOST}${nonarch_base_libdir}/firmware/tz1_en.bin ${dst_atf_bin}

@@ -36,7 +36,6 @@ do_image_synaimg[depends] += " \
     virtual/bootloader:do_deploy \
     synasdk-fastlogo:do_deploy \
     synasdk-preboot:do_deploy \
-    syna-trusted-app:do_deploy \
     synasdk-security:do_deploy \
     synasdk-tzk:do_deploy \
     ${EXTRA_FW_DEPENDS} \

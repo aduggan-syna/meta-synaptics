@@ -39,15 +39,13 @@ IMAGE_INSTALL:append:myna2 = " \
     kernel-module-leds-tlc5917 \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
-    syna-trusted-app \
-    kernel-module-syna-dvfs \
-    kernel-module-dolphin-hwmon \
+    synasdk-drivers-syna-dvfs \
+    synasdk-drivers-syna-hwmon \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
     synasdk-brcm-bt-start \
-    syna-trusted-app \
     pciutils \
 "
 
