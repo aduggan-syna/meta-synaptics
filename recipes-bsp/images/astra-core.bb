@@ -48,7 +48,6 @@ IMAGE_INSTALL:append:myna2 = " \
     synasdk-drivers-tlc5917 \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
-    syna-trusted-app \
     synasdk-drivers-syna-dvfs \
     synasdk-drivers-syna-hwmon \
 "
@@ -62,7 +61,6 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     synasdk-drivers-berlin-ir \
     synasdk-drivers-syna-hwmon \
     synasdk-brcm-bt-start \
-    syna-trusted-app \
     pciutils \
 "
 

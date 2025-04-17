@@ -30,7 +30,6 @@ do_image_synaspiimg[depends] += " \
     synasdk-tools-native:do_populate_sysroot \
     virtual/bootloader:do_deploy \
     synasdk-preboot:do_deploy \
-    syna-trusted-app:do_deploy \
     synasdk-security:do_deploy \
     synasdk-tzk:do_deploy \
     linux-syna:do_deploy \
