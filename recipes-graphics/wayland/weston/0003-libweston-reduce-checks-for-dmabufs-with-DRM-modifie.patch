@@ -1,4 +1,4 @@
-From a460b48d4b59780a915d5b299fb0c402a51198ff Mon Sep 17 00:00:00 2001
+From 21d2be7d588ee3eba08366ee15aa1ecfa88ac044 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Thu, 15 Apr 2021 19:30:02 +0100
 Subject: [PATCH 3/5] libweston: reduce checks for dmabufs with DRM modifiers
@@ -16,10 +16,10 @@ equivalent linear framebuffer.
 Upstream-Status: Inappropriate [ astra specific ]
 
 diff --git a/libweston/linux-dmabuf.c b/libweston/linux-dmabuf.c
-index 21de498d..6d1c3ee4 100644
+index ea781cdf..691d8374 100644
 --- a/libweston/linux-dmabuf.c
 +++ b/libweston/linux-dmabuf.c
-@@ -244,22 +244,25 @@ params_create_common(struct wl_client *client,
+@@ -245,22 +245,25 @@ params_create_common(struct wl_client *client,
  			goto err_out;
  		}
  

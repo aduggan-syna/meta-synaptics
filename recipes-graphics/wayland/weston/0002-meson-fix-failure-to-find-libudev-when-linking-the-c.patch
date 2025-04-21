@@ -1,4 +1,4 @@
-From e4f58888b532d8fc85558b5369448ec3eefba310 Mon Sep 17 00:00:00 2001
+From 421f194fc7ce86a5904812ed0b2b442d7fa657b7 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Thu, 28 Mar 2019 12:58:10 +0000
 Subject: [PATCH 2/5] meson: fix failure to find libudev when linking the
@@ -19,10 +19,10 @@ compositor.
 Upstream-Status: Inappropriate [ astra specific ]
 
 diff --git a/compositor/meson.build b/compositor/meson.build
-index 8a54ea99..11a6c59b 100644
+index 7b49c485..24a41c31 100644
 --- a/compositor/meson.build
 +++ b/compositor/meson.build
-@@ -17,6 +17,7 @@ deps_weston = [
+@@ -16,6 +16,7 @@ deps_weston = [
  	dep_libevdev,
  	dep_libdl,
  	dep_threads,
