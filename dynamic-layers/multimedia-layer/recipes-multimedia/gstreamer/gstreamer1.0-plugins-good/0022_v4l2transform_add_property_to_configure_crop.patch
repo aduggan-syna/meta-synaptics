@@ -1,0 +1,166 @@
+Upstream-Status: Inappropriate [platform-specific]
+
+diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2transform.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2transform.c
+index 38805489df..8ca282e661 100644
+--- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2transform.c
++++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2transform.c
+@@ -48,7 +48,8 @@ enum
+ {
+   PROP_0,
+   V4L2_STD_OBJECT_PROPS,
+-  PROP_DISABLE_PASSTHROUGH
++  PROP_DISABLE_PASSTHROUGH,
++  PROP_SELECTION_TARGETS,
+ };
+
+ typedef struct
+@@ -62,6 +63,71 @@ typedef struct
+ G_DEFINE_ABSTRACT_TYPE (GstV4l2Transform, gst_v4l2_transform,
+     GST_TYPE_BASE_TRANSFORM);
+
++static void
++gst_v4l2_transform_selection_targets_apply (GstV4l2Transform * self)
++{
++  GST_OBJECT_LOCK (self);
++
++  if (self->selection_targets.crop_output_need_config) {
++    struct v4l2_rect rect = {
++      .left = self->selection_targets.crop_output_rect.x,
++      .top = self->selection_targets.crop_output_rect.y,
++      .width = self->selection_targets.crop_output_rect.w,
++      .height = self->selection_targets.crop_output_rect.h,
++    };
++
++    if (!gst_v4l2_object_set_crop (self->v4l2output, &rect))
++      GST_WARNING_OBJECT (self, "Failed to configure crop for output");
++    else
++      GST_DEBUG_OBJECT (self,
++          "Configure crop for output. left/top/width/height: %d %d %u %u",
++          rect.left, rect.top, rect.width, rect.height);
++
++    self->selection_targets.crop_output_need_config = FALSE;
++  }
++
++  GST_OBJECT_UNLOCK (self);
++}
++
++static void
++gst_v4l2_transform_selection_targets_config (GObject * object,
++    guint prop_id, const GValue * value, GParamSpec * pspec)
++{
++  const GstStructure *s = gst_value_get_structure (value);
++  GstV4l2Transform *self = GST_V4L2_TRANSFORM (object);
++
++  if (s != NULL) {
++    GST_OBJECT_LOCK (self);
++
++    if (s &&
++        gst_structure_has_field (s, "crop-output-x") &&
++        gst_structure_has_field (s, "crop-output-y") &&
++        gst_structure_has_field (s, "crop-output-w") &&
++        gst_structure_has_field (s, "crop-output-h")) {
++
++      gst_structure_get_int (s, "crop-output-x",
++          &(self->selection_targets.crop_output_rect.x));
++      gst_structure_get_int (s, "crop-output-y",
++          &(self->selection_targets.crop_output_rect.y));
++      gst_structure_get_int (s, "crop-output-w",
++          &(self->selection_targets.crop_output_rect.w));
++      gst_structure_get_int (s, "crop-output-h",
++          &(self->selection_targets.crop_output_rect.h));
++
++      self->selection_targets.crop_output_need_config = TRUE;
++
++      GST_DEBUG_OBJECT (self,
++          "The crop configure for output x,y,w,h : %d,%d,%d,%d",
++          self->selection_targets.crop_output_rect.x,
++          self->selection_targets.crop_output_rect.y,
++          self->selection_targets.crop_output_rect.w,
++          self->selection_targets.crop_output_rect.h);
++    }
++
++    GST_OBJECT_UNLOCK (self);
++  }
++}
++
+ static void
+ gst_v4l2_transform_set_property (GObject * object,
+     guint prop_id, const GValue * value, GParamSpec * pspec)
+@@ -76,6 +142,10 @@ gst_v4l2_transform_set_property (GObject * object,
+     case PROP_DISABLE_PASSTHROUGH:
+       self->disable_passthrough = g_value_get_boolean (value);
+       break;
++    case PROP_SELECTION_TARGETS:
++      gst_v4l2_transform_selection_targets_config (object, prop_id, value,
++          pspec);
++      break;
+
+       /* By default, only set on output */
+     default:
+@@ -930,6 +1000,8 @@ gst_v4l2_transform_prepare_output_buffer (GstBaseTransform * trans,
+       goto activate_failed;
+   }
+
++  gst_v4l2_transform_selection_targets_apply (self);
++
+   GST_DEBUG_OBJECT (self, "Queue input buffer");
+   ret =
+       gst_v4l2_buffer_pool_process (GST_V4L2_BUFFER_POOL (pool), &inbuf, NULL);
+@@ -1172,6 +1244,30 @@ gst_v4l2_transform_class_init (GstV4l2TransformClass * klass)
+       g_param_spec_boolean ("disable-passthrough", "Disable Passthrough",
+           "Forces passing buffers through the converter", FALSE,
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++
++  /**
++   * GstV4l2Transform:selection-targets:
++   * According to v4l2 spec, we can do cropping or composing on capture/output
++   * https://docs.kernel.org/6.1/userspace-api/media/v4l/selection-api.html
++   *
++   * so, here we export a property named selection-targets, and this property is boxed type
++   * here is a example to set crop for output
++   * v4l2convert selection-targets="cid,crop-output-x=100, crop-output-y=100
++   * crop-output-w=300,crop-output-h=200"
++   *
++   * crop-output-x
++   * crop-output-y
++   * crop-output-w
++   * crop-output-h
++   */
++  g_object_class_install_property (gobject_class, PROP_SELECTION_TARGETS,
++      g_param_spec_boxed ("selection-targets", "Selection Targets",
++          "Configure output cropping.\n"
++          "\t\t\t\tcrop-output-x: offset from left\n\t\t\t\tcrop-output-y: offset from top\n"
++          "\t\t\t\tcrop-output-w: width to be cropped\n\t\t\t\tcrop-output-h: height to be cropped \n"
++          "\t\t\teg: selection-targets=\"cid,crop-output-x=100,crop-output-y=100,"
++          "crop-output-w=300,crop-output-h=200\" ",
++          GST_TYPE_STRUCTURE, G_PARAM_WRITABLE | G_PARAM_STATIC_STRINGS));
+ }
+
+ static void
+diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2transform.h b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2transform.h
+index 29f3f3c655..e192659d7a 100644
+--- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2transform.h
++++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2transform.h
+@@ -46,6 +46,13 @@ G_BEGIN_DECLS
+ typedef struct _GstV4l2Transform GstV4l2Transform;
+ typedef struct _GstV4l2TransformClass GstV4l2TransformClass;
+
++typedef struct _GstSelectionTargets GstSelectionTargets ;
++struct _GstSelectionTargets
++{
++  GstVideoRectangle crop_output_rect;
++  gboolean crop_output_need_config;
++};
++
+ struct _GstV4l2Transform
+ {
+   GstBaseTransform parent;
+@@ -63,6 +70,8 @@ struct _GstV4l2Transform
+   GstCaps *outcaps;
+
+   gboolean disable_passthrough;
++
++  GstSelectionTargets selection_targets;
+ };
+
+ struct _GstV4l2TransformClass

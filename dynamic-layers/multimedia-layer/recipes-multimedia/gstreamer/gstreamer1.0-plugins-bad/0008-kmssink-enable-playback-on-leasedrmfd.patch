@@ -1,0 +1,185 @@
+Upstream-Status: Inappropriate [platform-specific]
+
+diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
+index 761e8d5..5b1d7bd 100644
+--- a/sys/kms/gstkmssink.c
++++ b/sys/kms/gstkmssink.c
+@@ -57,6 +57,8 @@
+ #include <xf86drmMode.h>
+ #include <drm_fourcc.h>
+ #include <string.h>
++#include <sys/socket.h>
++#include <sys/un.h>
+ 
+ #include "gstkmssink.h"
+ #include "gstkmsutils.h"
+@@ -1078,6 +1080,116 @@ gst_kms_sink_update_crtc_properties (GstKMSSink * self, drmModeAtomicReq *req)
+   gst_kms_sink_update_properties (&iter, self->crtc_props);
+ }
+ 
++static int drm_leased_externally(GstKMSSink *self)
++{
++  const char *runtime_dir = "";
++  const char *leasefd_name = "drm_lease_fd_sock";
++  struct sockaddr_un addr;
++  int sock_fd;
++  socklen_t size;
++
++  runtime_dir = getenv("XDG_RUNTIME_DIR");
++  if (!runtime_dir || runtime_dir[0] != '/') {
++     GST_DEBUG_OBJECT (self, "no socket to read drm fd lease");
++     return -1;
++  }
++
++  addr.sun_family = AF_LOCAL;
++  snprintf(addr.sun_path, sizeof (addr.sun_path),
++           "%s/%s", runtime_dir, leasefd_name);
++
++  sock_fd = socket(PF_LOCAL, SOCK_STREAM | SOCK_CLOEXEC, 0);
++  if (sock_fd < 0) {
++    GST_DEBUG_OBJECT (self, "error opening socket:%s in xdg path:%s",
++                      leasefd_name, runtime_dir);
++    return -1;
++  }
++  GST_DEBUG_OBJECT(self, "opened socket:%s in xdg path:%s",
++                      leasefd_name, runtime_dir);
++
++  size = offsetof (struct sockaddr_un, sun_path) + strlen(addr.sun_path);
++  if (connect(sock_fd, &addr, size)) {
++    GST_DEBUG_OBJECT (self, "error connecting to socket : %s\n", strerror(errno));
++    close(sock_fd);
++    return -1;
++  }
++
++  return sock_fd;
++}
++
++int get_fd_from_lease(GstKMSSink *self, int sock_fd)
++{
++  struct iovec iov;
++  struct msghdr msg = {0};
++  struct cmsghdr *cmsg;
++  char buf[16];
++  ssize_t size;
++  int drm_fd;
++
++  union {
++    struct cmsghdr hdr;
++    char buf[CMSG_SPACE(sizeof(int))];
++  }cms_dat;
++
++  iov.iov_base = buf;
++  iov.iov_len = sizeof(buf);
++
++  msg.msg_name = NULL;
++  msg.msg_namelen = 0;
++  msg.msg_iov = &iov;
++  msg.msg_iovlen = 1;
++
++  msg.msg_control = cms_dat.buf;
++  msg.msg_controllen = sizeof(cms_dat.buf);
++
++  size = recvmsg (sock_fd, &msg, 0);
++  if (size < 0) {
++    perror ("recvmsg");
++    return -1;
++  }
++
++  cmsg = CMSG_FIRSTHDR(&msg);
++  if (cmsg && cmsg->cmsg_len == CMSG_LEN(sizeof(int))) {
++    if (cmsg->cmsg_level != SOL_SOCKET) {
++      GST_DEBUG_OBJECT (self,  "error, cmsg_level %d\n",
++                        cmsg->cmsg_level);
++      return -1;
++    }
++    if (cmsg->cmsg_type != SCM_RIGHTS) {
++      GST_DEBUG_OBJECT (self, "error, cmsg_type %d\n",
++                        cmsg->cmsg_type);
++      return -1;
++    }
++
++    drm_fd = *((int *) CMSG_DATA(cmsg));
++    GST_DEBUG_OBJECT (self, "drm fd %d received from socket,", drm_fd);
++  }
++
++  return drm_fd;
++}
++
++static gboolean
++gst_kms_clear_events(GstKMSSink * self)
++{
++  gint ret;
++  drmEventContext evctxt = {
++    .version = DRM_EVENT_CONTEXT_VERSION,
++  };
++
++  do {
++    ret = gst_poll_wait (self->poll, GST_MSECOND);
++  } while (ret == -1 && (errno == EAGAIN || errno == EINTR));
++
++  if (ret == 0)
++    return FALSE; //timeout
++
++  ret = drmHandleEvent (self->fd, &evctxt);
++  if (ret)
++    return FALSE;
++
++  return TRUE;
++}
++
+ static gboolean
+ gst_kms_sink_start (GstBaseSink * bsink)
+ {
+@@ -1089,6 +1201,7 @@ gst_kms_sink_start (GstBaseSink * bsink)
+   drmModePlane *plane;
+   gboolean universal_planes;
+   gboolean ret;
++  int soc_fd;
+ 
+   self = GST_KMS_SINK (bsink);
+   universal_planes = FALSE;
+@@ -1101,7 +1214,11 @@ gst_kms_sink_start (GstBaseSink * bsink)
+ 
+   /* open our own internal device fd if application did not supply its own */
+   if (self->is_internal_fd) {
+-    if (self->devname || self->bus_id)
++    if ((soc_fd = drm_leased_externally(self)) > 0) {
++      self->fd = get_fd_from_lease(self, soc_fd);
++      close(soc_fd);
++
++    } else if (self->devname || self->bus_id)
+       self->fd = drmOpen (self->devname, self->bus_id);
+     else
+       self->fd = kms_open (&self->devname);
+@@ -1198,6 +1315,9 @@ retry_find_plane:
+   gst_kms_sink_update_connector_properties (self, NULL);
+   gst_kms_sink_update_plane_properties (self, NULL);
+ 
++  if (gst_kms_clear_events(self))
++    GST_DEBUG_OBJECT (self, "handled pending events from drmfd");
++
+   ret = TRUE;
+ 
+ bail:
+@@ -1640,10 +1760,8 @@ no_pool:
+ static void
+ sync_handler (gint fd, guint frame, guint sec, guint usec, gpointer data)
+ {
+-  gboolean *waiting;
+-
+-  waiting = data;
+-  *waiting = FALSE;
++  GstKMSSink *self = data;
++  self->pageflip_pending = FALSE;
+ }
+ 
+ static gboolean
+@@ -1950,7 +2068,7 @@ static gint gst_kms_atomic_commit_plane(GstKMSSink *self, uint64_t fb_id,
+   }
+ 
+   gst_kms_sink_update_plane_properties(self, req);
+-  err = drmModeAtomicCommit(self->fd, req, atomic_flags, &self->pageflip_pending);
++  err = drmModeAtomicCommit(self->fd, req, atomic_flags, self);
+   drmModeAtomicFree(req);
+   return err;
+ }

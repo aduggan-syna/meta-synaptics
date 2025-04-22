@@ -1,0 +1,15 @@
+Upstream-Status: Inappropriate [platform-specific]
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 522c9fa..6e1e95e 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -691,7 +691,7 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+   if (need_pool)
+     pool = gst_wayland_create_pool (self, caps);
+ 
+-  gst_query_add_allocation_pool (query, pool, self->video_info.size, 2, 0);
++  gst_query_add_allocation_pool (query, pool, self->video_info.size, 3, 0);
+   if (pool)
+     g_object_unref (pool);
+ 

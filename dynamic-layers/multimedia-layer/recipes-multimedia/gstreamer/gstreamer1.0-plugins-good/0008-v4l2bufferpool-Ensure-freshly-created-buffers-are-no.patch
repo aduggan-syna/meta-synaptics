@@ -1,0 +1,40 @@
+From 80a03fa640e164e550f998ba69b65974a62be90d Mon Sep 17 00:00:00 2001
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Fri, 5 Apr 2024 17:30:01 +0200
+Subject: [PATCH 08/20] v4l2bufferpool: Ensure freshly created buffers are not
+ marked as queued
+
+Otherwise, if we run in to the copy case, this can cause these
+groups to stay around with queued flag set, but never actually
+queued, until gst_v4l2_allocator_flush() is called, which then
+erroneously frees the associated memories, causing the release
+function to decrement the allocator refcount where it was never
+incremented, resulting in early allocator disposal, and either
+deadlock or use after free.
+
+Upstream-Status: Submitted [https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6552]
+---
+ subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c
+index 18d570689b..be33939515 100644
+--- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c
++++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c
+@@ -272,6 +272,13 @@ gst_v4l2_memory_group_new (GstV4l2Allocator * allocator, guint32 index)
+     return NULL;
+   }
+ 
++  if (IS_QUEUED (group->buffer)) {
++    GST_WARNING_OBJECT (allocator,
++        "Driver pretends buffer %d is queued even if freshly created, "
++        "this indicates a bug in the driver.", group->buffer.index);
++    UNSET_QUEUED (group->buffer);
++  }
++
+   /* Check that provided size matches the format we have negotiation. Failing
+    * there usually means a driver of libv4l bug. */
+   if (V4L2_TYPE_IS_MULTIPLANAR (obj->type)) {
+-- 
+2.17.1
+
