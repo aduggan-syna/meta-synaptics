@@ -5,4 +5,4 @@ SRC_URI:append:syna = " \
 "
 
 PACKAGECONFIG_GL = "${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'gles2', 'no-opengl', d)}"
-
+PACKAGECONFIG:append = " icu"
