@@ -1,0 +1,43 @@
+From: Developer Name <developer@synaptics.com>
+Subject: glamor: xv: add glsl shaders for OpenGLES 3.0
+Upstream-Status: Pending
+---
+diff --git a/glamor/glamor_xv.c b/glamor/glamor_xv.c
+index d016f9d..005bcd9 100644
+--- a/glamor/glamor_xv.c
++++ b/glamor/glamor_xv.c
+@@ -251,6 +251,22 @@ static const glamor_facet glamor_facet_xv_rgb_raw = {
+                 ),
+ };
+ 
++static const glamor_facet glamor_facet_xv_rgb_raw_300es = {
++    .version = 300,
++    .is_gles = TRUE,
++    .name = "xv_rgb",
++    .source_name = "v_texcoord0",
++    .vs_vars = ("in vec2 position;\n"
++                "in vec2 v_texcoord0;\n"
++                "out vec2 tcs;\n"),
++    .vs_exec = (GLAMOR_POS(gl_Position, position)
++                "        tcs = v_texcoord0;\n"),
++    .fs_vars = ("uniform sampler2D sampler;\n"
++                "in vec2 tcs;\n"
++                "out vec4 myFragColor;\n"),
++    .fs_exec = ("        myFragColor = texture(sampler, tcs);\n"),
++};
++
+ static const glamor_facet glamor_facet_xv_planar_3_300es = {
+     .version = 300,
+     .is_gles = TRUE,
+@@ -339,7 +355,10 @@ glamor_init_xv_shader(ScreenPtr screen, glamor_port_private *port_priv, int id)
+         break;
+     case FOURCC_RGBA32:
+     case FOURCC_RGB565:
+-        glamor_facet_xv_planar = &glamor_facet_xv_rgb_raw;
++        if (glamor_priv->is_gles && glamor_priv->glsl_version >= 300) {
++            glamor_facet_xv_planar = &glamor_facet_xv_rgb_raw_300es;
++        } else
++            glamor_facet_xv_planar = &glamor_facet_xv_rgb_raw;
+         break;
+     default:
+         break;

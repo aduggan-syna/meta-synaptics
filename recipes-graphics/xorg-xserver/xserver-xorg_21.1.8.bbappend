@@ -15,6 +15,10 @@ SRC_URI += "file://0011-Revert-render-Break-PICT_a4.patch"
 SRC_URI += "file://0012-config-Fix-bus-ID-of-platform-device-with-PCI-parent.patch"
 SRC_URI += "file://0013-meson-pkg-config-was-not-being-used-for-libcrypto.patch"
 SRC_URI += "file://0014-glamor-xv-add-glsl-shaders-for-OpenGLES-3.0.patch"
+SRC_URI += "file://0015-support-for-RGB-and-UYVY-formats.patch"
+SRC_URI += "file://0016-glamor-xv-add-glsl-shaders-for-OpenGLES-3.0-for-format-UYVY.patch"
+SRC_URI += "file://0017-fixup-UYVY-format.patch"
+SRC_URI += "file://0018-glamor-xv-add-glsl-shaders-for-OpenGLES-3.0-for-format-RGB.patch"
 
 # changes to pass custom xorg config file for Xserver
 SRC_URI += "file://xorg_conf_override"
