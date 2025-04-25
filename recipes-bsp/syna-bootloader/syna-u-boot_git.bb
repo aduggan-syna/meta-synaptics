@@ -36,6 +36,7 @@ SRC_URI = " \
     ${SYNA_SRC_UBOOT} \
     ${SYNA_SRC_EXTERNAL} \
     file://0001-Force-gcc-as-HOSTCC.patch \
+    file://generate_boot_manifest.py \
 "
 
 SRCREV_uboot = "${SYNA_SRCREV_UBOOT}"
@@ -98,6 +99,13 @@ do_deploy () {
             # Change the subimage files to .gz
             sed -i -e 's:\([a-zA-Z0-9]\+\)\(_[a|b]\)\?\.subimg,:\1.subimg.gz,:' ${DEPLOYDIR}/emmc_image_list
         fi
+    else
+        python3 ${WORKDIR}/generate_boot_manifest.py \
+            --uboot_binary ${B}/target/release/uboot/uboot_en.bin \
+            --sdk_config ${STAGING_DATADIR_NATIVE}/syna/build/.config \
+            --uboot_config ${B}/target/release/uboot/intermediate/output_uboot/.config \
+            --output ${WORKDIR}/manifest.yaml
+        install -m 0644 ${WORKDIR}/manifest.yaml ${DEPLOYDIR}/manifest.yaml
     fi
 }
 
