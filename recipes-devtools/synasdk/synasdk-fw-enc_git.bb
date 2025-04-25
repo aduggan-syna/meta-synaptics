@@ -15,10 +15,6 @@ DEPENDS = " \
 COMPATIBLE_MACHINE = "syna"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-SRC_URI = " \
-    ${SYNA_SRC_FW_ENC} \
-"
-
 SRCREV_fwenc = "${SYNA_SRCREV_FW_ENC}"
 
 SRCREV_FORMAT = "fwenc"
