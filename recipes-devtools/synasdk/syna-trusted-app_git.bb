@@ -12,9 +12,8 @@ DEPENDS += " synasdk-tools-native"
 COMPATIBLE_MACHINE = "syna"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-SRC_URI = " \
-    ${SYNA_SRC_TA_ENC} \
-"
+SRC_URI:playpus += "${SYNA_SRC_TA_ENC}"
+SRC_URI:dolphin += "${SYNA_SRC_TA_ENC}"
 
 SRCREV_taenc = "${SYNA_SRCREV_TA_ENC}"
 
@@ -37,9 +36,14 @@ do_compile () {
 
 do_install () {
     install -d ${D}${libdir}/tee-supplicant/plugins
-    find "${S}/ta_enc" -type f \
-        -regex ".*${syna_chip_name}/${syna_chip_rev}.*1316a183.*\.plugin$" -exec sh -c \
-        'install -Dm0644 {} ${D}${libdir}/tee-supplicant/plugins/$(basename {})' \;
+
+    if [ -d "${S}/ta_enc" ]; then
+        find "${S}/ta_enc" -type f \
+            -regex ".*${syna_chip_name}/${syna_chip_rev}.*1316a183.*\.plugin$" -exec sh -c \
+            'install -Dm0644 {} ${D}${libdir}/tee-supplicant/plugins/$(basename {})' \;
+    else
+        echo "Directory ${S}/ta_enc does not exist. Skipping plugin installation."
+    fi
 }
 
 FILES:${PN} = " \
