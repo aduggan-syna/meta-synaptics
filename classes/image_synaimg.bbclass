@@ -107,7 +107,6 @@ IMAGE_CMD:synaimg () {
 # Check that the needed files are available
     [ -f ${DEPLOY_DIR_IMAGE}/key.subimg ]
     [ -f ${DEPLOY_DIR_IMAGE}/preboot.subimg ]
-    [ -f ${DEPLOY_DIR_IMAGE}/preload_ta.subimg ]
     [ -f ${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg ]
     [ -f ${DEPLOY_DIR_IMAGE}/emmc_part_list ]
     [ -f ${DEPLOY_DIR_IMAGE}/emmc_image_list ]
@@ -140,7 +139,9 @@ IMAGE_CMD:synaimg () {
     if [ ${bootloader_append_size} -lt 512 ]; then
         dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/bootloader.subimg bs=1 seek=${bootloader_subimg_size} count=${bootloader_append_size} conv=notrunc
     fi
-    cat ${DEPLOY_DIR_IMAGE}/preload_ta.subimg >> ${DEPLOY_DIR_IMAGE}/bootloader.subimg
+    if [ -f ${DEPLOY_DIR_IMAGE}/preload_ta.subimg ];then
+        cat ${DEPLOY_DIR_IMAGE}/preload_ta.subimg >> ${DEPLOY_DIR_IMAGE}/bootloader.subimg
+    fi
 
 # Split the rootfs between the ro part, and the rw part (/opt)
     if [ -d ${WORKDIR}/rootfs_ro ]; then
