@@ -12,9 +12,9 @@ KERNEL_MODULE_PROBECONF:append:dolphin = " isp"
 inherit module
 
 SRC_URI = "file://COPYING \
-           ${SYNA_SRC_LINUX_5_15_MODULES}"
+           ${SYNA_SRC_LINUX_6_12_MODULES}"
 
-SRCREV = "${SYNA_SRCREV_LINUX_5_15_MODULES}"
+SRCREV = "${SYNA_SRCREV_LINUX_6_12_MODULES}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
