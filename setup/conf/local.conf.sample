@@ -239,7 +239,7 @@ CONF_VERSION = "2"
 
 # change the following to fetch from a non-standard release server
 # SYNA_RELEASE_GIT_HOST = "git@github.com/synaptics-astra"
-# SYNA_RELEASE_BRANCH = "v${ASTRA_VERSION}"
+# SYNA_RELEASE_BRANCH = "${ASTRA_VERSION}"
 # SYNA_RELEASE_GIT_PROTOCOL = "ssh"
 
 # fetch syna-sdk sources from a local checkout instead of the server
