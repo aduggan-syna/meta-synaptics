@@ -200,7 +200,7 @@ elif [ -z "$_CONFIGS_FOUND" ]; then
 fi
 
 if [ "is$OOBE" = "isenabled" ]; then
-    if [ "is${MACHINE}" = "issl1680" ]; then
+    if [ "is${MACHINE}" = "issl1680" ] || [ "is${MACHINE}" = "issl1640" ]; then
         echo "DISTRO_FEATURES:append = \" virtualization\"" >> conf/local.conf
     fi
 fi
