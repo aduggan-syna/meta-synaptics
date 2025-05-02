@@ -27,14 +27,14 @@ python __anonymous() {
     import os
     machine = d.getVar("MACHINE")
     if machine == "sl1640":
-        d.appendVar("SRC_URI", " file://xorg_conf")
-        d.setVar("XORG_CONF_FILE", "xorg_conf")
+        d.appendVar("SRC_URI", " file://xorg_conf_sl1640")
+        d.setVar("XORG_CONF_FILE", "xorg_conf_sl1640")
     elif machine == "sl1680":
         d.appendVar("SRC_URI", " file://xorg_conf_sl1680")
         d.setVar("XORG_CONF_FILE", "xorg_conf_sl1680")
     elif machine == "sl1620":
-        d.appendVar("SRC_URI", " file://xorg_conf")
-        d.setVar("XORG_CONF_FILE", "xorg_conf")
+        d.appendVar("SRC_URI", " file://xorg_conf_sl1620")
+        d.setVar("XORG_CONF_FILE", "xorg_conf_sl1620")
     else:
         bb.warn("No specific xorg_conf provided for MACHINE: %s" % machine)
         d.setVar("XORG_CONF_FILE", "xorg_conf")  # fallback

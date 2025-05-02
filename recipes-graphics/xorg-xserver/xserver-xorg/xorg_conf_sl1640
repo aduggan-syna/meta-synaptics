@@ -1,4 +1,4 @@
-# X.Org X server configuration file for SL1620 and SL1640
+# X.Org X server configuration file for SL1640
 
 Section "Device"
         Identifier      "Video Device"
