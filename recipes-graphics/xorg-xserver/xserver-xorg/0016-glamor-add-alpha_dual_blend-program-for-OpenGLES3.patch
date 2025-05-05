@@ -1,0 +1,115 @@
+From 769a5f9e9984e57cee12129d49e044ab043d6956 Mon Sep 17 00:00:00 2001
+From: Brendan King <Brendan.King@imgtec.com>
+Date: Thu, 25 Apr 2024 17:50:20 +0100
+Subject: [PATCH 16/16] glamor: add alpha_dual_blend program for OpenGLES3
+Upstream-Status: Pending
+
+Add alpha dual blend shaders for Glamor with OpenGLES3.
+
+As a result of the missing shaders, the glamor_program_alpha_dual_blend
+entry in the glamor_combine_300es array was not set, resulting in either
+a segfault, or a shader compilation error in the server when running
+"x11perf -reps 1 -repeat 1 -all", due to an out of bounds array access.
+
+The glamor_program_alpha_dual_blend entry in the glamor_combine_300es
+array is set to NULL, as it isn't used.
+
+This commit should be merged with commit "glamor: add glsl shaders for
+OpenGLES 3.0" when the patches are generated for the the next server
+version.
+---
+ glamor/glamor_composite_glyphs.c |  4 +++-
+ glamor/glamor_program.c          | 12 ++++++++++--
+ glamor/glamor_render.c           | 17 +++++++++++------
+ 3 files changed, 24 insertions(+), 9 deletions(-)
+
+diff --git a/glamor/glamor_composite_glyphs.c b/glamor/glamor_composite_glyphs.c
+index 9ab0244d7..fc4b592d3 100644
+--- a/glamor/glamor_composite_glyphs.c
++++ b/glamor/glamor_composite_glyphs.c
+@@ -181,6 +181,7 @@ static const glamor_facet glamor_facet_composite_glyphs_300es = {
+     .name = "composite_glyphs",
+     .version = 300,
+     .is_gles = TRUE,
++    .fs_extensions = ("#extension GL_EXT_blend_func_extended : enable\n"),
+     .vs_vars = ("in vec4 primitive;\n"
+                 "in vec2 source;\n"
+                 "out vec2 glyph_pos;\n"),
+@@ -188,7 +189,8 @@ static const glamor_facet glamor_facet_composite_glyphs_300es = {
+                 GLAMOR_POS(gl_Position, (primitive.xy + pos))
+                 "       glyph_pos = (source + pos) * ATLAS_DIM_INV;\n"),
+     .fs_vars = ("in vec2 glyph_pos;\n"
+-                "out vec4 myFragColor;\n"),
++                "out vec4 myFragColor;\n"
++                "out vec4 mySecondaryFragColor;\n"),
+     .fs_exec = ("       vec4 mask = texture(atlas, glyph_pos);\n"),
+     .source_name = "source",
+     .locations = glamor_program_location_atlas,
+diff --git a/glamor/glamor_program.c b/glamor/glamor_program.c
+index 08b67241c..aa01d40fb 100644
+--- a/glamor/glamor_program.c
++++ b/glamor/glamor_program.c
+@@ -468,8 +468,13 @@ glamor_build_program(ScreenPtr          screen,
+         glBindAttribLocation(prog->prog, GLAMOR_VERTEX_SOURCE, prim->source_name);
+     }
+     if (prog->alpha == glamor_program_alpha_dual_blend) {
+-        glBindFragDataLocationIndexed(prog->prog, 0, 0, "color0");
+-        glBindFragDataLocationIndexed(prog->prog, 0, 1, "color1");
++        if (glamor_priv->is_gles) {
++            glBindFragDataLocationIndexed(prog->prog, 0, 0, "myFragColor");
++            glBindFragDataLocationIndexed(prog->prog, 0, 1, "mySecondaryFragColor");
++        } else {
++            glBindFragDataLocationIndexed(prog->prog, 0, 0, "color0");
++            glBindFragDataLocationIndexed(prog->prog, 0, 1, "color1");
++        }
+     }
+ 
+     glamor_link_glsl_prog(screen, prog->prog, "%s_%s", prim->name, fill->name);
+@@ -745,6 +750,9 @@ static const char *glamor_combine_300es[] = {
+     [glamor_program_alpha_normal]    = "       myFragColor = source * mask.a;\n",
+     [glamor_program_alpha_ca_first]  = "       myFragColor = source.a * mask;\n",
+     [glamor_program_alpha_ca_second] = "       myFragColor = source * mask;\n",
++    [glamor_program_alpha_dual_blend] =      " myFragColor = source * mask;\n"
++                                             " mySecondaryFragColor = source.a * mask;\n",
++    [glamor_program_alpha_dual_blend_gles2] = NULL
+ };
+ 
+ static Bool
+diff --git a/glamor/glamor_render.c b/glamor/glamor_render.c
+index 889fe1b36..88150217a 100644
+--- a/glamor/glamor_render.c
++++ b/glamor/glamor_render.c
+@@ -302,11 +302,16 @@ glamor_create_composite_fs(glamor_screen_private *glamor_priv, struct shader_key
+         in = in_ca_alpha;
+         break;
+     case glamor_program_alpha_dual_blend:
+-        in = in_ca_dual_blend;
+-        if (glamor_priv->glsl_version >= 130)
+-           header = header_ca_dual_blend;
+-        else
+-           header = header_ca_dual_blend_gpu_shader4;
++        if (glamor_priv->is_gles) {
++            in = in_ca_dual_blend_gles2;
++            header = header_ca_dual_blend_gles2;
++        } else {
++            in = in_ca_dual_blend;
++            if (glamor_priv->glsl_version >= 130)
++                header = header_ca_dual_blend;
++            else
++                header = header_ca_dual_blend_gpu_shader4;
++        }
+         break;
+     case glamor_program_alpha_dual_blend_gles2:
+         in = in_ca_dual_blend_gles2;
+@@ -396,7 +401,7 @@ glamor_create_composite_shader(ScreenPtr screen, struct shader_key *key,
+     glBindAttribLocation(prog, GLAMOR_VERTEX_SOURCE, "v_texcoord0");
+     glBindAttribLocation(prog, GLAMOR_VERTEX_MASK, "v_texcoord1");
+ 
+-    if (key->in == glamor_program_alpha_dual_blend) {
++    if (key->in == glamor_program_alpha_dual_blend && !glamor_priv->is_gles) {
+         glBindFragDataLocationIndexed(prog, 0, 0, "color0");
+         glBindFragDataLocationIndexed(prog, 0, 1, "color1");
+     }
+-- 
+2.34.1
+

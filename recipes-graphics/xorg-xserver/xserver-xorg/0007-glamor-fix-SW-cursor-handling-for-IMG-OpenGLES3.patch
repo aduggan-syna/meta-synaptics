@@ -1,7 +1,8 @@
-From df5f59cba1c5a8b980fe0c7122c5f0f0155f39c6 Mon Sep 17 00:00:00 2001
+From 36812044f1db466a821f575cde7fe0b95b4dc498 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Fri, 20 Jul 2018 13:36:02 +0100
-Subject: [PATCH 05/12] glamor: fix SW cursor handling for IMG OpenGLES3
+Subject: [PATCH 07/16] glamor: fix SW cursor handling for IMG OpenGLES3
+Upstream-Status: Pending
 
 Add a soft cursor workaround when using OpenGLES with Imagination
 Technologies GPUs.
@@ -24,7 +25,7 @@ being left on the screen when the cursor is moved.
  6 files changed, 34 insertions(+), 3 deletions(-)
 
 diff --git a/glamor/glamor.c b/glamor/glamor.c
-index 0eba61696..23134aae4 100644
+index c18fd908a..7aa089430 100644
 --- a/glamor/glamor.c
 +++ b/glamor/glamor.c
 @@ -230,6 +230,9 @@ glamor_create_pixmap(ScreenPtr screen, int w, int h, int depth,
@@ -37,7 +38,7 @@ index 0eba61696..23134aae4 100644
      if (usage == GLAMOR_CREATE_PIXMAP_NO_TEXTURE) {
          glamor_init_pixmap_private_small(pixmap, pixmap_priv);
          return pixmap;
-@@ -846,6 +849,13 @@ glamor_init(ScreenPtr screen, unsigned int flags)
+@@ -848,6 +851,13 @@ glamor_init(ScreenPtr screen, unsigned int flags)
           strstr((char *)glGetString(GL_RENDERER), "V3D")))
          glamor_priv->use_quads = FALSE;
  
@@ -148,5 +149,5 @@ index d1da0fd58..79460d626 100644
              return FALSE;
      }
 -- 
-2.25.1
+2.34.1
 

@@ -1,14 +1,15 @@
-From f6d063f66d3cfdb97bc01397e8dcda40c0243b27 Mon Sep 17 00:00:00 2001
+From bb4e28fc27b9e182057907eeb4b198b855d5cd1f Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Tue, 13 Sep 2022 18:55:52 +0100
-Subject: [PATCH 13/13] meson: pkg-config was not being used for libcrypto
+Subject: [PATCH 15/16] meson: pkg-config was not being used for libcrypto
+Upstream-Status: Pending
 
 ---
  meson.build | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index a6afd5575..d1bd54824 100644
+index 9e54a0a6f..eb2012bb7 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -365,7 +365,7 @@ foreach t : test_sha1

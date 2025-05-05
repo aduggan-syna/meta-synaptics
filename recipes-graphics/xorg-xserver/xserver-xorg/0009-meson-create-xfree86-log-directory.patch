@@ -1,7 +1,8 @@
-From b32f0ccd11b8d6ea0e56ab6d331b72e764be50b6 Mon Sep 17 00:00:00 2001
+From c45e8add06e0bc17e90c1dc032c474ea97146c30 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Tue, 14 Jan 2020 11:14:01 +0000
-Subject: [PATCH 07/12] meson: create xfree86 log directory
+Subject: [PATCH 09/16] meson: create xfree86 log directory
+Upstream-Status: Pending
 
 Create the xfree86 log directory, just as autotools does. The X Server
 will not start if the directory doesn't exist.
@@ -31,5 +32,5 @@ index 000000000..a2beae5b5
 +
 +[ -n "$1" ] && mkdir -p "${DESTDIR}/$1"
 -- 
-2.25.1
+2.34.1
 

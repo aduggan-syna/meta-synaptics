@@ -2,6 +2,7 @@ From a081980af6b41409e7bc60a2d1d5386bf5b20d47 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Fri, 19 Nov 2021 16:57:53 +0000
 Subject: [PATCH 02/12] glamor: improve OpenGLES support
+Upstream-Status: Pending
 
 Use an OpenGLES 3.0 context, where possible.
 
@@ -41,7 +42,7 @@ change the variable name from "sample" to "smp".
  6 files changed, 76 insertions(+), 28 deletions(-)
 
 diff --git a/glamor/glamor.c b/glamor/glamor.c
-index da2ea94ba..a9ad1c473 100644
+index bc91de2..b6acb6c 100644
 --- a/glamor/glamor.c
 +++ b/glamor/glamor.c
 @@ -585,11 +585,18 @@ glamor_setup_formats(ScreenPtr screen)
@@ -49,22 +50,22 @@ index da2ea94ba..a9ad1c473 100644
  
      if (glamor_priv->is_gles) {
 -        assert(X_BYTE_ORDER == X_LITTLE_ENDIAN);
--        glamor_add_format(screen, 24, PICT_x8b8g8r8,
--                          GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, TRUE);
--        glamor_add_format(screen, 32, PICT_a8b8g8r8,
--                          GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, TRUE);
+-        glamor_add_format(screen, 24, PICT_x8r8g8b8,
+-                          GL_BGRA, GL_BGRA, GL_UNSIGNED_BYTE, TRUE);
+-        glamor_add_format(screen, 32, PICT_a8r8g8b8,
+-                          GL_BGRA, GL_BGRA, GL_UNSIGNED_BYTE, TRUE);
 +        if (glamor_priv->has_format_bgra8888) {
 +            glamor_add_format(screen, 24, PICT_x8r8g8b8,
 +                              GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE, TRUE);
 +            glamor_add_format(screen, 32, PICT_a8r8g8b8,
 +                              GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE, TRUE);
-+	} else {
++       } else {
 +            assert(X_BYTE_ORDER == X_LITTLE_ENDIAN);
 +            glamor_add_format(screen, 24, PICT_x8b8g8r8,
 +                              GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, TRUE);
 +            glamor_add_format(screen, 32, PICT_a8b8g8r8,
 +                              GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, TRUE);
-+	}
++       }
      } else {
          glamor_add_format(screen, 24, PICT_x8r8g8b8,
                            GL_RGBA, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, TRUE);
@@ -112,7 +113,7 @@ index da2ea94ba..a9ad1c473 100644
  
      glamor_priv->use_quads = !glamor_priv->is_gles &&
 diff --git a/glamor/glamor_egl.c b/glamor/glamor_egl.c
-index 6e0fc6596..d2e4a6f6d 100644
+index 6e0fc65..d2e4a6f 100644
 --- a/glamor/glamor_egl.c
 +++ b/glamor/glamor_egl.c
 @@ -1018,6 +1018,28 @@ glamor_egl_init(ScrnInfoPtr scrn, int fd)
@@ -154,7 +155,7 @@ index 6e0fc6596..d2e4a6f6d 100644
          }
  
 diff --git a/glamor/glamor_points.c b/glamor/glamor_points.c
-index faf6f433b..688370602 100644
+index faf6f43..6883706 100644
 --- a/glamor/glamor_points.c
 +++ b/glamor/glamor_points.c
 @@ -32,7 +32,8 @@
@@ -168,7 +169,7 @@ index faf6f433b..688370602 100644
  
  static Bool
 diff --git a/glamor/glamor_prepare.c b/glamor/glamor_prepare.c
-index 835c4ebea..4e059cfe2 100644
+index 835c4eb..4e059cf 100644
 --- a/glamor/glamor_prepare.c
 +++ b/glamor/glamor_prepare.c
 @@ -125,12 +125,25 @@ glamor_prep_pixmap_box(PixmapPtr pixmap, glamor_access_t access, BoxPtr box)
@@ -204,7 +205,7 @@ index 835c4ebea..4e059cfe2 100644
      }
  
 diff --git a/glamor/glamor_priv.h b/glamor/glamor_priv.h
-index 028a6d374..a94eaa360 100644
+index 028a6d3..a94eaa3 100644
 --- a/glamor/glamor_priv.h
 +++ b/glamor/glamor_priv.h
 @@ -216,6 +216,7 @@ typedef struct glamor_screen_private {
@@ -216,7 +217,7 @@ index 028a6d374..a94eaa360 100644
      Bool can_copyplane;
      Bool use_gpu_shader4;
 diff --git a/glamor/glamor_xv.c b/glamor/glamor_xv.c
-index dbb490599..95d337b2b 100644
+index dbb4905..95d337b 100644
 --- a/glamor/glamor_xv.c
 +++ b/glamor/glamor_xv.c
 @@ -94,8 +94,6 @@ static const glamor_facet glamor_facet_xv_planar_2 = {
@@ -250,6 +251,3 @@ index dbb490599..95d337b2b 100644
                  "        temp1.w = 1.0;\n"
                  "        gl_FragColor = temp1;\n"
                  ),
--- 
-2.25.1
-

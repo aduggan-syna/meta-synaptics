@@ -1,7 +1,8 @@
-From 0fa9d07286fa22499c4502fa374a6f93c2b12742 Mon Sep 17 00:00:00 2001
+From 515cd885e4cb3f13029cd62d9ad85dc962d4113c Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Fri, 24 Nov 2017 16:26:10 +0000
-Subject: [PATCH 03/12] glamor: if no DRI2, don't call DRI2CloseScreen
+Subject: [PATCH 05/16] glamor: if no DRI2, don't call DRI2CloseScreen
+Upstream-Status: Pending
 
 The ms_dri2_screen_init function checks for DRI2 before performing
 DRI2 initialisation, but ms_dri2_close_screen wasn't checking before
@@ -25,5 +26,5 @@ index 8d1b742ef..9b202862b 100644
  
  #endif /* GLAMOR_HAS_GBM */
 -- 
-2.25.1
+2.34.1
 

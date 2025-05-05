@@ -1,7 +1,8 @@
-From a87700dfe71322dcdcc86f7878d320796ec74452 Mon Sep 17 00:00:00 2001
+From 6261911af1d0298df82a1d05c0b8f182eb1701d4 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Thu, 10 Sep 2020 18:27:21 +0100
-Subject: [PATCH 12/12] config: Fix bus ID of platform device with PCI parent
+Subject: [PATCH 14/16] config: Fix bus ID of platform device with PCI parent
+Upstream-Status: Pending
 
 IMG Test Chip systems may create platform devices that have PCI
 parents. Changes to device probing and detection:
@@ -49,5 +50,5 @@ index 836fc2afa..463a0f5e6 100644
          attribs->busid[3] = ':';
      }
 -- 
-2.25.1
+2.34.1
 

@@ -1,8 +1,9 @@
-From 52e78410e4a134842da252be6ac867de4156de65 Mon Sep 17 00:00:00 2001
+From 169d3f0d6ef2d374751bdbe5dcda1b987f7012fd Mon Sep 17 00:00:00 2001
 From: brendan King <Brendan.King@imgtec.com>
 Date: Thu, 5 Aug 2021 10:46:59 +0100
-Subject: [PATCH 09/12] glamor: increase the precision for some GLES shader
+Subject: [PATCH 11/16] glamor: increase the precision for some GLES shader
  types
+Upstream-Status: Pending
 
 For OpenGLES shaders, set the default precision for sampler2D to
 mediump, and the default precision for float to highp, when possible.
@@ -33,5 +34,5 @@ index 49ee57eee..5d7679899 100644
  
  #include "glyphstr.h"
 -- 
-2.25.1
+2.34.1
 

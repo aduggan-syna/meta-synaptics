@@ -1,8 +1,9 @@
-From 2204cd5585c49cd5f9ed373ef709d234b6f03aaf Mon Sep 17 00:00:00 2001
+From 250b85850c4291583549d113d99a0c9b005b7af6 Mon Sep 17 00:00:00 2001
 From: Frank Binns <frank.binns@imgtec.com>
 Date: Wed, 23 Apr 2014 13:55:27 +0100
-Subject: [PATCH 01/12] present: don't do a vblank abort on a pending flip
+Subject: [PATCH 03/16] present: don't do a vblank abort on a pending flip
  during window destruction
+Upstream-Status: Pending
 
 As part of present's window destroy function, any vblanks associated with the
 destroyed window are aborted and destroyed. However, this can include a
@@ -18,7 +19,7 @@ destroyed, from being aborted and destroyed during window destruction.
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/present/present_screen.c b/present/present_screen.c
-index 15684eda4..16e016967 100644
+index 2c29aafd2..3866ba1a5 100644
 --- a/present/present_screen.c
 +++ b/present/present_screen.c
 @@ -77,8 +77,10 @@ present_free_window_vblank(WindowPtr window)
@@ -35,5 +36,5 @@ index 15684eda4..16e016967 100644
  }
  
 -- 
-2.25.1
+2.34.1
 

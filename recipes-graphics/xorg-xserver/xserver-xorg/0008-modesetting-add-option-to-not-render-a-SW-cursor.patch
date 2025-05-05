@@ -1,7 +1,8 @@
-From ba960c1051d118e25842e3348a428255c615148f Mon Sep 17 00:00:00 2001
+From 3f97bfb7d382dc1bd21375b2c1ac6d5dd5a4aab9 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Fri, 27 Jul 2018 15:16:58 +0100
-Subject: [PATCH 06/12] modesetting: add option to not render a SW cursor
+Subject: [PATCH 08/16] modesetting: add option to not render a SW cursor
+Upstream-Status: Pending
 
 If option NoCursor is set to true in the Device section of xorg.conf,
 don't render a software cursor.
@@ -82,5 +83,5 @@ index 29f9b8f7d..20130e64f 100644
      /* Broken-out options. */
      OptionInfoPtr Options;
 -- 
-2.25.1
+2.34.1
 

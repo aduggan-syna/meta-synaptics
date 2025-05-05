@@ -1,7 +1,8 @@
-From 12abb20243f71077897f4e39859cc35d42d89a17 Mon Sep 17 00:00:00 2001
+From 3e0139146b7a295eb75718d6a8e09c2678e282d1 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Tue, 16 Jun 2020 16:21:41 +0100
-Subject: [PATCH 08/12] glx: allow direct GLX with DRI3 only screens
+Subject: [PATCH 10/16] glx: allow direct GLX with DRI3 only screens
+Upstream-Status: Pending
 
 Indirect GLX requires the DRI2 extension, which not all screens
 support. Indirect GLX is disabled by default, and rarely used these
@@ -111,5 +112,5 @@ index 822515a86..24bc4d508 100644
      if (screen->driScreen == NULL) {
          LogMessage(X_ERROR, "AIGLX error: Calling driver entry point failed\n");
 -- 
-2.25.1
+2.34.1
 

@@ -1,7 +1,8 @@
-From b91279f1c24588a076359e3d37299b404cbd61b9 Mon Sep 17 00:00:00 2001
+From 3afae7e16930b07580b70ef9c36aad6219ab2dac Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Mon, 18 Jun 2018 16:15:55 +0100
-Subject: [PATCH 04/12] glamor: add glsl shaders for OpenGLES 3.0
+Subject: [PATCH 06/16] glamor: add glsl shaders for OpenGLES 3.0
+Upstream-Status: Pending
 
 For those paths that require GLSL 130 with deskop OpenGL, add shaders
 for OpenGLES 3.0 (glsl version 300), so that software fallback can be
@@ -19,7 +20,7 @@ avoided on OpenGLES 3.0.
  9 files changed, 455 insertions(+), 48 deletions(-)
 
 diff --git a/glamor/glamor.c b/glamor/glamor.c
-index a9ad1c473..0eba61696 100644
+index 7a16afb51..c18fd908a 100644
 --- a/glamor/glamor.c
 +++ b/glamor/glamor.c
 @@ -725,7 +725,8 @@ glamor_init(ScreenPtr screen, unsigned int flags)
@@ -33,7 +34,7 @@ index a9ad1c473..0eba61696 100644
  
      /* We'd like to require GL_ARB_map_buffer_range or
 diff --git a/glamor/glamor_composite_glyphs.c b/glamor/glamor_composite_glyphs.c
-index 147e3bb31..e86c4e2b5 100644
+index c69b940d4..9ab0244d7 100644
 --- a/glamor/glamor_composite_glyphs.c
 +++ b/glamor/glamor_composite_glyphs.c
 @@ -177,6 +177,23 @@ glamor_glyph_add(struct glamor_glyph_atlas *atlas, DrawablePtr glyph_draw)
@@ -60,7 +61,7 @@ index 147e3bb31..e86c4e2b5 100644
  static const glamor_facet glamor_facet_composite_glyphs_130 = {
      .name = "composite_glyphs",
      .version = 130,
-@@ -434,7 +451,12 @@ glamor_composite_glyphs(CARD8 op,
+@@ -450,7 +467,12 @@ glamor_composite_glyphs(CARD8 op,
                      /* First glyph in the current atlas?
                       */
                      if (_X_UNLIKELY(glyphs_queued == 0)) {
@@ -304,7 +305,7 @@ index b53ce5c50..2e8f31fa3 100644
  
          if (!glamor_use_program(pixmap, gc, prog, NULL))
 diff --git a/glamor/glamor_program.c b/glamor/glamor_program.c
-index d8ddb4c77..5025789fc 100644
+index 46a506aaf..08b67241c 100644
 --- a/glamor/glamor_program.c
 +++ b/glamor/glamor_program.c
 @@ -98,6 +98,63 @@ static const glamor_facet *glamor_facet_fill[4] = {
@@ -457,7 +458,7 @@ index d8ddb4c77..5025789fc 100644
      return vars;
  }
  
-@@ -274,7 +377,8 @@ glamor_build_program(ScreenPtr          screen,
+@@ -276,7 +379,8 @@ glamor_build_program(ScreenPtr          screen,
      version = MAX(version, fill->version);
  
      if (version > glamor_priv->glsl_version) {
@@ -467,7 +468,7 @@ index d8ddb4c77..5025789fc 100644
              goto fail;
          else {
              version = 120;
-@@ -282,8 +386,8 @@ glamor_build_program(ScreenPtr          screen,
+@@ -284,8 +388,8 @@ glamor_build_program(ScreenPtr          screen,
          }
      }
  
@@ -478,7 +479,7 @@ index d8ddb4c77..5025789fc 100644
  
      if (!vs_vars)
          goto fail;
-@@ -291,8 +395,13 @@ glamor_build_program(ScreenPtr          screen,
+@@ -293,8 +397,13 @@ glamor_build_program(ScreenPtr          screen,
          goto fail;
  
      if (version) {
@@ -494,7 +495,7 @@ index d8ddb4c77..5025789fc 100644
          if (!version_string)
              goto fail;
      }
-@@ -424,7 +533,10 @@ glamor_use_program_fill(PixmapPtr               pixmap,
+@@ -428,7 +537,10 @@ glamor_use_program_fill(PixmapPtr               pixmap,
          return FALSE;
  
      if (!prog->prog) {
@@ -506,7 +507,7 @@ index d8ddb4c77..5025789fc 100644
          if (!fill)
              return NULL;
  
-@@ -580,6 +692,40 @@ static const glamor_facet *glamor_facet_source[glamor_program_source_count] = {
+@@ -585,6 +697,40 @@ static const glamor_facet *glamor_facet_source[glamor_program_source_count] = {
      [glamor_program_source_1x1_picture] = &glamor_source_1x1_picture,
  };
  
@@ -545,10 +546,10 @@ index d8ddb4c77..5025789fc 100644
 +};
 +
  static const char *glamor_combine[] = {
-     [glamor_program_alpha_normal]    = "       gl_FragColor = source * mask.a;\n",
-     [glamor_program_alpha_ca_first]  = "       gl_FragColor = source.a * mask;\n",
-@@ -588,6 +734,12 @@ static const char *glamor_combine[] = {
-                                         "      color1 = source.a * mask;\n"
+     [glamor_program_alpha_normal]    = "        gl_FragColor = source * mask.a;\n",
+     [glamor_program_alpha_ca_first]  = "        gl_FragColor = source.a * mask;\n",
+@@ -595,6 +741,12 @@ static const char *glamor_combine[] = {
+                                               " gl_SecondaryFragColorEXT = source.a * mask;\n"
  };
  
 +static const char *glamor_combine_300es[] = {
@@ -560,7 +561,7 @@ index d8ddb4c77..5025789fc 100644
  static Bool
  glamor_setup_one_program_render(ScreenPtr               screen,
                                  glamor_program          *prog,
-@@ -600,13 +752,21 @@ glamor_setup_one_program_render(ScreenPtr               screen,
+@@ -607,13 +759,21 @@ glamor_setup_one_program_render(ScreenPtr               screen,
          return FALSE;
  
      if (!prog->prog) {
@@ -586,16 +587,16 @@ index d8ddb4c77..5025789fc 100644
      }
  
 diff --git a/glamor/glamor_program.h b/glamor/glamor_program.h
-index ab6e46f7b..979a914cc 100644
+index 0bd918fff..174672a17 100644
 --- a/glamor/glamor_program.h
 +++ b/glamor/glamor_program.h
-@@ -56,6 +56,7 @@ typedef Bool (*glamor_use_render) (CARD8 op, PicturePtr src, PicturePtr dst, gla
+@@ -57,6 +57,7 @@ typedef Bool (*glamor_use_render) (CARD8 op, PicturePtr src, PicturePtr dst, gla
  typedef struct {
      const char                          *name;
      const int                           version;
 +    Bool                                is_gles;
-     char                                *vs_defines;
-     char                                *fs_defines;
+     char                                *vs_extensions;
+     const char                          *fs_extensions;
      const char                          *vs_vars;
 diff --git a/glamor/glamor_rects.c b/glamor/glamor_rects.c
 index 8cdad64e4..82668b4d7 100644
@@ -827,5 +828,5 @@ index cf165cad8..d2b0f46d4 100644
  
          if (!glamor_build_program(screen, prog, prim_facet, fill_facet, NULL, NULL))
 -- 
-2.25.1
+2.34.1
 

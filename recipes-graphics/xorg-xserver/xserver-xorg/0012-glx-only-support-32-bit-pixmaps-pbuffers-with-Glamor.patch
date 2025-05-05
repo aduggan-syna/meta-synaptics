@@ -1,7 +1,8 @@
-From a52371d22b8eff2599c667a80925f431fe4a47f8 Mon Sep 17 00:00:00 2001
+From 9dfd6ae53cb26f018c67d2e143823d02e60368b4 Mon Sep 17 00:00:00 2001
 From: brendan King <Brendan.King@imgtec.com>
 Date: Thu, 26 Aug 2021 17:32:39 +0100
-Subject: [PATCH 10/12] glx: only support 32 bit pixmaps/pbuffers with Glamor
+Subject: [PATCH 12/16] glx: only support 32 bit pixmaps/pbuffers with Glamor
+Upstream-Status: Pending
 
 Glamor can't export pixmaps that don't have a depth of 32. This
 causes rendering to pixmaps and pbuffers to fail with Mesa, when
@@ -17,10 +18,10 @@ checking Glamor is in use at run time.
  3 files changed, 42 insertions(+), 3 deletions(-)
 
 diff --git a/glx/glxcmds.c b/glx/glxcmds.c
-index fc26a2e34..003c8ae3c 100644
+index 1e46d0c72..b64c26d62 100644
 --- a/glx/glxcmds.c
 +++ b/glx/glxcmds.c
-@@ -893,7 +893,7 @@ __glXDisp_CopyContext(__GLXclientState * cl, GLbyte * pc)
+@@ -894,7 +894,7 @@ __glXDisp_CopyContext(__GLXclientState * cl, GLbyte * pc)
  
  enum {
      GLX_VIS_CONFIG_UNPAIRED = 18,
@@ -29,7 +30,7 @@ index fc26a2e34..003c8ae3c 100644
  };
  
  enum {
-@@ -979,6 +979,8 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
+@@ -980,6 +980,8 @@ __glXDisp_GetVisualConfigs(__GLXclientState * cl, GLbyte * pc)
          buf[p++] = modes->transparentAlpha;
          buf[p++] = GLX_TRANSPARENT_INDEX_VALUE;
          buf[p++] = modes->transparentIndex;
@@ -38,7 +39,7 @@ index fc26a2e34..003c8ae3c 100644
          buf[p++] = GLX_SAMPLES_SGIS;
          buf[p++] = modes->samples;
          buf[p++] = GLX_SAMPLE_BUFFERS_SGIS;
-@@ -1035,11 +1037,22 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
+@@ -1036,11 +1038,22 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
      reply = (xGLXGetFBConfigsReply) {
          .type = X_Reply,
          .sequenceNumber = client->sequence,
@@ -63,7 +64,7 @@ index fc26a2e34..003c8ae3c 100644
      if (client->swapped) {
          __GLX_SWAP_SHORT(&reply.sequenceNumber);
          __GLX_SWAP_INT(&reply.length);
-@@ -1050,6 +1063,10 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
+@@ -1051,6 +1064,10 @@ DoGetFBConfigs(__GLXclientState * cl, unsigned screen)
      WriteToClient(client, sz_xGLXGetFBConfigsReply, &reply);
  
      for (modes = pGlxScreen->fbconfigs; modes != NULL; modes = modes->next) {
@@ -74,7 +75,7 @@ index fc26a2e34..003c8ae3c 100644
          p = 0;
  
  #define WRITE_PAIR(tag,value) \
-@@ -1214,6 +1231,11 @@ DoCreateGLXPixmap(ClientPtr client, __GLXscreen * pGlxScreen,
+@@ -1215,6 +1232,11 @@ DoCreateGLXPixmap(ClientPtr client, __GLXscreen * pGlxScreen,
          return BadPixmap;
      }
  
@@ -126,5 +127,5 @@ index 5cd9fcfd4..5e45de1c3 100644
              config->greenMask != visual->greenMask ||
              config->blueMask != visual->blueMask)
 -- 
-2.25.1
+2.34.1
 

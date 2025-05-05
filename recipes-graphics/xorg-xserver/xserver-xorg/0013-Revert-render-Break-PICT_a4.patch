@@ -1,7 +1,8 @@
-From dd64f289a0626736fb0bae7ee864b90273f400f7 Mon Sep 17 00:00:00 2001
+From b8ce526c79a8b3999f48b0d3b1be980fef9a99c7 Mon Sep 17 00:00:00 2001
 From: Brendan King <Brendan.King@imgtec.com>
 Date: Thu, 25 Nov 2021 17:51:05 +0000
-Subject: [PATCH 11/12] Revert "render: Break PICT_a4"
+Subject: [PATCH 13/16] Revert "render: Break PICT_a4"
+Upstream-Status: Pending
 
 This reverts commit 436fd7e8b4966c305ea9c43f3c14c2ca04c35539,
 "render: Break PICT_a4".
@@ -29,5 +30,5 @@ index 2be4b1954..3fa48f919 100644
      formats[nformats].depth = 32;
      nformats++;
 -- 
-2.25.1
+2.34.1
 
