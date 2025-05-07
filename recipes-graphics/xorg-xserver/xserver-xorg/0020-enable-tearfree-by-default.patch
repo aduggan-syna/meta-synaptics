@@ -1,0 +1,35 @@
+Upstream-Status: Pending
+
+diff --git a/hw/xfree86/drivers/modesetting/driver.c b/hw/xfree86/drivers/modesetting/driver.c
+index ca8be5c..a80259d 100644
+--- a/hw/xfree86/drivers/modesetting/driver.c
++++ b/hw/xfree86/drivers/modesetting/driver.c
+@@ -146,6 +146,7 @@ static const OptionInfoRec Options[] = {
+     {OPTION_USE_GAMMA_LUT, "UseGammaLUT", OPTV_BOOLEAN, {0}, FALSE},
+     {OPTION_ASYNC_FLIP_SECONDARIES, "AsyncFlipSecondaries", OPTV_BOOLEAN, {0}, FALSE},
+     {OPTION_NOSW_CURSOR, "NoCursor", OPTV_BOOLEAN, {0}, FALSE},
++    {OPTION_TEARFREE, "TearFree", OPTV_BOOLEAN, {0}, FALSE},
+     {-1, NULL, OPTV_NONE, {0}, FALSE}
+ };
+ 
+@@ -1354,7 +1355,7 @@ PreInit(ScrnInfoPtr pScrn, int flags)
+     }
+ 
+     /* TearFree requires glamor and, if PageFlip is enabled, universal planes */
+-    if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_TEARFREE, FALSE)) {
++    if (xf86ReturnOptValBool(ms->drmmode.Options, OPTION_TEARFREE, TRUE)) {
+         if (pScrn->is_gpu) {
+             xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
+                        "TearFree cannot synchronize PRIME; use 'PRIME Synchronization' instead\n");
+diff --git a/hw/xfree86/drivers/modesetting/driver.h b/hw/xfree86/drivers/modesetting/driver.h
+index 9273783..bfdb7b4 100644
+--- a/hw/xfree86/drivers/modesetting/driver.h
++++ b/hw/xfree86/drivers/modesetting/driver.h
+@@ -62,6 +62,7 @@ typedef enum {
+     OPTION_USE_GAMMA_LUT,
+     OPTION_ASYNC_FLIP_SECONDARIES,
+     OPTION_NOSW_CURSOR,
++    OPTION_TEARFREE,
+ } modesettingOpts;
+ 
+ typedef struct

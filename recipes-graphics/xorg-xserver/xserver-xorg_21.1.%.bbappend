@@ -20,6 +20,9 @@ SRC_URI += " \
     file://0015-meson-pkg-config-was-not-being-used-for-libcrypto.patch \
     file://0016-glamor-add-alpha_dual_blend-program-for-OpenGLES3.patch \
     file://0017-glamor-xv-add-glsl-shaders-for-OpenGLES-3.0.patch \
+    file://0018-add-support-for-TearFree-pageflips.patch \
+    file://0019-fix-inaccurate-PresentCompleteNotify-timing-for-tearfree.patch \
+    file://0020-enable-tearfree-by-default.patch \
 "
 
 INSANE_SKIP:${PN} += "empty-dirs"
