@@ -52,6 +52,7 @@ IMAGE_INSTALL:append:platypus = " \
     kernel-module-sunplus \
 "
 
+IMAGE_INSTALL:append:dolphin = "${PLATYPUS_DOLPHIN_INSTALL}"
 mount_usb () {
     cat >> ${IMAGE_ROOTFS}/etc/fstab <<EOF
 
