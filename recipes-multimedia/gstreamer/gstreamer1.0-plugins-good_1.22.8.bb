@@ -27,6 +27,7 @@ SRC_URI = "https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-go
            file://0020-v4l2transform-force-256-Bytes-aligned-stride.patch;striplevel=3 \
            file://0021-v4l2src-adding-support-for-bayer-10bit.patch;striplevel=3 \
            file://0022_v4l2transform_add_property_to_configure_crop.patch;striplevel=3 \
+           file://0023-v4l2src-adding-support-yuv24.patch;striplevel=3 \
            "
 
 SRC_URI[sha256sum] = "e305b9f07f52743ca481da0a4e0c76c35efd60adaf1b0694eb3bb021e2137e39"

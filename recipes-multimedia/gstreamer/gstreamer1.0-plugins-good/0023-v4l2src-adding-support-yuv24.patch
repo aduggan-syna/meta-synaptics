@@ -1,0 +1,84 @@
+commit 667c9ccdfa28fe6bce0e4ef9bbfd242846622997
+Author: Ganesh Pipare <ganesh.pipare@synaptics.com>
+Date:   Thu May 15 06:24:35 2025 +0000
+subject: [PATCH] v4l2src: adding support for raw yuv24 packed format
+
+    Adding raw yuv24 packed interleaved format
+
+diff --git a/subprojects/gst-plugins-good/docs/gst_plugins_cache.json b/subprojects/gst-plugins-good/docs/gst_plugins_cache.json
+index 944a91c..f1ddc10 100644
+--- a/subprojects/gst-plugins-good/docs/gst_plugins_cache.json
++++ b/subprojects/gst-plugins-good/docs/gst_plugins_cache.json
+@@ -24891,7 +24891,7 @@
+                 "long-name": "Video (video4linux2) Sink",
+                 "pad-templates": {
+                     "sink": {
+-                        "caps": "image/jpeg:\n         parsed: true\nvideo/mpeg:\n    mpegversion: 4\n   systemstream: false\nvideo/mpeg:\n    mpegversion: { (int)1, (int)2 }\nvideo/mpegts:\n   systemstream: true\nvideo/x-bayer:\n         format: { bggr, gbrgle, grbgle, rggble, bggr10le, gbrg10le, grbg10le, rggb10le, bggr12le, gbrg12le, grbg12le, rggb12le, bggr14le, gbrg14le, grbg14le, rggb14le, bggr16le, gbrg16le, grbg16le, rggb16le }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-dv:\n   systemstream: true\nvideo/x-fwht:\nvideo/x-h263:\n        variant: itu\nvideo/x-h264:\n  stream-format: { (string)byte-stream, (string)avc }\n      alignment: au\nvideo/x-h265:\n  stream-format: byte-stream\n      alignment: au\nvideo/x-pwc1:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-pwc2:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-raw:\n         format: { RGB16, BGR, RGB, ABGR, xBGR, RGBA, RGBx, GRAY8, GRAY16_LE, GRAY16_BE, YVU9, YUY2, YVYU, UYVY, Y42B, Y41B, YUV9, NV12_64Z32, NV12_8L128, NV12_10BE_8L128, NV24, NV12_16L32S, NV61, NV16, NV21, NV12, I420, YV12, ARGB, xRGB, BGRA, BGRx, BGR15, RGB15 }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-sonix:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-vp8:\nvideo/x-vp9:\nvideo/x-wmv:\n     wmvversion: 3\n         format: WVC1\n\nvideo/x-raw(format:Interlaced):\n         format: { RGB16, BGR, RGB, ABGR, xBGR, RGBA, RGBx, GRAY8, GRAY16_LE, GRAY16_BE, YVU9, YUY2, YVYU, UYVY, Y42B, Y41B, YUV9, NV12_64Z32, NV12_8L128, NV12_10BE_8L128, NV24, NV12_16L32S, NV61, NV16, NV21, NV12, I420, YV12, ARGB, xRGB, BGRA, BGRx, BGR15, RGB15 }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\n interlace-mode: alternate\n",
++                        "caps": "image/jpeg:\n         parsed: true\nvideo/mpeg:\n    mpegversion: 4\n   systemstream: false\nvideo/mpeg:\n    mpegversion: { (int)1, (int)2 }\nvideo/mpegts:\n   systemstream: true\nvideo/x-bayer:\n         format: { bggr, gbrgle, grbgle, rggble, bggr10le, gbrg10le, grbg10le, rggb10le, bggr12le, gbrg12le, grbg12le, rggb12le, bggr14le, gbrg14le, grbg14le, rggb14le, bggr16le, gbrg16le, grbg16le, rggb16le }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-dv:\n   systemstream: true\nvideo/x-fwht:\nvideo/x-h263:\n        variant: itu\nvideo/x-h264:\n  stream-format: { (string)byte-stream, (string)avc }\n      alignment: au\nvideo/x-h265:\n  stream-format: byte-stream\n      alignment: au\nvideo/x-pwc1:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-pwc2:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-raw:\n         format: { RGB16, BGR, RGB, ABGR, xBGR, RGBA, RGBx, GRAY8, GRAY16_LE, GRAY16_BE, YVU9, YUY2, YVYU, UYVY, Y42B, Y41B, YUV9, v308, NV12_64Z32, NV12_8L128, NV12_10BE_8L128, NV24, NV12_16L32S, NV61, NV16, NV21, NV12, I420, YV12, ARGB, xRGB, BGRA, BGRx, BGR15, RGB15 }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-sonix:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-vp8:\nvideo/x-vp9:\nvideo/x-wmv:\n     wmvversion: 3\n         format: WVC1\n\nvideo/x-raw(format:Interlaced):\n         format: { RGB16, BGR, RGB, ABGR, xBGR, RGBA, RGBx, GRAY8, GRAY16_LE, GRAY16_BE, YVU9, YUY2, YVYU, UYVY, Y42B, Y41B, YUV9, v308, NV12_64Z32, NV12_8L128, NV12_10BE_8L128, NV24, NV12_16L32S, NV61, NV16, NV21, NV12, I420, YV12, ARGB, xRGB, BGRA, BGRx, BGR15, RGB15 }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\n interlace-mode: alternate\n",
+                         "direction": "sink",
+                         "presence": "always"
+                     }
+@@ -25199,7 +25199,7 @@
+                 "long-name": "Video (video4linux2) Source",
+                 "pad-templates": {
+                     "src": {
+-                        "caps": "image/jpeg:\n         parsed: true\nvideo/mpeg:\n    mpegversion: 4\n   systemstream: false\nvideo/mpeg:\n    mpegversion: { (int)1, (int)2 }\nvideo/mpegts:\n   systemstream: true\nvideo/x-bayer:\n         format: { bggr, gbrgle, grbgle, rggble, bggr10le, gbrg10le, grbg10le, rggb10le, bggr12le, gbrg12le, grbg12le, rggb12le, bggr14le, gbrg14le, grbg14le, rggb14le, bggr16le, gbrg16le, grbg16le, rggb16le }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-dv:\n   systemstream: true\nvideo/x-fwht:\nvideo/x-h263:\n        variant: itu\nvideo/x-h264:\n  stream-format: { (string)byte-stream, (string)avc }\n      alignment: au\nvideo/x-h265:\n  stream-format: byte-stream\n      alignment: au\nvideo/x-pwc1:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-pwc2:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-raw:\n         format: { RGB16, BGR, RGB, ABGR, xBGR, RGBA, RGBx, GRAY8, GRAY16_LE, GRAY16_BE, YVU9, YUY2, YVYU, UYVY, Y42B, Y41B, YUV9, NV12_64Z32, NV12_8L128, NV12_10BE_8L128, NV24, NV12_16L32S, NV61, NV16, NV21, NV12, I420, YV12, ARGB, xRGB, BGRA, BGRx, BGR15, RGB15 }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-sonix:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-vp8:\nvideo/x-vp9:\nvideo/x-wmv:\n     wmvversion: 3\n         format: WVC1\n\nvideo/x-raw(format:Interlaced):\n         format: { RGB16, BGR, RGB, ABGR, xBGR, RGBA, RGBx, GRAY8, GRAY16_LE, GRAY16_BE, YVU9, YUY2, YVYU, UYVY, Y42B, Y41B, YUV9, NV12_64Z32, NV12_8L128, NV12_10BE_8L128, NV24, NV12_16L32S, NV61, NV16, NV21, NV12, I420, YV12, ARGB, xRGB, BGRA, BGRx, BGR15, RGB15 }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\n interlace-mode: alternate\n",
++                        "caps": "image/jpeg:\n         parsed: true\nvideo/mpeg:\n    mpegversion: 4\n   systemstream: false\nvideo/mpeg:\n    mpegversion: { (int)1, (int)2 }\nvideo/mpegts:\n   systemstream: true\nvideo/x-bayer:\n         format: { bggr, gbrgle, grbgle, rggble, bggr10le, gbrg10le, grbg10le, rggb10le, bggr12le, gbrg12le, grbg12le, rggb12le, bggr14le, gbrg14le, grbg14le, rggb14le, bggr16le, gbrg16le, grbg16le, rggb16le }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-dv:\n   systemstream: true\nvideo/x-fwht:\nvideo/x-h263:\n        variant: itu\nvideo/x-h264:\n  stream-format: { (string)byte-stream, (string)avc }\n      alignment: au\nvideo/x-h265:\n  stream-format: byte-stream\n      alignment: au\nvideo/x-pwc1:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-pwc2:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-raw:\n         format: { RGB16, BGR, RGB, ABGR, xBGR, RGBA, RGBx, GRAY8, GRAY16_LE, GRAY16_BE, YVU9, YUY2, YVYU, UYVY, Y42B, Y41B, YUV9, v308, NV12_64Z32, NV12_8L128, NV12_10BE_8L128, NV24, NV12_16L32S, NV61, NV16, NV21, NV12, I420, YV12, ARGB, xRGB, BGRA, BGRx, BGR15, RGB15 }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-sonix:\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\nvideo/x-vp8:\nvideo/x-vp9:\nvideo/x-wmv:\n     wmvversion: 3\n         format: WVC1\n\nvideo/x-raw(format:Interlaced):\n         format: { RGB16, BGR, RGB, ABGR, xBGR, RGBA, RGBx, GRAY8, GRAY16_LE, GRAY16_BE, YVU9, YUY2, YVYU, UYVY, Y42B, Y41B, YUV9, v308, NV12_64Z32, NV12_8L128, NV12_10BE_8L128, NV24, NV12_16L32S, NV61, NV16, NV21, NV12, I420, YV12, ARGB, xRGB, BGRA, BGRx, BGR15, RGB15 }\n          width: [ 1, 32768 ]\n         height: [ 1, 32768 ]\n      framerate: [ 0/1, 2147483647/1 ]\n interlace-mode: alternate\n",
+                         "direction": "src",
+                         "presence": "always"
+                     }
+@@ -28217,4 +28217,4 @@
+         "tracers": {},
+         "url": "Unknown package origin"
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
+index 0e4d5ec..0d0040c 100644
+--- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
++++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2object.c
+@@ -148,6 +148,7 @@ static const GstV4L2FormatDesc gst_v4l2_formats[] = {
+   {V4L2_PIX_FMT_HI240, TRUE, GST_V4L2_RAW},
+   {V4L2_PIX_FMT_HM12, TRUE, GST_V4L2_RAW},
+   {V4L2_PIX_FMT_M420, TRUE, GST_V4L2_RAW},
++  {V4L2_PIX_FMT_YUV24, TRUE, GST_V4L2_RAW},
+ 
+   /* two planes -- one Y, one Cr + Cb interleaved  */
+   {V4L2_PIX_FMT_NV12, TRUE, GST_V4L2_RAW},
+@@ -1117,6 +1118,7 @@ gst_v4l2_object_format_get_rank (const struct v4l2_fmtdesc *fmt)
+     case V4L2_PIX_FMT_NV61:    /* 16  Y/CrCb 4:2:2  */
+     case V4L2_PIX_FMT_NV61M:   /* Same as NV61      */
+     case V4L2_PIX_FMT_NV24:    /* 24  Y/CrCb 4:4:4  */
++    case V4L2_PIX_FMT_YUV24:    /* 24  packed YCrCb 4:4:4  */
+     case V4L2_PIX_FMT_MM21:    /* NV12 Y 16x32, UV 16x16 tile */
+     case V4L2_PIX_FMT_NV12M_8L128:
+     case V4L2_PIX_FMT_NV12M_10BE_8L128:
+@@ -1472,6 +1474,9 @@ gst_v4l2_object_v4l2fourcc_to_video_format (guint32 fourcc)
+     case V4L2_PIX_FMT_NV24:
+       format = GST_VIDEO_FORMAT_NV24;
+       break;
++    case V4L2_PIX_FMT_YUV24:
++      format = GST_VIDEO_FORMAT_v308;
++      break;
+     default:
+       format = GST_VIDEO_FORMAT_UNKNOWN;
+       break;
+@@ -1632,6 +1637,7 @@ gst_v4l2_object_v4l2fourcc_to_bare_struct (guint32 fourcc)
+     case V4L2_PIX_FMT_NV61:    /* 16  Y/CrCb 4:2:2  */
+     case V4L2_PIX_FMT_NV61M:
+     case V4L2_PIX_FMT_NV24:    /* 24  Y/CrCb 4:4:4  */
++    case V4L2_PIX_FMT_YUV24:    /* 24  packed YCrCb 4:4:4  */
+     case V4L2_PIX_FMT_YVU410:
+     case V4L2_PIX_FMT_YUV410:
+     case V4L2_PIX_FMT_YUV420:  /* I420/IYUV */
+@@ -2005,6 +2011,9 @@ gst_v4l2_object_get_caps_info (GstV4l2Object * v4l2object, GstCaps * caps,
+       case GST_VIDEO_FORMAT_NV24:
+         fourcc = V4L2_PIX_FMT_NV24;
+         break;
++      case GST_VIDEO_FORMAT_v308:
++        fourcc = V4L2_PIX_FMT_YUV24;
++        break;
+       case GST_VIDEO_FORMAT_YVYU:
+         fourcc = V4L2_PIX_FMT_YVYU;
+         break;
