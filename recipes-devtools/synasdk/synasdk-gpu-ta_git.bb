@@ -3,7 +3,7 @@ DESCRIPTION = "OP-TEE GPU TA"
 
 LICENSE = "CLOSED"
 
-inherit release python3native
+inherit python3native
 require recipes-security/optee/optee.inc
 require recipes-devtools/synasdk/synasdk-config.inc
 
@@ -30,6 +30,8 @@ do_configure() {
 do_compile() {
     export CFLAGS="${CFLAGS} --sysroot=${STAGING_DIR_HOST}"
     export LIBGCC_LOCATE_CFLAGS=--sysroot=${STAGING_DIR_HOST}
+    export TA_CROSS_COMPILE=${HOST_PREFIX}
+    export TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR}
 
     echo "out is ${S}"
 
