@@ -32,6 +32,8 @@ IMAGE_INSTALL:append = " \
     libubootenv \
     libubootenv-bin \
     swu-conf \
+    android-tools \
+    android-tools-adbd \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
@@ -69,7 +71,14 @@ add_version () {
     echo "${ASTRA_VERSION}" > ${IMAGE_ROOTFS}/etc/astra_version
 }
 
-ROOTFS_POSTPROCESS_COMMAND += "mount_usb; add_version; "
+#Fix me
+#ROOTFS_POSTPROCESS_COMMAND in android-tools bb file does not work
+#Add it here to workaround it
+android_tools_enable_devmode() {
+    touch ${IMAGE_ROOTFS}/etc/usb-debugging-enabled
+}
+
+ROOTFS_POSTPROCESS_COMMAND += "mount_usb; add_version; android_tools_enable_devmode;"
 
 LICENSE = "MIT"
 
