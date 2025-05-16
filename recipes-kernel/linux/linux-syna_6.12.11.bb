@@ -14,6 +14,8 @@ SRC_URI = " \
     git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-6.12;destsuffix=${KMETA} \
 "
 
+SRC_URI += "${SYNA_SRC_LINUX_6_12_MODULES}"
+
 KMETA = "kernel-meta"
 
 SRCREV_meta = "9c34085a1b39aaba74176c64be0ef5081f81e1ed"
