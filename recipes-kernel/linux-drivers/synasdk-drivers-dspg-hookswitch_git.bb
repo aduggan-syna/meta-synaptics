@@ -12,13 +12,13 @@ KERNEL_MODULE_PROBECONF:append:myna2 = " dspg-hookswitch"
 inherit module
 
 SRC_URI = "file://COPYING \
-           ${SYNA_SRC_LINUX_6_12_MODULES}"
+           ${SYNA_SRC_EXTERNAL}"
 
 SRCREV = "${SYNA_SRCREV_LINUX_6_12_MODULES}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-S = "${WORKDIR}/${SYNA_MODULES_SOURCE_PREFIX}/drivers/input/keyboard/dspg-hookswitch"
+S = "${WORKDIR}/${SYNA_EXTERNAL_DRIVERS_PREFIX}/drivers/input/keyboard/dspg-hookswitch"
 
 do_install:append() {
     rm -f ${D}/lib/modules/${KERNEL_VERSION}/extra/modules.order.*
