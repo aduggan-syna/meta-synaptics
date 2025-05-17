@@ -1,0 +1,33 @@
+diff --git a/ext/nnstreamer/tensor_filter/meson.build b/ext/nnstreamer/tensor_filter/meson.build
+index ac7df4c6..27bfb61b 100644
+--- a/ext/nnstreamer/tensor_filter/meson.build
++++ b/ext/nnstreamer/tensor_filter/meson.build
+@@ -97,6 +97,7 @@ endif
+ tflite_ver_dep = disabler()
+ if tflite_support_is_available
+   tflite_ver = tflite_support_deps[0].version()
++  tflite_ver = '2.15.0'
+   tflite_ver_major = tflite_ver.split('.')[0]
+   tflite_ver_minor = tflite_ver.split('.')[1]
+   tflite_ver_micro = tflite_ver.split('.')[2]
+@@ -165,6 +166,7 @@ endif
+ tflite2_ver_dep = disabler()
+ if tflite2_support_is_available
+   tflite2_ver = tflite2_support_deps[0].version()
++  tflite2_ver = '2.15.0'
+   tflite2_ver_major = tflite2_ver.split('.')[0]
+   tflite2_ver_minor = tflite2_ver.split('.')[1]
+   tflite2_ver_micro = tflite2_ver.split('.')[2]
+diff --git a/meson.build b/meson.build
+index 17fbabba..3f0018d2 100644
+--- a/meson.build
++++ b/meson.build
+@@ -536,7 +536,7 @@ features = {
+     'project_args': { 'ENABLE_TENSORFLOW_LITE': 1 }
+   },
+   'tflite2-support': {
+-    'target': 'tensorflow2-lite',
++    'target': 'tensorflow-lite',
+     'project_args': { 'ENABLE_TENSORFLOW2_LITE': 1 }
+   },
+   'pytorch-support': {
