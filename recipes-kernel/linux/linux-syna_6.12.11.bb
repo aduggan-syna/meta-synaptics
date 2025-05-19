@@ -20,6 +20,7 @@ KMETA = "kernel-meta"
 
 SRCREV_meta = "9c34085a1b39aaba74176c64be0ef5081f81e1ed"
 SRCREV_linux_main = "${SYNA_SRCREV_LINUX_6_12}"
+SRCREV_linux_drivers_synaptics = "${SYNA_SRCREV_LINUX_6_12_MODULES}"
 
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://systemd.cfg', '', d)}"
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'bluetooth', 'file://add-bcm-bt-driver.cfg', '', d)}"
