@@ -23,6 +23,10 @@ SRC_URI += " \
     file://0018-add-support-for-TearFree-pageflips.patch \
     file://0019-fix-inaccurate-PresentCompleteNotify-timing-for-tearfree.patch \
     file://0020-enable-tearfree-by-default.patch \
+    file://0021-support-for-RGB-and-UYVY-formats.patch \
+    file://0022-glamor-xv-add-glsl-shaders-for-OpenGLES-3.0-for-format-UYVY.patch \
+    file://0023-fixup-UYVY-format.patch \
+    file://0024-glamor-xv-add-glsl-shaders-for-OpenGLES-3.0-for-format-RGB.patch \
 "
 
 INSANE_SKIP:${PN} += "empty-dirs"

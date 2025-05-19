@@ -1,0 +1,69 @@
+Upstream-Status: Pending
+
+diff --git a/glamor/glamor_xv.c b/glamor/glamor_xv.c
+index 14e6414..1aca9cc 100644
+--- a/glamor/glamor_xv.c
++++ b/glamor/glamor_xv.c
+@@ -194,6 +194,50 @@ static const glamor_facet glamor_facet_xv_uyvy = {
+         ),
+ };
+ 
++static const glamor_facet glamor_facet_xv_uyvy_300es = {
++    .version = 300,
++    .is_gles = TRUE,
++    .name = "xv_uyvy",
++    .source_name = "v_texcoord0",
++    .vs_vars = (
++        "in vec2 position;\n"
++        "in vec2 v_texcoord0;\n"
++        "out vec2 tcs;\n"
++    ),
++    .vs_exec = (
++        GLAMOR_POS(gl_Position, position)
++        "        tcs = v_texcoord0;\n"
++    ),
++    .fs_vars = (
++        "uniform sampler2D sampler;\n"
++        "uniform vec2 texelSize;\n"
++        "uniform vec4 offsetyco;\n"
++        "uniform vec4 ucogamma;\n"
++        "uniform vec4 vco;\n"
++        "in vec2 tcs;\n"
++        "out vec4 myFragColor;\n"
++    ),
++    .fs_exec = (
++        "    vec3 uyv;\n"
++        "    vec4 frameOut = texture(sampler, tcs.st);\n"
++        "\n"
++        "    vec4 prevPixel = texture(sampler, vec2(tcs.s - texelSize.x, tcs.t));\n"
++        "    vec4 nextPixel = texture(sampler, vec2(tcs.s + texelSize.x, tcs.t));\n"
++        "\n"
++        "    float delta = 0.50;\n"
++        "\n"
++        "    int even = int(mod(tcs.x / texelSize.x, 2.0));\n"
++        "\n"
++        "    uyv.rgb = float(even) * vec3(frameOut.rg, nextPixel.r) + (1.0 - float(even)) * vec3(prevPixel.r, frameOut.gr);\n"
++        "\n"
++        "    frameOut.r = uyv.g + 1.403 * (uyv.r - delta);\n"
++        "    frameOut.g = uyv.g - 0.714 * (uyv.r - delta) - 0.344 * (uyv.b - delta);\n"
++        "    frameOut.b = uyv.g + 1.773 * (uyv.b - delta);\n"
++        "    frameOut.a = 1.0;\n"
++        "    myFragColor = frameOut;\n"
++    ),
++};
++
+ static const glamor_facet glamor_facet_xv_rgb_raw = {
+     .name = "xv_rgb",
+ 
+@@ -292,7 +336,10 @@ glamor_init_xv_shader(ScreenPtr screen, glamor_port_private *port_priv, int id)
+             glamor_facet_xv_planar = &glamor_facet_xv_planar_2;
+         break;
+     case FOURCC_UYVY:
+-        glamor_facet_xv_planar = &glamor_facet_xv_uyvy;
++        if (glamor_priv->is_gles && glamor_priv->glsl_version >= 300)
++            glamor_facet_xv_planar = &glamor_facet_xv_uyvy_300es;
++        else
++            glamor_facet_xv_planar = &glamor_facet_xv_uyvy;
+         break;
+     case FOURCC_RGBA32:
+     case FOURCC_RGB565:
