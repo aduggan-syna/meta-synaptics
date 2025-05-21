@@ -176,5 +176,3 @@ module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
 
 module_conf_syna-vpu = "softdep syna-vpu pre: amp_bm"
 module_conf_vpu = "softdep vpu pre: amp_bm"
-
-module_conf_syna_drm = "options syna_drm hdmi_preferred_mode=1920x1080"
