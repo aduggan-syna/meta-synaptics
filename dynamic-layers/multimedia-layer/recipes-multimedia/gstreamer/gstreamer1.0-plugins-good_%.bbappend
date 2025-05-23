@@ -1,1 +1,1 @@
-PACKAGECONFIG:append = " vpx"
+PACKAGECONFIG:append = " vpx deinterlace"
