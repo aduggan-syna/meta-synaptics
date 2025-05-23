@@ -1,5 +1,5 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/gstreamer1.0-plugins-good:"
-PACKAGECONFIG:append = " vpx"
+PACKAGECONFIG:append = " vpx deinterlace"
 
 SRC_URI += " \
     file://0021-v4l2src-adding-support-for-bayer-10bit.patch;striplevel=3 \

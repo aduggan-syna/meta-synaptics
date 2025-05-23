@@ -16,5 +16,4 @@ SRC_URI += " \
 "
 EXTRA_OECONF:append = " --enable-nice"
 
-PACKAGECONFIG:append = " webrtc srtp"
-
+PACKAGECONFIG:append = " webrtc srtp dash"
