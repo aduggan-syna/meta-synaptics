@@ -16,11 +16,13 @@ DEPENDS:append = " \
 DEPENDS:append:dolphin = "synasdk-vpu-ta \
                           synasdk-fastlogo-ta  \
                           synasdk-ptm-ta \
+                          synasdk-drm-factory-ca-program \
                           synasdk-dhub-ta \
                           synasdk-gpu-ta"
 
 DEPENDS:append:platypus = "synasdk-vpu-ta \
                            synasdk-fastlogo-ta \
+                           synasdk-drm-factory-ca-program \
                            synasdk-ptm-ta \
                            synasdk-gpu-ta"
 
