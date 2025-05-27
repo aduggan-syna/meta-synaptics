@@ -1,4 +1,4 @@
-From 37576a2c6e1eec2083f1351f56d10f1ed84d70ea Mon Sep 17 00:00:00 2001
+From 2395c5de2197a7b5abd575fabd3aa79f00163622 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 09:17:01 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -6,7 +6,7 @@ Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
 Change-Id: Iacde6e76f0e8a382adf2ff0c237815bb1d334148
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 ---
- .../arch/arm/plat-synaptics/chip/dolphin/hal_soc.c |   389 +
+ .../arch/arm/plat-synaptics/chip/dolphin/hal_soc.c |   390 +
  .../chip/dolphin/include/Galois_memmap.h           |  2185 ++
  .../chip/dolphin/include/Galois_memmap_sm.h        |    39 +
  .../chip/dolphin/include/Galois_memmap_soc.h       |    35 +
@@ -32,7 +32,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arm/plat-synaptics/chip/dolphin/include/tsp.h  | 14919 +++++++++++
  .../arm/plat-synaptics/chip/dolphin/mpt_rule.h     |    24 +
  core/arch/arm/plat-synaptics/chip/dolphin/sub.mk   |     2 +
- core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c  |   384 +
+ core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c  |   385 +
  .../chip/myna2/include/Galois_memmap.h             |   665 +
  .../chip/myna2/include/Galois_memmap_sm.h          |    39 +
  .../chip/myna2/include/Galois_memmap_soc.h         |    35 +
@@ -57,7 +57,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arm/plat-synaptics/chip/myna2/include/tsp.h    | 14846 +++++++++++
  core/arch/arm/plat-synaptics/chip/myna2/sub.mk     |     2 +
  core/arch/arm/plat-synaptics/chip/myna2/szc_mst.h  |    35 +
- .../arm/plat-synaptics/chip/platypus/hal_soc.c     |   386 +
+ .../arm/plat-synaptics/chip/platypus/hal_soc.c     |   387 +
  .../chip/platypus/include/Galois_memmap.h          |  2284 ++
  .../chip/platypus/include/Galois_memmap_sm.h       |    39 +
  .../chip/platypus/include/Galois_memmap_soc.h      |    35 +
@@ -89,7 +89,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../common/syna_fastcall/fc_verifyimage.c          |   108 +
  .../common/syna_fastcall/syna_fastcall.h           |    16 +
  .../plat-synaptics/common/syna_fastcall_entry.c    |   176 +
- core/arch/arm/plat-synaptics/common/syna_setup.c   |   246 +
+ core/arch/arm/plat-synaptics/common/syna_setup.c   |   248 +
  .../arm/plat-synaptics/common/tee_genx_ta_verify.c |   307 +
  .../arm/plat-synaptics/common/tee_ta_perm_ctrl.c   |  1051 +
  .../arch/arm/plat-synaptics/common/tee_time_syna.c |    27 +
@@ -194,7 +194,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../tz/tz_boot_param_value_platypus.c              |   608 +
  core/arch/arm/plat-synaptics/tz/tz_errcode.h       |    44 +
  core/arch/arm/plat-synaptics/tz/tz_perm.h          |    89 +
- 188 files changed, 312850 insertions(+)
+ 188 files changed, 312855 insertions(+)
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap.h
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap_sm.h
@@ -386,10 +386,10 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 
 diff --git a/core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c b/core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
 new file mode 100644
-index 0000000..5b494ee
+index 0000000..23e875d
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
-@@ -0,0 +1,389 @@
+@@ -0,0 +1,390 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -411,18 +411,19 @@ index 0000000..5b494ee
 +#include <kernel/boot.h>
 +#include "szc_mpt.h"
 +#include "apb_timer.h"
++#include <mm/core_memprot.h>
 +
 +#define SUSPEND_WAKEUP_INTR		GIC_IID_SPI(IRQ_sm2socSwInt)
 +
 +//using SM msg queue 1
 +#define SM_Send_MsgQ                    (0x1F400 + MEMMAP_SM_REG_BASE)
 +
-+#define SOC_OTP_BASE_ADDR		(MEMMAP_TSP_REG_BASE + 0x4000)
++#define SOC_OTP_BASE_ADDR		(vaddr_t)phys_to_virt_io((MEMMAP_TSP_REG_BASE + 0x4000), MEMMAP_TSP_REG_SIZE)
 +
 +#define SOC_OTP_ROWS			192
 +#define SOC_OTP_ROW_LEN			16
 +
-+#define SOC_RESET_CTRL_BASE		(MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger)
++#define SOC_RESET_CTRL_BASE		(vaddr_t)phys_to_virt_io((MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger), MEMMAP_CHIP_CTRL_REG_SIZE)
 +static unsigned char otp_data[SOC_OTP_ROWS * SOC_OTP_ROW_LEN / 2];
 +
 +void otp_init(void)
@@ -98226,10 +98227,10 @@ index 0000000..aa491b1
 +srcs-y += hal_soc.c
 diff --git a/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c b/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c
 new file mode 100644
-index 0000000..8e4a83a
+index 0000000..f04c5b0
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c
-@@ -0,0 +1,384 @@
+@@ -0,0 +1,385 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -98247,16 +98248,17 @@ index 0000000..8e4a83a
 +#include <kernel/boot.h>
 +#include "tee_api_types.h"
 +#include "apb_timer.h"
++#include <mm/core_memprot.h>
 +
 +#define MEMMAP_OTP_DUMP_OFFSET          0x0
 +#define MEMMAP_OTP_DUMP_SIZE            (0xC00)
-+#define SOC_OTP_BASE_ADDR             (MEMMAP_SRAM_REG_BASE + MEMMAP_OTP_DUMP_OFFSET)
++#define SOC_OTP_BASE_ADDR             (vaddr_t)phys_to_virt_io((MEMMAP_SRAM_REG_BASE + MEMMAP_OTP_DUMP_OFFSET), MEMMAP_SRAM_REG_SIZE)
 +
 +#define SOC_OTP_ROWS			192
 +#define SOC_OTP_ROW_LEN			16
 +static unsigned char otp_data[SOC_OTP_ROWS * SOC_OTP_ROW_LEN / 2];
 +
-+#define SOC_RESET_CTRL_BASE		(MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger)
++#define SOC_RESET_CTRL_BASE		(vaddr_t)phys_to_virt_io((MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger), MEMMAP_CHIP_CTRL_REG_SIZE)
 +#if 0
 +#define SUSPEND_WAKEUP_INTR		GIC_IID_SPI(IRQ_sm2socSwInt)
 +
@@ -199679,10 +199681,10 @@ index 0000000..d4b6a37
 +#endif /* _SZC_MST_H_ */
 diff --git a/core/arch/arm/plat-synaptics/chip/platypus/hal_soc.c b/core/arch/arm/plat-synaptics/chip/platypus/hal_soc.c
 new file mode 100644
-index 0000000..70fdebb
+index 0000000..a954456
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/platypus/hal_soc.c
-@@ -0,0 +1,386 @@
+@@ -0,0 +1,387 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -199706,13 +199708,14 @@ index 0000000..70fdebb
 +#include <kernel/boot.h>
 +#include "szc_mpt.h"
 +#include "apb_timer.h"
++#include <mm/core_memprot.h>
 +
-+#define SOC_OTP_BASE_ADDR		(MEMMAP_TSP_REG_BASE + 0x4000)
++#define SOC_OTP_BASE_ADDR		(vaddr_t)phys_to_virt_io((MEMMAP_TSP_REG_BASE + 0x4000), MEMMAP_TSP_REG_SIZE)
 +#define SOC_OTP_ROWS			192
 +#define SOC_OTP_ROW_LEN			16
 +static unsigned char otp_data[SOC_OTP_ROWS * SOC_OTP_ROW_LEN / 2];
 +
-+#define SOC_RESET_CTRL_BASE		(MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger)
++#define SOC_RESET_CTRL_BASE		(vaddr_t)phys_to_virt_io((MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger), MEMMAP_CHIP_CTRL_REG_SIZE)
 +#if 0
 +#define SUSPEND_WAKEUP_INTR		GIC_IID_SPI(IRQ_sm2socSwInt)
 +
@@ -299605,10 +299608,10 @@ index 0000000..c827d90
 +}
 diff --git a/core/arch/arm/plat-synaptics/common/syna_setup.c b/core/arch/arm/plat-synaptics/common/syna_setup.c
 new file mode 100644
-index 0000000..d556f90
+index 0000000..fb52b86
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/common/syna_setup.c
-@@ -0,0 +1,246 @@
+@@ -0,0 +1,248 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -299629,6 +299632,7 @@ index 0000000..d556f90
 +#include "mr_setup.h"
 +#include "tz_boot_cmd.h"
 +#include "syna_setup.h"
++#include "hal_soc.h"
 +
 +static unsigned long tz_boot_stage = TZ_BOOT_STAGE_BOOTLOADER;
 +static unsigned long tz_boot_mode = TZ_BOOT_MODE_NORMAL;
@@ -299849,6 +299853,7 @@ index 0000000..d556f90
 +	mr_early_setup();
 +	parse_boot_params();
 +	mr_setup();
++	otp_init();
 +
 +	//check_mmu();
 +	return TEE_SUCCESS;
