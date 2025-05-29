@@ -1,0 +1,13 @@
+diff --git a/chrome/installer/linux/common/desktop.template b/chrome/installer/linux/common/desktop.template
+index 2eb13ee..65e8459 100644
+--- a/chrome/installer/linux/common/desktop.template
++++ b/chrome/installer/linux/common/desktop.template
+@@ -105,7 +105,7 @@ Comment[vi]=Truy cập Internet
+ Comment[zh_CN]=访问互联网
+ Comment[zh_HK]=連線到網際網路
+ Comment[zh_TW]=連線到網際網路
+-Exec=/usr/bin/@@USR_BIN_SYMLINK_NAME@@ %U
++Exec=/usr/bin/@@USR_BIN_SYMLINK_NAME@@ --no-sandbox --alsa-output-device=hw:0,7 --restore-last-session
+ StartupNotify=true
+ Terminal=false
+ Icon=@@PACKAGE@@
