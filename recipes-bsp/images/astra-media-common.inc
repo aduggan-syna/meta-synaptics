@@ -69,8 +69,6 @@ IMAGE_INSTALL:append = " \
     i2c-tools \
     v4l-utils \
     kernel-module-syna-axi-meter \
-    kernel-module-bluetooth-lpm \
-    kernel-module-bluetooth-rfkill \
     kernel-module-hl7593 \
     kernel-module-rt5739-regulator \
     kernel-module-tps6286x-regulator \
@@ -78,7 +76,6 @@ IMAGE_INSTALL:append = " \
     kernel-module-phy-syna-usb \
     kernel-module-berlin-chipid \
     kernel-module-rpi-panel-attiny-regulator \
-    kernel-module-pvrsrvkm \
     synasdk-demos \
     alsa-utils \
     gstreamer1.0-meta-base \
@@ -174,7 +171,6 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     kernel-module-dolphin-hwmon \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
-    synasdk-synap-module \
     tim-vx \
     tflite-vx-delegate \
     libdrm-tests \
@@ -185,7 +181,6 @@ IMAGE_INSTALL:append:dolphin = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-v4l2isp-daemon \
     synasdk-vpu-plugin \
-    synasdk-drivers-isp \
     synasdk-v4l2isp-qtapp \
 "
 
