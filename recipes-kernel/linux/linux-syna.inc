@@ -148,6 +148,8 @@ KERNEL_MODULE_AUTOLOAD:append = " \
     syna_drm \
     pvrsrvkm \
     bcmdhd \
+    synadhd103 \
+    synadhd591 \
 "
 
 KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
@@ -157,11 +159,6 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
     vvcam_video \
     vvcam_isp_subdev \
     hrx_v4l2 \
-    synadhd103 \
-"
-
-KERNEL_MODULE_AUTOLOAD:append:platypus = " \
-    synadhd103 \
 "
 
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
