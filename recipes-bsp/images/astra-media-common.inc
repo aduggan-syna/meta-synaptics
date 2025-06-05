@@ -69,6 +69,8 @@ IMAGE_INSTALL:append = " \
     i2c-tools \
     v4l-utils \
     kernel-module-syna-axi-meter \
+    kernel-module-bluetooth-lpm \
+    kernel-module-bluetooth-rfkill \
     kernel-module-hl7593 \
     kernel-module-rt5739-regulator \
     kernel-module-tps6286x-regulator \
