@@ -34,11 +34,11 @@
     },
     {
       "classname": "Awbv2",
-      "state": 1,
-      "enable": false,
+      "state": 2,
+      "enable": true,
       "mode": 1,
       "useCcoffset": true,
-      "useCcmatrix": true,
+      "useCcmatrix": false,
       "useDamping": true,
       "roiNumber": 0,
       "roiWindow": [

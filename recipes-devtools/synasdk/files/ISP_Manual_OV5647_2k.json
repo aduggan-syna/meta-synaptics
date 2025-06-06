@@ -36,7 +36,7 @@
           "max_global_strength": 72,
           "enable": true,
           "max_gain": 3,
-          "strength": 50
+          "strength": 40
         },
         {
           "class": "C2dnrv3",
@@ -44,7 +44,7 @@
           "enable": true,
           "pregamma_strength": false,
           "sigma": 10,
-          "strength": 65
+          "strength": 55
         },
         {
           "class": "C3dnrv1_2",
@@ -52,12 +52,12 @@
           "enable": 1,
           "delta_factor": 48,
           "motion_factor": 512,
-          "strength": 60
+          "strength": 50
         },
         {
           "class": "Bls",
           "state": 1,
-          "bls": [256, 256, 256, 256]
+          "bls": [128, 128, 128, 128]
         },
         {
           "bit": 14,
