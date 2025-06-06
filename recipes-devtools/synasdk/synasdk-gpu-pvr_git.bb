@@ -74,13 +74,6 @@ do_install:append:aarch64 () {
         ln -sf "libVK_IMG.so" "libVK_IMG.so.1"; \
         cd -
     fi
-
-    # Check if ${D}${libdir}/libvulkan.so exists and create a symbolic link
-    if [ -f "${D}${libdir}/libvulkan.so" ]; then \
-        cd ${D}${libdir}
-        ln -sf "libvulkan.so" "libvulkan.so.1"; \
-        cd -
-    fi
 }
 
 do_install:append:arm () {
