@@ -78,6 +78,7 @@ IMAGE_INSTALL:append = " \
     kernel-module-phy-syna-usb \
     kernel-module-berlin-chipid \
     kernel-module-rpi-panel-attiny-regulator \
+    kernel-module-pvrsrvkm \
     synasdk-demos \
     alsa-utils \
     gstreamer1.0-meta-base \
