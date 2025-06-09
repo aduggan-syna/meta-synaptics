@@ -162,6 +162,7 @@ IMAGE_INSTALL:append:myna2 = " \
     synasdk-brcm-bt-start \
     synasdk-drivers-syna-dvfs \
     synasdk-drivers-syna-hwmon \
+    zigbee \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
