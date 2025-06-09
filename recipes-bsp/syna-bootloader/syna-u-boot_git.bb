@@ -46,7 +46,7 @@ SRCREV_FORMAT = "uboot_boot_external"
 
 require recipes-devtools/synasdk/synasdk-build.inc
 
-PV = "2019.10+git${SRCPV}"
+PV = "2025.01+git${SRCPV}"
 
 do_compile () {
     security_tools_path="${STAGING_DIR_NATIVE}${prefix}/libexec/syna/"
