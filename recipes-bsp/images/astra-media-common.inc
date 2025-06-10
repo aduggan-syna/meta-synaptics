@@ -172,6 +172,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     kernel-module-pcie-berlin \
     kernel-module-berlin-ir \
     kernel-module-dolphin-hwmon \
+    kernel-module-hrx-v4l2 \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
     tim-vx \
