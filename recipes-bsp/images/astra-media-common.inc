@@ -172,7 +172,6 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     kernel-module-pcie-berlin \
     kernel-module-berlin-ir \
     kernel-module-dolphin-hwmon \
-    kernel-module-hrx-v4l2 \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
     tim-vx \
@@ -186,6 +185,7 @@ IMAGE_INSTALL:append:dolphin = " \
     synasdk-v4l2isp-daemon \
     synasdk-vpu-plugin \
     synasdk-v4l2isp-qtapp \
+    kernel-module-hrx-v4l2 \
 "
 
 IMAGE_INSTALL:append:platypus = " \
