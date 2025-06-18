@@ -7,19 +7,16 @@ IMAGE_INSTALL:append = " \
 "
 
 IMAGE_INSTALL:append:platypus = " \
-    bluealsa \
     pulseaudio \
     evtest \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
-    bluealsa \
     pulseaudio \
     evtest \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
-    bluealsa \
     pulseaudio \
     evtest \
 "

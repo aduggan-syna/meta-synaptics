@@ -1,4 +1,5 @@
 IMAGE_INSTALL:append = " \
+    bluealsa \
     gstreamer1.0-plugins-bad-fdkaac \
     gstreamer1.0-plugins-base-audiomixer \
     gstreamer1.0-plugins-base-apps \
@@ -8,4 +9,5 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-bad-bayer \
     gstreamer1.0-plugins-bad-videoparsersbad \
     gstreamer1.0-plugins-ugly-x264 \
+    v4l-utils \
 "

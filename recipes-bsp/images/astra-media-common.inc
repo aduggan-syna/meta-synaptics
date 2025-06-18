@@ -50,12 +50,8 @@ WAYLAND_PACKAGES = " \
 "
 
 IMAGE_INSTALL:append = " \
-    gdbserver \
-    curl \
     kernel-modules \
     linux-firmware-syna \
-    i2c-tools \
-    v4l-utils \
     kernel-module-syna-axi-meter \
     kernel-module-bluetooth-lpm \
     kernel-module-bluetooth-rfkill \
@@ -67,62 +63,70 @@ IMAGE_INSTALL:append = " \
     kernel-module-berlin-chipid \
     kernel-module-rpi-panel-attiny-regulator \
     kernel-module-pvrsrvkm \
-    synasdk-demos \
+"
+
+IMAGE_INSTALL:append = " \
+    gdbserver \
+    curl \
+    i2c-tools \
     alsa-utils \
+    synasdk-demos \
+    synasdk-bootctrl \
+    synasdk-sysctl-conf \
+    synasdk-macaddr \
+    syna-mount-generator \
+    synasdk-syna-settings-framework \
+    synasdk-syna-compositor \
+    tensorflow-lite \
+    synasdk-synap-models \
+    synasdk-synap-framework \
+    "
+
+IMAGE_INSTALL:append = " \
     gstreamer1.0-meta-base \
     gstreamer1.0-meta-video \
     gstreamer1.0-plugins-base-app \
-    gstreamer1.0-plugins-base-pango \
+    gstreamer1.0-plugins-base-compositor \
     gstreamer1.0-plugins-base-opengl \
+    gstreamer1.0-plugins-base-pango \
     gstreamer1.0-plugins-base-rawparse \
+    gstreamer1.0-plugins-base-videorate \
     gstreamer1.0-plugins-good-audioparsers \
+    gstreamer1.0-plugins-good-cairo \
     gstreamer1.0-plugins-good-flv \
     gstreamer1.0-plugins-good-id3demux \
     gstreamer1.0-plugins-good-imagefreeze \
     gstreamer1.0-plugins-good-isomp4 \
     gstreamer1.0-plugins-good-mpg123 \
     gstreamer1.0-plugins-good-multifile \
+    gstreamer1.0-plugins-good-png \
+    gstreamer1.0-plugins-good-jpeg \
     gstreamer1.0-plugins-good-video4linux2 \
     gstreamer1.0-plugins-good-udp \
     gstreamer1.0-plugins-good-rtp\
+    gstreamer1.0-plugins-good-rtsp \
+    gstreamer1.0-plugins-good-rtpmanager \
     gstreamer1.0-plugins-bad-autoconvert \
     gstreamer1.0-plugins-bad-camerabin \
     gstreamer1.0-plugins-bad-jpegformat \
     gstreamer1.0-plugins-bad-mpegtsdemux \
     gstreamer1.0-plugins-bad-videoparsersbad \
     gstreamer1.0-plugins-bad-kms \
-    gstreamer1.0-plugins-syna \
     gstreamer1.0-meta-debug \
-    synasdk-synap-models \
-    synasdk-synap-framework \
-    tensorflow-lite \
-    synasdk-macaddr \
-    ethtool \
     gstreamer1.0-libav \
-    syna-mount-generator \
+    gstreamer1.0-rtsp-server \
+    "
+
+IMAGE_INSTALL:append = " \
+    wget \
+    vim \
+    wlan-connect \
+    ethtool \
     syna-wifi-tools \
-    gstreamer1.0-plugins-base-compositor \
-    gstreamer1.0-plugins-base-videorate \
-    gstreamer1.0-plugins-good-cairo \
-    gstreamer1.0-plugins-good-rtsp \
-    gstreamer1.0-plugins-good-rtpmanager \
-    gstreamer1.0-plugins-good-jpeg \
-    gstreamer1.0-plugins-good-png \
     hostapd \
     iptables \
     protobuf \
-    opencv \
-    qtmultimedia \
-    gstreamer1.0-rtsp-server \
-    synasdk-bootctrl \
-    wlan-connect \
-    synasdk-sysctl-conf \
-    wget \
-    vim \
-    synasdk-syna-settings-framework \
-    bridge-utils \
-    synasdk-syna-compositor \
-"
+    "
 
 # install xfce desktop for X backend in 1680
 IMAGE_INSTALL:append:dolphin = " \
@@ -167,7 +171,6 @@ IMAGE_INSTALL:append:dolphin = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-v4l2isp-daemon \
     synasdk-vpu-plugin \
-    synasdk-v4l2isp-qtapp \
     kernel-module-hrx-v4l2 \
 "
 
