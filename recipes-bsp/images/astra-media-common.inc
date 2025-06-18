@@ -49,18 +49,6 @@ WAYLAND_PACKAGES = " \
     gstreamer1.0-plugins-bad-waylandsink \
 "
 
-SWUPDATE_INSTALL = " \
-    swupdate \
-    swupdate-client \
-    swupdate-progress \
-    swupdate-tools \
-    swupdate-tools-hawkbit \
-    swupdate-tools-ipc \
-    libubootenv \
-    libubootenv-bin \
-    swu-conf \
-"
-
 IMAGE_INSTALL:append = " \
     gdbserver \
     curl \
@@ -127,7 +115,6 @@ IMAGE_INSTALL:append = " \
     qtmultimedia \
     gstreamer1.0-rtsp-server \
     synasdk-bootctrl \
-    ${SWUPDATE_INSTALL} \
     wlan-connect \
     synasdk-sysctl-conf \
     wget \
@@ -136,10 +123,6 @@ IMAGE_INSTALL:append = " \
     bridge-utils \
     synasdk-syna-compositor \
 "
-
-IMAGE_INSTALL:remove:sl1620usb = "${SWUPDATE_INSTALL}"
-IMAGE_INSTALL:remove:sl1640usb = "${SWUPDATE_INSTALL}"
-IMAGE_INSTALL:remove:sl1680usb = "${SWUPDATE_INSTALL}"
 
 # install xfce desktop for X backend in 1680
 IMAGE_INSTALL:append:dolphin = " \
@@ -218,26 +201,3 @@ ROOTFS_POSTPROCESS_COMMAND += "mount_usb; add_version; "
 LICENSE = "MIT"
 
 inherit core-image
-
-# Include dependencies and SWUpdate
-inherit swupdate
-
-SRC_URI = "file://generate_swu.sh"
-
-do_swuimage() {
-    if [ ${MACHINE} == "sl1620usb" ] || [ ${MACHINE} == "sl1640usb" ] || [ ${MACHINE} == "sl1680usb" ]; then
-        return
-    fi
-    # Change to build directory (or wherever your images are generated)
-    cd ${WORKDIR}
-
-    # Run the script to generate the .swu image and sw-description
-    chmod +x generate_swu.sh
-    MACHINE=${MACHINE} ROOTFS_IMAGE_FILE="${PN}-${MACHINE}.rootfs.ext4.gz" VERSION=${SYNA_SDK_REVISION} ./generate_swu.sh ${DEPLOY_DIR_IMAGE} 3
-
-    # Copy the output .swu file to the deployment directory
-    # install -d ${DEPLOY_DIR_IMAGE}
-    cp ${DEPLOY_DIR_IMAGE}/image.swu ${DEPLOY_DIR_IMAGE}/astra-media.swu
-}
-# Ensure swu image is built after do_image_complete task
-addtask do_swuimage after do_image_complete
