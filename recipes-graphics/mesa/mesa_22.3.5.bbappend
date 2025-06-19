@@ -171,38 +171,6 @@ SRC_URI += "file://0166-zink-workaround-undefined-swizzle-1-for-z-s-textures.pat
 SRC_URI += "file://0167-zink-rename-shadow-key-to-zs-swizzle.patch"
 SRC_URI += "file://0168-kopper-add-compatibility-to-old-style-DRI-interface.patch"
 
-# Some files are stored in the GIT repository with LF line endings,
-# but have CR/LF line endings when checked out. Patches generated for
-# such files with "git format-patch" have LF line endings, which
-# cannot be applied, without error, to checked out files with "patch".
-# The line endings for such files are converted from CR/LF to LF prior
-# to patching, and converted back afterwards.
-PATCH_CRLF_FILES = "src/mesa/main/formats.csv"
-
-crlf_file_prepatch() {
-	local rf
-	local af
-
-	for rf in "${PATCH_CRLF_FILES}"
-	do
-		af=${S}/${rf}
-		sed 's/\r$//' < ${af} > ${af}.lf && mv -f ${af}.lf ${af}
-	done
-}
-
-crlf_file_postpatch() {
-	local rf
-	local af
-	for rf in "${PATCH_CRLF_FILES}"
-	do
-		af=${S}/${rf}
-		sed 's/$/\r/' < ${af} > ${af}.crlf && mv -f ${af}.crlf ${af}
-	done
-}
-
-do_patch[prefuncs] += "crlf_file_prepatch"
-do_patch[postfuncs] += "crlf_file_postpatch"
-
 PACKAGECONFIG:append:class-target = " pvr-alias"
 
 GALLIUMDRIVERS:append:class-target = ",pvr"
