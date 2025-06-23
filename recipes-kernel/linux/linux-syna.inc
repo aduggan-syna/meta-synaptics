@@ -144,6 +144,7 @@ do_deploy:append() {
 KERNEL_MODULE_AUTOLOAD:append = " \
     amp_bm \
     vpu \
+    rpi-panel-attiny-regulator \
     panel-waveshare-dsi \
     syna_drm \
     pvrsrvkm \
@@ -161,17 +162,17 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
 
 KERNEL_MODULE_PROBECONF:append = "bcmdhd "
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
+KERNEL_MODULE_PROBECONF:append = "rpi-panel-attiny-regulator "
 KERNEL_MODULE_PROBECONF:append = "panel-waveshare-dsi "
 KERNEL_MODULE_PROBECONF:append = "amp_bm "
 KERNEL_MODULE_PROBECONF:append = "pvrsrvkm "
 KERNEL_MODULE_PROBECONF:append = "syna-vpu "
 KERNEL_MODULE_PROBECONF:append = "vpu "
 
-module_conf_syna_drm = "softdep syna_drm pre: amp_bm fxl6408 panel-waveshare-dsi"
+module_conf_syna_drm = "softdep syna_drm pre: amp_bm fxl6408 rpi-panel-attiny-regulator panel-waveshare-dsi"
 module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
 
 module_conf_syna-vpu = "softdep syna-vpu pre: amp_bm"
 module_conf_vpu = "softdep vpu pre: amp_bm"
 
 # module_conf_bcmdhd = "options bcmdhd firmware_path=bcm/fw_bcm43752.bin nvram_path=bcm/bcmdhd_43752.cal clm_path=bcm/bcmdhd_clm_43752.blob"
-module_conf_syna_drm = "options syna_drm hdmi_preferred_mode=1920x1080"
