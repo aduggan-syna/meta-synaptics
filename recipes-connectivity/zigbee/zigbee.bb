@@ -5,7 +5,6 @@ SRC_URI = " \
     file://zigbee_coordinator.sh \
     file://bulb.json \
     file://switch.json \
-    file://brcm_patchram_plus \
     file://color_dimmer_switch_zc \
 "
 
