@@ -1,0 +1,45 @@
+From 216a5687471bb89538f9ed735b93b88b4bacb2fe Mon Sep 17 00:00:00 2001
+From: Randy Li <ayaka@soulik.info>
+Date: Thu, 27 Apr 2023 04:10:13 +0800
+Subject: [PATCH 02/16] matroskademux: normalize colorimetry to string result
+
+Upstream-Status: Submitted
+Signed-off-by: Hsia-Jun(Randy) Li <randy.li@synaptics.com>
+---
+ .../gst-plugins-good/gst/matroska/matroska-demux.c  | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/subprojects/gst-plugins-good/gst/matroska/matroska-demux.c b/subprojects/gst-plugins-good/gst/matroska/matroska-demux.c
+index 9b3cf83adb..7b6a7cead5 100644
+--- a/subprojects/gst-plugins-good/gst/matroska/matroska-demux.c
++++ b/subprojects/gst-plugins-good/gst/matroska/matroska-demux.c
+@@ -6747,6 +6747,8 @@ gst_matroska_demux_video_caps (GstMatroskaTrackVideoContext *
+   if (caps != NULL) {
+     int i;
+     GstStructure *structure;
++    GstVideoColorimetry *cinfo;
++    gchar *colorimetry;
+ 
+     for (i = 0; i < gst_caps_get_size (caps); i++) {
+       structure = gst_caps_get_structure (caps, i);
+@@ -6841,13 +6843,10 @@ gst_matroska_demux_video_caps (GstMatroskaTrackVideoContext *
+           GST_FLAG_SET_MASK_EXACT, NULL);
+     }
+ 
+-    if (videocontext->colorimetry.range != GST_VIDEO_COLOR_RANGE_UNKNOWN ||
+-        videocontext->colorimetry.matrix != GST_VIDEO_COLOR_MATRIX_UNKNOWN ||
+-        videocontext->colorimetry.transfer != GST_VIDEO_TRANSFER_UNKNOWN ||
+-        videocontext->colorimetry.primaries !=
+-        GST_VIDEO_COLOR_PRIMARIES_UNKNOWN) {
+-      gchar *colorimetry =
+-          gst_video_colorimetry_to_string (&videocontext->colorimetry);
++    cinfo = &videocontext->colorimetry;
++    gst_video_colorimetry_normalize (cinfo);
++    colorimetry = gst_video_colorimetry_to_string (cinfo);
++    if (colorimetry) {
+       gst_caps_set_simple (caps, "colorimetry", G_TYPE_STRING, colorimetry,
+           NULL);
+       GST_DEBUG ("setting colorimetry to %s", colorimetry);
+-- 
+2.17.1
+

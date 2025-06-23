@@ -1,0 +1,106 @@
+From 9e5f84345ff9a46fc270fe9722b1db809dd07823 Mon Sep 17 00:00:00 2001
+From: "Hsia-Jun(Randy) Li" <randy.li@synaptics.com>
+Date: Wed, 30 Nov 2022 18:11:16 +0800
+Subject: [PATCH] video-color: normalize colorimetry to string result
+
+Fixed #1603
+Upstream-Status: Submitted
+
+Signed-off-by: Hsia-Jun(Randy) Li <randy.li@synaptics.com>
+---
+ .../gst-libs/gst/video/video-color.c          | 64 +++++++++++++++++++
+ .../gst-libs/gst/video/video-color.h          |  3 +
+ 2 files changed, 67 insertions(+)
+
+diff --git a/subprojects/gst-plugins-base/gst-libs/gst/video/video-color.c b/subprojects/gst-plugins-base/gst-libs/gst/video/video-color.c
+index 90fa380b18..fb8fa654d3 100644
+--- a/subprojects/gst-plugins-base/gst-libs/gst/video/video-color.c
++++ b/subprojects/gst-plugins-base/gst-libs/gst/video/video-color.c
+@@ -185,6 +185,70 @@ gst_video_colorimetry_matches (const GstVideoColorimetry * cinfo,
+   return FALSE;
+ }
+ 
++/**
++ * gst_video_colorimetry_normalize:
++ * @cinfo: (transfer full): a #GstVideoColorimetry to normalize
++ *
++ * Returns a #GstVideoColorimetry that represent a complete version of @cinfo.
++ * If @cinfo is incomplete (e.g. if any entry in the structure is
++ * set to `UNKNOWN`) it will try to find the best suitable value.
++ * If we can't solve the `UNKNOWN` entry in @cinfo, the @cinfo would
++ * become `DEFAULT_UNKNOWN`.
++ *
++ * Since: 1.24
++ */
++void
++gst_video_colorimetry_normalize (GstVideoColorimetry * cinfo)
++{
++  guint score, highest_score, idx;
++  GstVideoColorRange range;
++  const GstVideoColorimetry *cur_cinfo;
++  guint i;
++
++  if (IS_UNKNOWN (cinfo))
++    return cinfo;
++
++  range = cinfo->range;
++
++  if (cinfo->transfer != GST_VIDEO_TRANSFER_UNKNOWN
++      && cinfo->primaries != GST_VIDEO_COLOR_PRIMARIES_UNKNOWN
++      && cinfo->matrix != GST_VIDEO_COLOR_MATRIX_UNKNOWN
++      && range != GST_VIDEO_COLOR_RANGE_UNKNOWN)
++    return;
++
++  cinfo->range = GST_VIDEO_COLOR_RANGE_UNKNOWN;
++  if (IS_UNKNOWN (cinfo))
++    return;
++
++  idx = DEFAULT_UNKNOWN;
++  highest_score = 0;
++
++  /* The last two are invalid colorimetry */
++  for (i = 0; i < G_N_ELEMENTS (colorimetry) - 2; i++) {
++    cur_cinfo = &(colorimetry[i].color);
++    score = 0;
++
++    if (cinfo->transfer == cur_cinfo->transfer)
++      score = 5;
++
++    if (cinfo->primaries == cur_cinfo->primaries)
++      score += 2;
++
++    if (cinfo->matrix == cur_cinfo->matrix)
++      score += 2;
++
++    if (range == cur_cinfo->range)
++      score++;
++
++    if (score > highest_score) {
++      highest_score = score;
++      idx = i;
++    }
++  }
++
++  *cinfo = colorimetry[idx].color;
++}
++
+ /**
+  * gst_video_color_range_offsets:
+  * @range: a #GstVideoColorRange
+diff --git a/subprojects/gst-plugins-base/gst-libs/gst/video/video-color.h b/subprojects/gst-plugins-base/gst-libs/gst/video/video-color.h
+index ccdf64cf90..6ae0ae3047 100644
+--- a/subprojects/gst-plugins-base/gst-libs/gst/video/video-color.h
++++ b/subprojects/gst-plugins-base/gst-libs/gst/video/video-color.h
+@@ -271,6 +271,9 @@ gboolean     gst_video_colorimetry_is_equivalent (const GstVideoColorimetry *cin
+                                                   guint bitdepth,
+                                                   const GstVideoColorimetry *other,
+                                                   guint other_bitdepth);
++GST_VIDEO_API
++void         gst_video_colorimetry_normalize    (GstVideoColorimetry * cinfo);
++
+ 
+ /* compute offset and scale */
+ 
+-- 
+2.17.1
+

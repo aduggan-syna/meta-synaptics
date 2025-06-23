@@ -1,0 +1,31 @@
+From 2f9da98611644027b25bef00aec31fe61c7c9965 Mon Sep 17 00:00:00 2001
+From: Philipp Zabel <p.zabel@pengutronix.de>
+Date: Fri, 5 Apr 2024 14:21:38 +0200
+Subject: [PATCH 05/16] v4l2: allocator: Fix unref log/trace on memory release
+
+Use gst_object_unref() instead of g_object_unref() in
+gst_v4l2_allocator_release(), so refcounting log and
+tracer get to know about this unref.
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6551>
+Upstream-Status: Backport
+---
+ subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c
+index 059039e530..18d570689b 100644
+--- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c
++++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2allocator.c
+@@ -374,7 +374,7 @@ gst_v4l2_allocator_release (GstV4l2Allocator * allocator, GstV4l2Memory * mem)
+   }
+ 
+   /* Keep last, allocator may be freed after this call */
+-  g_object_unref (allocator);
++  gst_object_unref (allocator);
+ }
+ 
+ static void
+-- 
+2.17.1
+

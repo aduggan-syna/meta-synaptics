@@ -1,0 +1,53 @@
+From 4c9dc983d4bf305cfaa57f8130a5c2113611cc93 Mon Sep 17 00:00:00 2001
+From: Hsia-Jun Li <randy.li@synaptics.com>
+Date: Mon, 23 Jun 2025 15:36:58 +0800
+Subject: [PATCH 16/16] v4l2bufferpool: actually queue back the empty buffer
+ flagged LAST
+
+It was the fixup for 1.22.8 for
+<https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6579>
+9b88ebe05b997af0183474a7f8c63530f9ac4b27
+
+Upstream-Status: Pending
+Signed-off-by: Hsia-Jun(Randy) Li <randy.li@synaptics.com>
+---
+ .../gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c        | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
+index 22dcb5d20f..9aebb1555b 100644
+--- a/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
++++ b/subprojects/gst-plugins-good/sys/v4l2/gstv4l2bufferpool.c
+@@ -1310,6 +1310,7 @@ gst_v4l2_buffer_pool_dqbuf (GstV4l2BufferPool * pool, GstBuffer ** buffer,
+   const GstVideoInfo *info = &obj->info;
+   gint i;
+   gint old_buffer_state;
++  gboolean last_empty_buffer = FALSE;
+ 
+   if ((res = gst_v4l2_buffer_pool_poll (pool, wait)) < GST_FLOW_OK)
+     goto poll_failed;
+@@ -1348,7 +1349,7 @@ gst_v4l2_buffer_pool_dqbuf (GstV4l2BufferPool * pool, GstBuffer ** buffer,
+   if (group->buffer.flags & V4L2_BUF_FLAG_LAST &&
+       group->planes[0].bytesused == 0) {
+     GST_DEBUG_OBJECT (pool, "Empty last buffer, signalling eos.");
+-    goto eos;
++    last_empty_buffer = TRUE;
+   }
+ 
+   outbuf = pool->buffers[group->buffer.index];
+@@ -1362,6 +1363,12 @@ gst_v4l2_buffer_pool_dqbuf (GstV4l2BufferPool * pool, GstBuffer ** buffer,
+     GST_OBJECT_UNLOCK (pool);
+   }
+ 
++  if (last_empty_buffer) {
++    gst_v4l2_buffer_pool_complete_release_buffer (GST_BUFFER_POOL_CAST (pool),
++        outbuf, FALSE);
++    goto eos;
++  }
++
+   timestamp = GST_TIMEVAL_TO_TIME (group->buffer.timestamp);
+ 
+   for (i = 0; i < group->n_mem; i++) {
+-- 
+2.17.1
+

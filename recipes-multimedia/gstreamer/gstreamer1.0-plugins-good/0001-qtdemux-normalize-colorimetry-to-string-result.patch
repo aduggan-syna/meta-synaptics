@@ -1,0 +1,46 @@
+From cdaebf0c9aaf7f2390b1dfbb49316d993d61bee6 Mon Sep 17 00:00:00 2001
+From: Randy Li <ayaka@soulik.info>
+Date: Thu, 27 Apr 2023 04:09:05 +0800
+Subject: [PATCH 01/16] qtdemux: normalize colorimetry to string result
+
+Upstream-Status: Submitted
+Signed-off-by: Hsia-Jun(Randy) Li <randy.li@synaptics.com>
+---
+ subprojects/gst-plugins-good/gst/isomp4/qtdemux.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/subprojects/gst-plugins-good/gst/isomp4/qtdemux.c b/subprojects/gst-plugins-good/gst/isomp4/qtdemux.c
+index a53d61e649..ae23c7bafd 100644
+--- a/subprojects/gst-plugins-good/gst/isomp4/qtdemux.c
++++ b/subprojects/gst-plugins-good/gst/isomp4/qtdemux.c
+@@ -8923,6 +8923,9 @@ gst_qtdemux_configure_stream (GstQTDemux * qtdemux, QtDemuxStream * stream)
+     gboolean fps_available = gst_qtdemux_guess_framerate (qtdemux, stream);
+ 
+     if (CUR_STREAM (stream)->caps) {
++      GstVideoColorimetry * cinfo;
++      gchar * colorimetry;
++
+       CUR_STREAM (stream)->caps =
+           gst_caps_make_writable (CUR_STREAM (stream)->caps);
+ 
+@@ -8985,13 +8988,10 @@ gst_qtdemux_configure_stream (GstQTDemux * qtdemux, QtDemuxStream * stream)
+         }
+       }
+ 
+-      /* Create incomplete colorimetry here if needed */
+-      if (CUR_STREAM (stream)->colorimetry.range ||
+-          CUR_STREAM (stream)->colorimetry.matrix ||
+-          CUR_STREAM (stream)->colorimetry.transfer
+-          || CUR_STREAM (stream)->colorimetry.primaries) {
+-        gchar *colorimetry =
+-            gst_video_colorimetry_to_string (&CUR_STREAM (stream)->colorimetry);
++      cinfo = &(CUR_STREAM (stream)->colorimetry);
++      gst_video_colorimetry_normalize (cinfo);
++      colorimetry = gst_video_colorimetry_to_string (cinfo);
++      if (colorimetry) {
+         gst_caps_set_simple (CUR_STREAM (stream)->caps, "colorimetry",
+             G_TYPE_STRING, colorimetry, NULL);
+         g_free (colorimetry);
+-- 
+2.17.1
+
