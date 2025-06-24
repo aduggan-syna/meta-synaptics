@@ -2,7 +2,7 @@ SUMMARY = "Synaptics Settings"
 SECTION = "multimedia"
 LICENSE = "Apache-2.0"
 
-DEPENDS += "qtbase qtdeclarative glib-2.0 \
+DEPENDS += "qtbase qtdeclarative glib-2.0  gstreamer1.0-plugins-base \
             synasdk-syna-settings-framework"
 RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
 
