@@ -15,6 +15,7 @@ SRC_URI = "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad
            file://0007-waylandsink-increase-buffer-count.patch \
            file://0008-kmssink-enable-playback-on-leasedrmfd.patch \
            file://0009-kmsink-update-dispwin-2-max-mode-size.patch \
+           file://0010-kmssink-align-nv12-plane-offset.patch \
            "
 SRC_URI[sha256sum] = "458783f8236068991e3e296edd671c8eddb8be6fac933c1c2e1503462864ea0f"
 
