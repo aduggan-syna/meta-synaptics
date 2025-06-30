@@ -72,7 +72,7 @@ IMAGE_INSTALL:append = " \
     kernel-module-bluetooth-lpm \
     kernel-module-bluetooth-rfkill \
     kernel-module-hl7593 \
-    kernel-module-rt5739-regulator \
+    kernel-module-rt5739 \
     kernel-module-tps6286x-regulator \
     kernel-module-dwc3-syna \
     kernel-module-phy-syna-usb \
