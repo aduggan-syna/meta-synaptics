@@ -1,11 +1,11 @@
 diff --git a/sys/kms/gstkmsallocator.c b/sys/kms/gstkmsallocator.c
-index 2e6a398..8d8c0f7 100644
+index 6687f3b..74fd317 100644
 --- a/sys/kms/gstkmsallocator.c
 +++ b/sys/kms/gstkmsallocator.c
-@@ -46,6 +46,17 @@
+@@ -46,6 +46,16 @@
  #define DRM_RDWR O_RDWR
  #endif
-
+ 
 +#ifndef ALIGN
 +#define ALIGN(x, a)  (((x) + ((a) - 1)) & ~((typeof(x))(a) - 1))
 +#endif //ALIGN
@@ -16,14 +16,13 @@ index 2e6a398..8d8c0f7 100644
 +
 +#define SIZE_4K 4096
 +#define BIT_ALIGN 8
-+
  #define GST_CAT_DEFAULT kmsallocator_debug
  GST_DEBUG_CATEGORY_STATIC (GST_CAT_DEFAULT);
-
-@@ -164,6 +175,13 @@ gst_kms_allocator_memory_create (GstKMSAllocator * allocator,
+ 
+@@ -164,6 +174,14 @@ gst_kms_allocator_memory_create (GstKMSAllocator * allocator,
    h = GST_VIDEO_INFO_HEIGHT (vinfo);
    arg.height = gst_drm_height_from_drm (fmt, h);
-
+ 
 +  /*Memory is allocated from system-cust-heap and is IOMMU enabled
 +   *Due to which HW expect 4k aligned plane offset in multi-planar formats
 +   *size increased to compensate the offset in case of unaligned address. */
@@ -40,6 +39,6 @@ index 2e6a398..8d8c0f7 100644
       * hence using the display height here. */
      offs += pitch * GST_VIDEO_FORMAT_INFO_SCALE_HEIGHT (vinfo->finfo, i, h);
 +    offs = ALIGN(offs, SIZE_4K);
-
+ 
      GST_DEBUG_OBJECT (allocator, "Created BO plane %i with stride %i and "
          "offset %" G_GSIZE_FORMAT, i,
