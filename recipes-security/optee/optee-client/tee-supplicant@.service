@@ -1,0 +1,13 @@
+# SPDX-License-Identifier: BSD-2-Clause
+[Unit]
+Description=TEE Supplicant on %i
+DefaultDependencies=no
+After=dev-%i.device
+Wants=dev-%i.device
+Conflicts=shutdown.target
+Before=tpm2.target sysinit.target shutdown.target
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/default/tee-supplicant
+ExecStart=/usr/sbin/tee-supplicant $OPTARGS

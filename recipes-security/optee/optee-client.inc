@@ -9,10 +9,10 @@ inherit systemd update-rc.d cmake useradd
 
 SRC_URI = " \
     git://github.com/OP-TEE/optee_client.git;branch=master;protocol=https \
+    file://tee-supplicant@.service \
     file://tee-supplicant.sh \
+    file://optee-udev.rules \
 "
-SRC_URI:append = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', \
-    '', 'file://0001-disable-systemd-service-file.patch', d)}"
 
 UPSTREAM_CHECK_GITTAGREGEX = "^(?P<pver>\d+(\.\d+)+)$"
 
@@ -21,14 +21,18 @@ S = "${WORKDIR}/git"
 EXTRA_OECMAKE = " \
     -DBUILD_SHARED_LIBS=ON \
     -DCFG_TEE_FS_PARENT_PATH='${localstatedir}/lib/tee' \
-    -DCFG_TEEPRIV_GROUP='teeclnt' \
 "
 EXTRA_OECMAKE:append:toolchain-clang = " -DCFG_WERROR=0"
 
 do_install:append() {
+    install -D -p -m0644 ${WORKDIR}/tee-supplicant@.service ${D}${systemd_system_unitdir}/tee-supplicant@.service
     install -D -p -m0755 ${WORKDIR}/tee-supplicant.sh ${D}${sysconfdir}/init.d/tee-supplicant
+    install -d ${D}${sysconfdir}/udev/rules.d
+    install -m 0644 ${WORKDIR}/optee-udev.rules ${D}${sysconfdir}/udev/rules.d/optee.rules
+
     sed -i -e s:@sysconfdir@:${sysconfdir}:g \
            -e s:@sbindir@:${sbindir}:g \
+              ${D}${systemd_system_unitdir}/tee-supplicant@.service \
               ${D}${sysconfdir}/init.d/tee-supplicant
 }
 
