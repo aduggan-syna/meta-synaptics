@@ -29,6 +29,10 @@ do_install() {
 
     install -d ${D}${nonarch_base_libdir}/firmware/mrvl
     install -m 0644 ${STAGING_KERNEL_DIR}/firmware/mrvl/* ${D}${nonarch_base_libdir}/firmware/mrvl
+
+    install -d ${D}${nonarch_base_libdir}/firmware/isp
+    install -m 0644 ${STAGING_KERNEL_DIR}/firmware/isp/DEWARP_LUT.isp ${D}${nonarch_base_libdir}/firmware/isp
+    install -m 0644 ${STAGING_KERNEL_DIR}/firmware/isp/DEWARP_LUT_IMX415.isp ${D}${nonarch_base_libdir}/firmware/isp
 }
 
 FILES:${PN} = " \
