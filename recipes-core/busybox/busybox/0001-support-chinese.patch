@@ -1,0 +1,49 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
+diff --git a/libbb/printable_string.c b/libbb/printable_string.c
+index a814fd03c..a97df774a 100644
+--- a/libbb/printable_string.c
++++ b/libbb/printable_string.c
+@@ -28,8 +28,6 @@ const char* FAST_FUNC printable_string2(uni_stat_t *stats, const char *str)
+ 		}
+ 		if (c < ' ')
+ 			break;
+-		if (c >= 0x7f)
+-			break;
+ 		s++;
+ 	}
+ 
+@@ -42,7 +40,8 @@ const char* FAST_FUNC printable_string2(uni_stat_t *stats, const char *str)
+ 			unsigned char c = *d;
+ 			if (c == '\0')
+ 				break;
+-			if (c < ' ' || c >= 0x7f)
++			/* Enable Chinese Chars */
++			if (c < ' ')
+ 				*d = '?';
+ 			d++;
+ 		}
+diff --git a/libbb/unicode.c b/libbb/unicode.c
+index e98cbbf35..d7bc5c898 100644
+--- a/libbb/unicode.c
++++ b/libbb/unicode.c
+@@ -1027,7 +1027,8 @@ static char* FAST_FUNC unicode_conv_to_printable2(uni_stat_t *stats, const char
+ 					while ((int)--width >= 0);
+ 					break;
+ 				}
+-				*d++ = (c >= ' ' && c < 0x7f) ? c : '?';
++				/*Enable Chinese Char*/
++				*d++ = (c >= ' ') ? c : '?';
+ 				src++;
+ 			}
+ 			*d = '\0';
+@@ -1035,7 +1036,8 @@ static char* FAST_FUNC unicode_conv_to_printable2(uni_stat_t *stats, const char
+ 			d = dst = xstrndup(src, width);
+ 			while (*d) {
+ 				unsigned char c = *d;
+-				if (c < ' ' || c >= 0x7f)
++				/*Enable Chinese Char*/
++				if (c < ' ')
+ 					*d = '?';
+ 				d++;
+ 			}
