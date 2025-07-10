@@ -125,11 +125,14 @@ IMAGE_CMD:synaspiimg () {
 # Add a "tag"
     touch ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/TAG--${IMAGE_NAME}--TAG
 
+# Preserve original file so we don't keep growing it
+    cp ${DEPLOY_DIR_IMAGE}/preboot.subimg ${DEPLOY_DIR_IMAGE}/preboot_aligned.subimg
+
 #Align preboot subimg
-    gen_preboot_subimg ${DEPLOY_DIR_IMAGE}/preboot.subimg
+    gen_preboot_subimg ${DEPLOY_DIR_IMAGE}/preboot_aligned.subimg
 
 # Make spi_suboot.bin which including preboot, tee and bootloader subimg
-    genx_spi_suboot_combo ${DEPLOY_DIR_IMAGE}/preboot.subimg ${DEPLOY_DIR_IMAGE}/tee.subimg ${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/spi_suboot.bin
+    genx_spi_suboot_combo ${DEPLOY_DIR_IMAGE}/preboot_aligned.subimg ${DEPLOY_DIR_IMAGE}/tee.subimg ${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/spi_suboot.bin
 
     cp ${DEPLOY_DIR_IMAGE}/linux_bootimgs.subimg ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/boot.subimg
 
