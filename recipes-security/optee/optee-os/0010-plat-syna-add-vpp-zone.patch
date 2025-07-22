@@ -1,0 +1,199 @@
+From d699ec0eebe197d323c7a20895e31ede90b54a17 Mon Sep 17 00:00:00 2001
+From: Shaojun Feng <Shaojun.Feng@synaptics.com>
+Date: Tue, 5 Aug 2025 14:00:20 +0800
+Subject: [PATCH] plat: syna: add vpp zone
+
+Change-Id: Icb27aeee8ff06cbcc2c438abacef899ea56e0b19
+Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
+---
+ core/arch/arm/plat-synaptics/common/syna_setup.c               | 10 ++++++++++
+ core/arch/arm/plat-synaptics/common/tz_umem_mgr.c              | 10 +++++++---
+ core/arch/arm/plat-synaptics/driver/szc/syscall_mpt.c          |  9 +++++++++
+ core/arch/arm/plat-synaptics/inc/mem_region_userdata.h         |  2 ++
+ core/arch/arm/plat-synaptics/inc/syna_setup.h                  |  2 ++
+ core/arch/arm/plat-synaptics/tz/tz_boot_param_value_dolphin.c  |  1 +
+ core/arch/arm/plat-synaptics/tz/tz_boot_param_value_myna2.c    |  1 +
+ core/arch/arm/plat-synaptics/tz/tz_boot_param_value_platypus.c |  1 +
+ lib/libutee/include/mem_region_userdata.h                      |  2 ++
+ 9 files changed, 35 insertions(+), 3 deletions(-)
+
+diff --git a/core/arch/arm/plat-synaptics/common/syna_setup.c b/core/arch/arm/plat-synaptics/common/syna_setup.c
+index fb52b86..90e90e0 100644
+--- a/core/arch/arm/plat-synaptics/common/syna_setup.c
++++ b/core/arch/arm/plat-synaptics/common/syna_setup.c
+@@ -123,11 +123,14 @@ struct mobj *syna_sec_mem_mobj;
+ struct mobj *syna_nsec_mobj;
+ struct mobj *syna_pt_mobj;
+ struct mobj *syna_nsec_nc_mobj;
++struct mobj *syna_vpp_mobj;
+ 
+ static unsigned long pt_paddr;
+ static unsigned long pt_size;
+ static unsigned long nsec_nc_paddr;
+ static unsigned long nsec_nc_size;
++static unsigned long vpp_paddr;
++static unsigned long vpp_size;
+ 
+ #define  MAX_REGION_COUNT 16
+ /* fill the memory region info to mem_map_section */
+@@ -181,6 +184,13 @@ static void mr_early_setup(void)
+ 			if (!syna_pt_mobj)
+ 				panic("Failed to register pt memory");
+ 		}
++		if (TEE_MR_USER_IS_VPP(mr + i)) {
++			vpp_paddr = mr[i].base;
++			vpp_size = mr[i].size;
++			syna_vpp_mobj = mobj_phys_alloc(vpp_paddr, vpp_size, TEE_MATTR_MEM_TYPE_CACHED, CORE_MEM_SDP_MEM);
++			if (!syna_vpp_mobj)
++				panic("Failed to register pt memory");
++		}
+ 
+ 		if (TEE_MR_USER_IS_ION(mr + i) && MR_IS_NONSECURE(mr + i) && MR_IS_UNCACHEABLE(mr + i)) {
+ 			nsec_nc_paddr = mr[i].base;
+diff --git a/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c b/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c
+index 63ecc7a..0353e17 100644
+--- a/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c
++++ b/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c
+@@ -309,8 +309,9 @@ static uint32_t umem_get_mmu_type_from_mz(struct umem *um)
+ 		return WRONG_MMU_ATTRIBUTE;
+ 	}
+ 
+-	if (!(TEE_MR_USER_IS_ION(mr) || TEE_MR_USER_IS_SYSTEM(mr) || TEE_MR_USER_IS_PT(mr))) {
+-		EMSG("memory(0x%lx, 0x%lx) is not in ION/System/PT memory region!!!\n",
++	if (!(TEE_MR_USER_IS_ION(mr) || TEE_MR_USER_IS_SYSTEM(mr)
++		|| TEE_MR_USER_IS_PT(mr) || TEE_MR_USER_IS_VPP(mr))) {
++		EMSG("memory(0x%lx, 0x%lx) is not in ION/System/PT/VPP memory region!!!\n",
+ 			um->s_list->s_item[0].addr, um->s_list->s_item[0].addr + um->size);
+ 		return WRONG_MMU_ATTRIBUTE;
+ 	}
+@@ -454,7 +455,7 @@ int umem_check_memory_region(paddr_t mem, size_t size)
+ 	if (!mr)
+ 		return TEE_ERROR_ACCESS_DENIED;
+ 
+-	if ((!TEE_MR_USER_IS_ION(mr)) && (!TEE_MR_USER_IS_PT(mr)))
++	if ((!TEE_MR_USER_IS_ION(mr)) && (!TEE_MR_USER_IS_PT(mr)) && (!TEE_MR_USER_IS_VPP(mr)))
+ 		return TEE_ERROR_BAD_PARAMETERS;
+ 
+ 	return TEE_SUCCESS;
+@@ -535,6 +536,9 @@ static bool umem_find_mobj(struct umem *um, scatter_list_t *s_list)
+ 
+ 		if (umem_from_mobj(um, syna_pt_mobj, pa, sz))
+ 			return true;
++
++		if (umem_from_mobj(um, syna_vpp_mobj, pa, sz))
++			return true;
+ 	}
+ 
+ 	npage = sz / SMALL_PAGE_SIZE;
+diff --git a/core/arch/arm/plat-synaptics/driver/szc/syscall_mpt.c b/core/arch/arm/plat-synaptics/driver/szc/syscall_mpt.c
+index 1f1725f..95c3351 100644
+--- a/core/arch/arm/plat-synaptics/driver/szc/syscall_mpt.c
++++ b/core/arch/arm/plat-synaptics/driver/szc/syscall_mpt.c
+@@ -188,6 +188,15 @@ static int get_mpt_valid_memory(void)
+ 		valid_mem[valid_mem_num ++].size = mr->size;
+ 	}
+ 
++	mr = mr_find_region_by_name("vpp");
++	if (mr) {
++		if (TEE_MR_ACPU_ZONE(mr))
++			return 0;
++		valid_mem[valid_mem_num].type = UMEM_DYNAMIC_SA;
++		valid_mem[valid_mem_num].base = mr->base;
++		valid_mem[valid_mem_num ++].size = mr->size;
++	}
++
+ 
+ 	return 0;
+ }
+diff --git a/core/arch/arm/plat-synaptics/inc/mem_region_userdata.h b/core/arch/arm/plat-synaptics/inc/mem_region_userdata.h
+index bd56a56..f1165db 100644
+--- a/core/arch/arm/plat-synaptics/inc/mem_region_userdata.h
++++ b/core/arch/arm/plat-synaptics/inc/mem_region_userdata.h
+@@ -40,6 +40,7 @@
+ #define TEE_MR_USER_REGISTER    0x07000000  /* The region is for register */
+ #define TEE_MR_USER_BCM         0x08000000  /* The region is for BCM */
+ #define TEE_MR_USER_PT          0x09000000  /* The region is for Hardware page table*/
++#define TEE_MR_USER_VPP         0x0A000000  /* The region is for Hardware page table*/
+ 
+ /* MACRO funtions for userdata processing */
+ #define TEE_MR_USER(mr)                 (((mr)->userdata[0] & 0xFF000000))
+@@ -54,6 +55,7 @@
+ #define TEE_MR_USER_IS_REGISTER(mr)     (TEE_MR_USER(mr) == TEE_MR_USER_REGISTER)
+ #define TEE_MR_USER_IS_BCM(mr)          (TEE_MR_USER(mr) == TEE_MR_USER_BCM)
+ #define TEE_MR_USER_IS_PT(mr)           (TEE_MR_USER(mr) == TEE_MR_USER_PT)
++#define TEE_MR_USER_IS_VPP(mr)          (TEE_MR_USER(mr) == TEE_MR_USER_VPP)
+ 
+ /* MACRO functions for ION memory region userdata processing */
+ #define TEE_MR_ION_ALG(mr)              (((mr)->userdata[0] & 0x00FFFFFF))
+diff --git a/core/arch/arm/plat-synaptics/inc/syna_setup.h b/core/arch/arm/plat-synaptics/inc/syna_setup.h
+index 51bfb41..702b041 100644
+--- a/core/arch/arm/plat-synaptics/inc/syna_setup.h
++++ b/core/arch/arm/plat-synaptics/inc/syna_setup.h
+@@ -8,6 +8,8 @@
+ #include <mm/mobj.h>
+ 
+ extern struct mobj *syna_pt_mobj;
++extern struct mobj *syna_vpp_mobj;
++
+ unsigned long tz_get_boot_stage(void);
+ void tz_set_boot_stage(unsigned long state);
+ unsigned long tz_sw_get_boot_mode(void);
+diff --git a/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_dolphin.c b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_dolphin.c
+index 6013729..aa9950a 100644
+--- a/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_dolphin.c
++++ b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_dolphin.c
+@@ -245,6 +245,7 @@ const struct mem_zone mem_zone_param[] = {
+ 	{8, "pt",		 S_ZONE, 0x0, 0x0,
+ 		MASTER_ACPUS | MASTER_VXG | MASTER_AVIO |  MASTER_ISP,
+ 		MASTER_ACPUS},
++	{9, "vpp",	 	NS_ZONE, 0xffffffff, 0xffffffff,0xffffffff, 0xffffffff},
+ };
+ 
+ const uint32_t mem_zone_num = ARRAY_SIZE(mem_zone_param);
+diff --git a/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_myna2.c b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_myna2.c
+index 3b167c1..ed605e2 100644
+--- a/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_myna2.c
++++ b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_myna2.c
+@@ -129,6 +129,7 @@ const struct mem_zone mem_zone_param[] = {
+ 	{5, "NonSecure-NC",	 NS_ZONE, 0xffffffff, 0xffffffff,0xffffffff, ~MASTER_GFX},
+ 	{6, "pt",		 S_ZONE, 0x0, 0x0, MASTER_ACPUS | MASTER_AVIO, MASTER_ACPUS },
+ 	{7, "rollback",		 NS_ZONE, 0, 0, 0, 0},
++	{8, "vpp",	 	NS_ZONE, 0xffffffff, 0xffffffff,0xffffffff, 0xffffffff},
+ };
+ 
+ const uint32_t mem_zone_num = ARRAY_SIZE(mem_zone_param);
+diff --git a/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_platypus.c b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_platypus.c
+index d7e2e31..ab09c7b 100644
+--- a/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_platypus.c
++++ b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_platypus.c
+@@ -281,6 +281,7 @@ const struct mem_zone mem_zone_param[] = {
+ 	{9, "pt",		 S_ZONE, 0x0, 0x0,
+ 		MASTER_ACPUS | MASTER_VXG | MASTER_AVIO,
+ 		MASTER_ACPUS },
++	{10, "vpp",	 	NS_ZONE, 0xffffffff, 0xffffffff,0xffffffff, 0xffffffff},
+ };
+ 
+ const uint32_t mem_zone_num = ARRAY_SIZE(mem_zone_param);
+diff --git a/lib/libutee/include/mem_region_userdata.h b/lib/libutee/include/mem_region_userdata.h
+index bd56a56..f1165db 100644
+--- a/lib/libutee/include/mem_region_userdata.h
++++ b/lib/libutee/include/mem_region_userdata.h
+@@ -40,6 +40,7 @@
+ #define TEE_MR_USER_REGISTER    0x07000000  /* The region is for register */
+ #define TEE_MR_USER_BCM         0x08000000  /* The region is for BCM */
+ #define TEE_MR_USER_PT          0x09000000  /* The region is for Hardware page table*/
++#define TEE_MR_USER_VPP         0x0A000000  /* The region is for Hardware page table*/
+ 
+ /* MACRO funtions for userdata processing */
+ #define TEE_MR_USER(mr)                 (((mr)->userdata[0] & 0xFF000000))
+@@ -54,6 +55,7 @@
+ #define TEE_MR_USER_IS_REGISTER(mr)     (TEE_MR_USER(mr) == TEE_MR_USER_REGISTER)
+ #define TEE_MR_USER_IS_BCM(mr)          (TEE_MR_USER(mr) == TEE_MR_USER_BCM)
+ #define TEE_MR_USER_IS_PT(mr)           (TEE_MR_USER(mr) == TEE_MR_USER_PT)
++#define TEE_MR_USER_IS_VPP(mr)          (TEE_MR_USER(mr) == TEE_MR_USER_VPP)
+ 
+ /* MACRO functions for ION memory region userdata processing */
+ #define TEE_MR_ION_ALG(mr)              (((mr)->userdata[0] & 0x00FFFFFF))
+-- 
+2.7.4
+

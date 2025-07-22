@@ -12,6 +12,7 @@ SRC_URI += " \
     file://0007-plat-syna-add-dolphin-platypus-and-myna2-support.patch \
     file://0008-libutee-add-syna-syscalls.patch \
     file://0009-core-support-berlin-secure-and-non-secure-heap.patch \
+    file://0010-plat-syna-add-vpp-zone.patch \
 "
 OPTEEMACHINE = "synaptics"
 SYNA_CHIP:myna2 = "myna2"
