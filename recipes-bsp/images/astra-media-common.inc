@@ -171,6 +171,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     kernel-module-dolphin-hwmon \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
+    synasdk-synap-module \
     tim-vx \
     tflite-vx-delegate \
     libdrm-tests \

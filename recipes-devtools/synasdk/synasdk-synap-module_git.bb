@@ -15,13 +15,8 @@ SRCREV = "${SYNA_SRCREV_SYNAP_DRIVER}"
 PV = "${SYNAP_VERSION}"
 
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/synap/vsi_npu_driver/kernel"
-B = "${WORKDIR}/${BPN}-${PV}"
 
-EXTRA_OEMAKE = "-C ${STAGING_KERNEL_DIR} src=${S} M=${B}"
-
-do_compile:prepend() {
-    cp ${S}/Kbuild ${B}
-}
+EXTRA_OEMAKE = "-C ${STAGING_KERNEL_DIR} M=${S}"
 
 do_install:append() {
     rm -f ${D}/lib/modules/${KERNEL_VERSION}/extra/modules.order.*
