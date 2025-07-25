@@ -1,0 +1,12 @@
+[Unit]
+Description=Reset upgrade_available flag on boot
+DefaultDependencies=no
+After=local-fs.target
+Before=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c '/usr/bin/fw_setenv upgrade_available 0 >/dev/null 2>&1 || true'
+
+[Install]
+WantedBy=multi-user.target

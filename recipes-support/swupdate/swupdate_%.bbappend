@@ -15,3 +15,7 @@ do_install:append() {
     install -m 0755 ${WORKDIR}/swupdate-wrapper ${D}${bindir}/swupdate-wrapper
     ln -s ${bindir}/swupdate-wrapper ${D}${bindir}/update
 }
+
+SYSTEMD_AUTO_ENABLE:${PN} = "disable"
+SYSTEMD_AUTO_ENABLE:${PN}-progress = "disable"
+SYSTEMD_AUTO_ENABLE:${PN}-usb = "disable"
