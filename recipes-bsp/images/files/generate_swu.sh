@@ -398,7 +398,7 @@ echo "Creating SWU image with cpio..."
             exit 1
         fi
 	#CPIO ARCHIVE (Remove or include the images in the below command as per the requirement)
-	(echo sw-description; echo sw-description.sig; echo post.sh; find . -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o -name "$ROOTFS" -o -name "$FASTLOGO") | cpio -o --format=newc > $SWU_IMAGE
+	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
     elif [ $2 -eq 2 ]; then
         if [ ! -f public.pem ]; then
             echo "test" > passout
@@ -419,7 +419,7 @@ echo "Creating SWU image with cpio..."
                 exit 1
         fi
 	#CPIO ARCHIVE (Remove or include the images in the below command as per the requirement)
-	(echo sw-description; echo sw-description.sig; echo post.sh; find . -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO") | cpio -o --format=newc > $SWU_IMAGE
+	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
     elif [ $2 -eq 3 ]; then
         if [ ! -f mycert.cert.pem ]; then
             openssl req -days +3650 -x509 -newkey rsa:4096 -nodes -keyout mycert.key.pem \
@@ -428,11 +428,11 @@ echo "Creating SWU image with cpio..."
         openssl cms -sign -in  sw-description -out sw-description.sig -signer mycert.cert.pem \
         -inkey mycert.key.pem -outform DER -nosmimecap -binary
 	#CPIO ARCHIVE (Remove or include the images in the below command as per the requirement)
-	(echo sw-description; echo sw-description.sig; echo post.sh; find . -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO") | cpio -o --format=newc > $SWU_IMAGE
+	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
 
     else
 	#CPIO ARCHIVE (Remove or include the images in the below command as per the requirement)
-	(echo sw-description; echo post.sh; find . -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO") | cpio -o --format=newc > $SWU_IMAGE
+	(echo sw-description; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
     fi
     if [ $? -eq 0 ]; then
         echo "SWU image created successfully: ${SWU_IMAGE}"

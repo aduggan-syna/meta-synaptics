@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [[ "$@" == *"-h"* || "$@" == *"-v"* || "$@" == *"-g"* ]]; then
+    # Run swupdate without piping to swupdate-progress
+    /usr/bin/swupdate "$@"
+else
+    # Run swupdate with progress
+    /usr/bin/swupdate "$@" | /usr/bin/swupdate-progress
+fi

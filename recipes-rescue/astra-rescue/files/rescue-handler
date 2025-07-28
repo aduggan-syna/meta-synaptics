@@ -1,0 +1,15 @@
+#!/bin/sh
+
+mkdir -p /mnt/rescue
+mount /dev/mmcblk0p2 /mnt/rescue
+
+if [ $? -eq 0 ]; then
+    if [ ! -f /mnt/rescue/Image.gz ] || [ ! -f /mnt/rescue/board.dtb ] || [ ! -f /mnt/rescue/initramfs.rootfs.cpio.gz ]; then
+        cp /rescue/Image-*.gz /mnt/rescue/Image.gz
+        cp /rescue/rescue-*.dtb /mnt/rescue/board.dtb
+        cp /rescue/rescue-*.rootfs.cpio.gz /mnt/rescue/initramfs.rootfs.cpio.gz
+    fi
+    umount /mnt/rescue
+else
+    echo "Mount failed: /dev/mmcblk0p2"
+fi
