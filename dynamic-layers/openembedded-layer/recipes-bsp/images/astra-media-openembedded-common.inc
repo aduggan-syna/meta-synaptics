@@ -7,6 +7,17 @@ IMAGE_INSTALL:append = " \
     networkmanager \
     networkmanager-nmcli \
     modemmanager \
+    ethtool \
+    net-tools \
+    tcpdump \
+    pciutils \
+    iputils \
+    coreutils \
+    rsyslog \
+    gdb \
+    less \
+    procps \
+    zip \
 "
 
 IMAGE_INSTALL:append:platypus = " \
