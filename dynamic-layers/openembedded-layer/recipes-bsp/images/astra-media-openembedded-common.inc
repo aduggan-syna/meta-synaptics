@@ -10,6 +10,9 @@ IMAGE_INSTALL:append = " \
     pciutils \
     iputils \
     zip \
+    networkmanager \
+    networkmanager-nmcli \
+    modemmanager \
 "
 
 IMAGE_INSTALL:append:platypus = " \
@@ -26,6 +29,26 @@ IMAGE_INSTALL:append:myna2 = " \
     pulseaudio \
     evtest \
 "
+
+IMAGE_INSTALL:remove = " \
+    ofono \
+    connman \
+    connman-gnome \
+    connman-conf \
+    packagegroup-core-tools-testapps \
+"
+
+PACKAGE_EXCLUDE:append = " \
+    ofono \
+    connman \
+    connman-gnome \
+    connman-conf \
+    connman-client \
+    connman-tools \
+    packagegroup-core-tools-testapps \
+"
+
+PACKAGECONFIG:append:pn-networkmanager = " modemmanager ppp"
 
 #Fix me
 #ROOTFS_POSTPROCESS_COMMAND in android-tools bb file does not work
