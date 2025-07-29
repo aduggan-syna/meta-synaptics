@@ -4,6 +4,17 @@ IMAGE_INSTALL:append = " \
     glmark2 \
     iperf2 \
     iperf3 \
+    ethtool \
+    net-tools \
+    tcpdump \
+    pciutils \
+    iputils \
+    coreutils \
+    rsyslog \
+    gdb \
+    less \
+    procps \
+    zip \
 "
 
 IMAGE_INSTALL:append:platypus = " \
