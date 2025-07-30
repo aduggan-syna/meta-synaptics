@@ -9,11 +9,6 @@ IMAGE_INSTALL:append = " \
     tcpdump \
     pciutils \
     iputils \
-    coreutils \
-    rsyslog \
-    gdb \
-    less \
-    procps \
     zip \
 "
 

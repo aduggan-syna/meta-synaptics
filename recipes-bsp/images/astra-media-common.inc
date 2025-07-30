@@ -126,16 +126,6 @@ IMAGE_INSTALL:append = " \
     hostapd \
     iptables \
     protobuf \
-    packagegroup-core-buildessential \
-    openssl \
-    openssl-dev \
-    libnl \
-    libnl-dev \
-    dbus \
-    dbus-dev \
-    cmake \
-    git \
-    tree \
     "
 
 # install xfce desktop for X backend in 1680
