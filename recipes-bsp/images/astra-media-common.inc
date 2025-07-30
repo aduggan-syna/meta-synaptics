@@ -135,16 +135,6 @@ IMAGE_INSTALL:append = " \
     synasdk-syna-settings-framework \
     bridge-utils \
     synasdk-syna-compositor \
-    packagegroup-core-buildessential \
-    openssl \
-    openssl-dev \
-    libnl \
-    libnl-dev \
-    dbus \
-    dbus-dev \
-    cmake \
-    git \
-    tree \
 "
 
 IMAGE_INSTALL:remove:sl1620usb = "${SWUPDATE_INSTALL}"
