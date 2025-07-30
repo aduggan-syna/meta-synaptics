@@ -1,6 +1,6 @@
 VIRTULIZATION_INSTALL = " \
     docker \
-    python3-docker-compose \
+    docker-compose \
     connman \
     connman-client \
 "
