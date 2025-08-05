@@ -9,7 +9,6 @@ PACKAGE_INSTALL:append:platypus = " kernel-module-gpio-regulator"
 ADBD_RPACKAGES = " initramfs-module-debug \
                             initramfs-module-setup-adbd \
                             kernel-module-dwc2 \
-                            kernel-module-roles \
                             kernel-module-pwm-berlin \
                             kernel-module-phy-syna-usb \
                             kernel-module-i2c-dyndmx-pinctrl \
