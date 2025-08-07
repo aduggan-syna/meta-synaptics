@@ -1,0 +1,12 @@
+#set the debug level
+ENV{WL_DBG_VAL}="ERR:1 INFO:0 DBG:0 SCAN:0 TRACE:0 P2PACTION:1 PNO:0"
+
+#PCIe PAth
+ACTION=="add", SUBSYSTEM=="module", KERNEL=="bcmdhd", \
+ TEST=="/sys/wifi_pcie/wl_dbg_level", \
+ RUN+="/bin/sh -c 'echo $env{WL_DBG_VAL} > /sys/wifi_pcie/wl_dbg_level'"
+
+#SDIO Path
+ACTION=="add", SUBSYSTEM=="module", KERNEL=="bcmdhd", \
+  TEST=="/sys/wifi_sdio/wl_dbg_level", \
+  RUN+="/bin/sh -c 'echo $env{WL_DBG_VAL} > /sys/wifi_sdio/wl_dbg_level'"
