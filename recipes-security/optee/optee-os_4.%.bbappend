@@ -62,6 +62,12 @@ do_install:append() {
     destination_addr=0x00160000
     ${security_libexec_path}/in_extras.py "TZ_KERNEL" ${B}/tzk_extras.bin ${prod_image_flag} ${destination_addr}
 
+    if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
+        tool_version=genx_v3
+    else
+        tool_version=genx
+    fi
+
     # Generate image
     gen_x_secure_image --chip-name=${syna_chip_name} \
                        --chip-rev=${syna_chip_rev} \
@@ -70,6 +76,7 @@ do_install:append() {
                        --length=0x0 --extras=${B}/tzk_extras.bin \
                        --workdir-security-tools=${security_libexec_path} \
                        --workdir-security-keys=${security_keys_path} \
+                       --tool-version=${tool_version} \
                        --in_payload=${in_bin} \
                        --out_store=${out_bin}
 }

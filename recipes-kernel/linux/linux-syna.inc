@@ -84,6 +84,12 @@ genx_secure_image() {
 
   exec_args="${exec_args} --workdir-security-tools=${security_tools_path}"
   exec_args="${exec_args} --workdir-security-keys=${security_keys_path}"
+  if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
+      exec_args="${exec_args} --tool-version=genx_v3"
+  else
+      exec_args="${exec_args} --tool-version=genx"
+  fi
+
   # Input and output
   exec_args="${exec_args} --in_payload=${f_input} --out_store=${f_output}"
 

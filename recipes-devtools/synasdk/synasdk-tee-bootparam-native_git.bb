@@ -80,6 +80,12 @@ do_compile:append () {
             tz_rel_ver=genx
         fi
 
+        if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
+            tool_version=genx_v3
+        else
+            tool_version=genx
+        fi
+
         module_topdir="${S}/tee/tee"
         echo "$module_topdir = ${module_topdir}"
 
@@ -97,6 +103,7 @@ do_compile:append () {
                        --length=0x0 --extras=${S}/boot_param_extras.bin \
                        --workdir-security-tools=${security_tools_path} \
                        --workdir-security-keys=${security_keys_path} \
+                       --tool-version=${tool_version} \
                        --in_payload=${in_bin} \
                        --out_store=${out_bin}
 
@@ -109,6 +116,7 @@ do_compile:append () {
                        --length=0x0 --extras=${S}/boot_param_extras.bin \
                        --workdir-security-tools=${security_tools_path} \
                        --workdir-security-keys=${security_keys_path} \
+                       --tool-version=${tool_version} \
                        --in_payload=${in_bin} \
                        --out_store=${out_bin}
     fi
