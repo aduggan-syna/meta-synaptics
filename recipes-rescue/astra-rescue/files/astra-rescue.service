@@ -1,0 +1,11 @@
+[Unit]
+Description=Copy rescue files to rescue partition
+After=multi-user.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/rescue-handler
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,34 @@
+#!/bin/sh
+
+mkdir -p /mnt/rescue
+mount /dev/mmcblk0p2 /mnt/rescue
+
+if [ $? -eq 0 ]; then
+    if [ ! -f /mnt/rescue/Image ] && [ ! -f /mnt/rescue/Image.gz ]; then
+        sl1620_gz=$(find /rescue -maxdepth 1 -name "Image-sl1620.gz" | head -n 1)
+        if [ -n "$sl1620_gz" ]; then
+            temp_dir=$(mktemp -d)
+            cp "$sl1620_gz" "$temp_dir/"
+            gzip -d "$temp_dir/Image-sl1620.gz"
+            cp "$temp_dir/Image-sl1620" /mnt/rescue/Image
+            rm -rf "$temp_dir"
+        else
+            gz_file=$(find /rescue -maxdepth 1 -name "Image-*.gz" | head -n 1)
+            if [ -n "$gz_file" ]; then
+                cp "$gz_file" /mnt/rescue/Image.gz
+            fi
+        fi
+    fi
+
+    if [ ! -f /mnt/rescue/board.dtb ]; then
+        cp /rescue/rescue-*.dtb /mnt/rescue/board.dtb
+    fi
+
+    if [ ! -f /mnt/rescue/initramfs.rootfs.cpio.gz ]; then
+        cp /rescue/rescue-*.rootfs.cpio.gz /mnt/rescue/initramfs.rootfs.cpio.gz
+    fi
+
+    umount /mnt/rescue
+else
+    echo "Mount failed: /dev/mmcblk0p2"
+fi
