@@ -69,6 +69,7 @@ IMAGE_INSTALL:append = " \
     gdbserver \
     curl \
     i2c-tools \
+    v4l-utils \
     alsa-utils \
     synasdk-demos \
     synasdk-bootctrl \
@@ -112,6 +113,7 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-bad-mpegtsdemux \
     gstreamer1.0-plugins-bad-videoparsersbad \
     gstreamer1.0-plugins-bad-kms \
+    gstreamer1.0-plugins-syna \
     gstreamer1.0-meta-debug \
     gstreamer1.0-libav \
     gstreamer1.0-rtsp-server \
@@ -126,6 +128,7 @@ IMAGE_INSTALL:append = " \
     hostapd \
     iptables \
     protobuf \
+    opencv \
     "
 
 # install xfce desktop for X backend in 1680
