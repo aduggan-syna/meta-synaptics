@@ -182,3 +182,4 @@ module_conf_syna-vpu = "softdep syna-vpu pre: amp_bm"
 module_conf_vpu = "softdep vpu pre: amp_bm"
 
 # module_conf_bcmdhd = "options bcmdhd firmware_path=bcm/fw_bcm43752.bin nvram_path=bcm/bcmdhd_43752.cal clm_path=bcm/bcmdhd_clm_43752.blob"
+module_conf_syna_drm:append = "options syna_drm hdmi_preferred_mode=1920x1080"
