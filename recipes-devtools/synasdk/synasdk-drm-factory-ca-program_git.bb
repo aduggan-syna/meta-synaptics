@@ -30,6 +30,7 @@ do_compile() {
     oe_runmake -f Makefile.op -C ${S}/otp_program O=${B}/out
     oe_runmake -f Makefile.op -C ${S}/write_rkekid O=${B}/out
     oe_runmake -f Makefile.op -C ${S}/read_rkekid O=${B}/out
+    oe_runmake -f Makefile.op -C ${S}/factory_util O=${B}/out
 }
 
 do_install() {
@@ -37,9 +38,11 @@ do_install() {
     install -m 0755 ${B}/otp_program/otp_program ${D}${bindir}
     install -m 0755 ${B}/write_rkekid/write_rkekid ${D}${bindir}
     install -m 0755 ${B}/read_rkekid/read_rkekid ${D}${bindir}
+    install -m 0755 ${B}/factory_util/factory_util ${D}${bindir}
 }
 
 FILES:${PN} += "${bindir}/otp_program"
 FILES:${PN} += "${bindir}/write_rkekid"
 FILES:${PN} += "${bindir}/read_rkekid"
+FILES:${PN} += "${bindir}/factory_util"
 INSANE_SKIP:${PN} += " already-stripped"
