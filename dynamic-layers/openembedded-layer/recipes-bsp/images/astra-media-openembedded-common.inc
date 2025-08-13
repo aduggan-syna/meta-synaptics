@@ -5,6 +5,7 @@ IMAGE_INSTALL:append = " \
     iperf2 \
     iperf3 \
     ethtool \
+    init-ifupdown \
     net-tools \
     tcpdump \
     pciutils \
