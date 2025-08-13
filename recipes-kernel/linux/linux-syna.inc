@@ -155,6 +155,9 @@ KERNEL_MODULE_AUTOLOAD:append = " \
     syna_drm \
     pvrsrvkm \
     bcmdhd \
+    synadhd103 \
+    synadhd591 \
+    synadhd361 \
 "
 
 KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
@@ -166,7 +169,6 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
     hrx_v4l2 \
 "
 
-KERNEL_MODULE_PROBECONF:append = "bcmdhd "
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
 KERNEL_MODULE_PROBECONF:append = "rpi-panel-attiny-regulator "
 KERNEL_MODULE_PROBECONF:append = "panel-waveshare-dsi "
@@ -181,5 +183,4 @@ module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
 module_conf_syna-vpu = "softdep syna-vpu pre: amp_bm"
 module_conf_vpu = "softdep vpu pre: amp_bm"
 
-# module_conf_bcmdhd = "options bcmdhd firmware_path=bcm/fw_bcm43752.bin nvram_path=bcm/bcmdhd_43752.cal clm_path=bcm/bcmdhd_clm_43752.blob"
 module_conf_syna_drm:append = "options syna_drm hdmi_preferred_mode=1920x1080"
