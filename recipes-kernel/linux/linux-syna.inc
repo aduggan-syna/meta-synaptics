@@ -150,6 +150,7 @@ KERNEL_MODULE_AUTOLOAD:append = " \
     bcmdhd \
     synadhd103 \
     synadhd591 \
+    synadhd361 \
 "
 
 KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
