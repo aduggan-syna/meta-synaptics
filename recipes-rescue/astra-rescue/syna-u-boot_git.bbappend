@@ -6,8 +6,8 @@ do_configure:prepend() {
     elif [ "${MACHINE}" = "sl1680" ]; then
 	MACHINE_NAME="dolphin"
     else
-	echo "Unsupported MACHINE: $MACHINE"
-	exit 1
+	echo "Unsupported MACHINE: ${MACHINE}"
+	return 0
     fi
 
     UBOOT_DEFCONFIG="${S}/boot/u-boot_2019_10/configs/${MACHINE_NAME}_suboot_defconfig"

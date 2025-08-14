@@ -11,8 +11,8 @@ do_install:append() {
         elif [ "${MACHINE}" = "sl1680" ]; then
             install -m 0644 ${WORKDIR}/sl1680_emmc.pt ${D}${datadir}/syna/build/emmc.pt
         else
-            echo "Unsupported MACHINE: $MACHINE"
-            exit 1
+            echo "Unsupported MACHINE: ${MACHINE}"
+            return 0
         fi
     fi
 }
