@@ -3,6 +3,8 @@ require astra-media-qt5-common.inc
 IMAGE_INSTALL:append = " \
     synasdk-synaexplorer \
     synasdk-syna-astra-about \
+    synasdk-syna-gst-webrtc \
+    synasdk-syna-dash-player \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
