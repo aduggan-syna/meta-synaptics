@@ -21,6 +21,7 @@ OUT = "${WORKDIR}/OUT"
 CHIP_FULL_NAME:platypus = "platypus"
 CHIP_FULL_NAME:dolphin = "dolphin_a0"
 CHIP_FULL_NAME:myna2 = "myna2"
+CHIP_FULL_NAME:klamath = "klamath"
 
 TARGET_CFLAGS += "--sysroot=${STAGING_DIR_HOST}"
 TARGET_LDFLAGS += "--sysroot=${STAGING_DIR_HOST}"

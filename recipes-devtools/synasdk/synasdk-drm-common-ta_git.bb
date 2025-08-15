@@ -21,6 +21,7 @@ OUT = "${WORKDIR}/OUT"
 CHIP_FULL_NAME:platypus = "platypus"
 CHIP_FULL_NAME:dolphin = "dolphin_a0"
 CHIP_FULL_NAME:myna2 = "myna2"
+CHIP_FULL_NAME:klamath = "klamath"
 
 EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  CHIP_FULL_NAME=${CHIP_FULL_NAME} \

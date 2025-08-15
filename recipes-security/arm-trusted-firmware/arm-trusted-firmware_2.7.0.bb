@@ -41,6 +41,7 @@ ATF_PLATFORM ?= "berlin"
 ATF_SOC:myna2 = "myna2"
 ATF_SOC:platypus = "platypus"
 ATF_SOC:dolphin = "dolphin"
+ATF_SOC:klamath = "klamath"
 
 do_compile() {
 	unset LDFLAGS

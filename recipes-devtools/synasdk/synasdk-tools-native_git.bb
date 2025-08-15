@@ -46,6 +46,7 @@ do_install () {
 
     install -m 0755 ${S}/build/tools/lib/sec_tools/bin/sign_image_v4 ${D}${prefix}/libexec/syna/sign_image_v4
     install -m 0755 ${S}/build/tools/lib/sec_tools/bin/genx_img ${D}${prefix}/libexec/syna/genx_img
+    install -m 0755 ${S}/build/tools/lib/sec_tools/bin/genx_img_v3 ${D}${prefix}/libexec/syna/genx_img_v3
 
     for file in ${TOOL_NAMES}
     do

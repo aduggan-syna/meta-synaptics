@@ -53,10 +53,14 @@ do_compile:append () {
 }
 
 do_deploy() {
+    process_cmd="prepend_image_info.sh"
+    if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
+      process_cmd="cp"
+    fi
     install -m 0644 ${B}/target/tee/tzk/tee_en.bin ${DEPLOYDIR}
     install -m 0644 ${B}/target/tee/tzk/tee_recovery_en.bin ${DEPLOYDIR}
-    prepend_image_info.sh ${B}/target/tee/tzk/tee_en.bin ${DEPLOYDIR}/tee.subimg
-    prepend_image_info.sh ${B}/target/tee/tzk/tee_recovery_en.bin ${DEPLOYDIR}/tee_recovery.subimg
+    ${process_cmd} ${B}/target/tee/tzk/tee_en.bin ${DEPLOYDIR}/tee.subimg
+    ${process_cmd} ${B}/target/tee/tzk/tee_recovery_en.bin ${DEPLOYDIR}/tee_recovery.subimg
 }
 
 addtask deploy after do_compile

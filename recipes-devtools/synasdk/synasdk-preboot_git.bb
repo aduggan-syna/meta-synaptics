@@ -11,6 +11,12 @@ DEPENDS = " \
     synasdk-tools-native \
 "
 
+# Fix me
+# Need security/keys for klamath
+DEPENDS:append:klamath = " \
+    synasdk-security-native \
+"
+
 COMPATIBLE_MACHINE = "syna"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
@@ -18,6 +24,9 @@ SRC_URI = " \
     ${SYNA_SRC_BOOT} \
     ${SYNA_SRC_PREBOOT} \
 "
+
+# klamath need boot/mcu instead of boot/preboot
+SRC_URI:remove:klamath = "${SYNA_SRC_PREBOOT}"
 
 SRCREV_boot = "${SYNA_SRCREV_BOOT}"
 SRCREV_preboot = "${SYNA_SRCREV_PREBOOT}"
@@ -68,7 +77,12 @@ do_deploy() {
              install -m 0644 target/preboot/intermediate/release/gen3_ddr_phy_fw_1.bin "${DEPLOYDIR}/gen3_ddr_phy_fw_1.bin.usb"
         fi
     else
-        install -m 0644 target/preboot/preboot_esmt.bin "${DEPLOYDIR}/preboot.subimg"
+        if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
+            install -m 0644 target/preboot/preboot_ksb.bin ${DEPLOYDIR}/preboot.subimg
+            install -m 0644 target/preboot/sysmgr_en.bin ${DEPLOYDIR}/sysmgr.subimg
+        else
+            install -m 0644 target/preboot/preboot_esmt.bin ${DEPLOYDIR}/preboot.subimg
+        fi
     fi
 }
 

@@ -15,10 +15,13 @@ IMAGE_TYPES:append:syna = " \
 SYNAREALMACH:platypus = "sl1640"
 SYNAREALMACH:myna2 = "sl1620"
 SYNAREALMACH:sl1680 = "sl1680"
+SYNAREALMACH:sl2610 = "sl2610"
 
 EXTRA_FW_DEPENDS = ""
 EXTRA_FW_DEPENDS:dolphin = "synasdk-fw-enc:do_deploy"
 EXTRA_FW_DEPENDS:platypus = "synasdk-fw-enc:do_deploy"
+EXTRA_FASTLOGO_DEPENDS = "synasdk-fastlogo:do_deploy"
+EXTRA_FASTLOGO_DEPENDS:klamath = ""
 DEPENDS += "android-tools-native"
 
 
@@ -34,11 +37,11 @@ do_image_synaimg[depends] += " \
     bc-native:do_populate_sysroot \
     synasdk-tools-native:do_populate_sysroot \
     virtual/bootloader:do_deploy \
-    synasdk-fastlogo:do_deploy \
     synasdk-preboot:do_deploy \
     synasdk-security:do_deploy \
     synasdk-tzk:do_deploy \
     ${EXTRA_FW_DEPENDS} \
+    ${EXTRA_FASTLOGO_DEPENDS} \
 "
 
 synaimg_mkext234fs () {
@@ -117,7 +120,7 @@ IMAGE_CMD:synaimg () {
 # Check files required for firmware.subimg, and create it (GenX only!)
 # From synasdk-fw-enc
     case "${SYNAREALMACH}" in
-        sl1620|sl1640|sl1680)
+        sl1620|sl1640|sl1680|sl2610)
             firmware_sub_args=""
             [ -f "${DEPLOY_DIR_IMAGE}/tsp.fw" ] && firmware_sub_args="${firmware_sub_args} -i TSPF -d ${DEPLOY_DIR_IMAGE}/tsp.fw"
             [ -f "${DEPLOY_DIR_IMAGE}/dsp.fw" ] && firmware_sub_args="${firmware_sub_args} -i DSPF -d ${DEPLOY_DIR_IMAGE}/dsp.fw"
@@ -284,7 +287,8 @@ IMAGE_CMD:synaimg () {
                   /rootfs_a/rootfs /rootfs_b/rootfs\
                   /opt/opt /home/home /tsb/tsb /app/app \
                   /firmware_a/firmware /firmware_b/firmware \
-                  /fastlogo/fastlogo /fastlogo_a/fastlogo /fastlogo_b/fastlogo"
+                  /fastlogo/fastlogo /fastlogo_a/fastlogo /fastlogo_b/fastlogo \
+                  /sysmgr_a/sysmgr /sysmgr_b/sysmgr"
 
 # Add emmc_part_list and emmc_image_list to the deployed image
     cp ${DEPLOY_DIR_IMAGE}/emmc_image_list ${DEPLOY_DIR_IMAGE}/emmc_part_list ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}

@@ -6,7 +6,7 @@ PR = "r0"
 
 inherit systemd
 
-COMPATIBLE_MACHINE = "platypus|dolphin|myna2"
+COMPATIBLE_MACHINE = "platypus|dolphin|myna2|klamath"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 

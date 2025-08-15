@@ -51,6 +51,7 @@ EXTRA_OECMAKE = "\
 
 EXTRA_OECMAKE:append:aarch64 = " -DENABLE_TFLITERUNTIME=ON"
 EXTRA_OECMAKE:append:myna2 = " -DENABLE_EBGRUNTIME=OFF"
+EXTRA_OECMAKE:append:klamath = " -DENABLE_EBGRUNTIME=OFF"
 
 INSANE_SKIP:${PN} += "already-stripped"
 PACKAGES = "${PN} ${PN}-dbg ${PN}-dev ${PN}-staticdev"

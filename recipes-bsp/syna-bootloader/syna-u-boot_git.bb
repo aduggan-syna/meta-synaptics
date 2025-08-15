@@ -35,12 +35,14 @@ SRC_URI = " \
     ${SYNA_SRC_BOOT} \
     ${SYNA_SRC_UBOOT} \
     ${SYNA_SRC_EXTERNAL} \
+    ${SYNA_SRC_TEE} \
     file://0001-Force-gcc-as-HOSTCC.patch \
 "
 
 SRCREV_uboot = "${SYNA_SRCREV_UBOOT}"
 SRCREV_boot = "${SYNA_SRCREV_BOOT}"
 SRCREV_external = "${SYNA_SRCREV_EXTERNAL}"
+SRCREV_tee = "${SYNA_SRCREV_TEE}"
 
 SRCREV_FORMAT = "uboot_boot_external"
 
@@ -65,7 +67,11 @@ do_compile () {
 
 do_deploy () {
     # bootloader.subimg
-    prepend_image_info.sh "${B}/target/release/uboot/uboot_en.bin" "${DEPLOYDIR}/bootloader_nopreload.subimg"
+    if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
+        cp "${B}/target/release/uboot/uboot_en.bin" "${DEPLOYDIR}/bootloader_nopreload.subimg"
+    else
+        prepend_image_info.sh "${B}/target/release/uboot/uboot_en.bin" "${DEPLOYDIR}/bootloader_nopreload.subimg"
+    fi
 
     if [ "${MACHINE}" != "sl1620usb" ] && [ "${MACHINE}" != "sl1640usb" ] && [ "${MACHINE}" != "sl1680usb" ]; then
         if [ -f "${B}/target/release/uboot/sm_fw_en.bin" ]; then

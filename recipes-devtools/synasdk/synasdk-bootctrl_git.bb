@@ -10,7 +10,7 @@ SRCREV = "${SYNA_SRCREV_APPLICATION}"
 
 PV = "git${SRCPV}"
 
-COMPATIBLE_MACHINE = "platypus|dolphin|myna2"
+COMPATIBLE_MACHINE = "platypus|dolphin|myna2|klamath"
 
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/bootctrl"
 

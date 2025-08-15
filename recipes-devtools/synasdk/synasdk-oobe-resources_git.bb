@@ -21,6 +21,7 @@ CXX:remove = "-Werror=format-security"
 TARGET_HW:dolphin = "dolphin"
 TARGET_HW:platypus = "platypus"
 TARGET_HW:myna2 = "myna2"
+TARGET_HW:klamath = "klamath"
 
 CLEANBROKEN = "1"
 

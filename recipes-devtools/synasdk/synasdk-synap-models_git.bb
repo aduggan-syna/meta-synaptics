@@ -19,6 +19,7 @@ S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/synap/release"
 MODELS_DIR:dolphin = "dolphin"
 MODELS_DIR:platypus = "platypus"
 MODELS_DIR:myna2 = "myna2"
+MODELS_DIR:klamath = "klamath"
 
 FILES:${PN} = "${datadir}/synap/models"
 FILES:${PN} += "${datadir}/synap/vxk"

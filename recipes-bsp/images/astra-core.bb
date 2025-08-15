@@ -35,6 +35,12 @@ IMAGE_INSTALL:append:myna2 = " \
     synasdk-brcm-bt-start \
 "
 
+IMAGE_INSTALL:append:klamath = " \
+    ${TEE_OPTEE} \
+    brcm-patchram-plus \
+    synasdk-brcm-bt-start \
+"
+
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
     synasdk-brcm-bt-start \

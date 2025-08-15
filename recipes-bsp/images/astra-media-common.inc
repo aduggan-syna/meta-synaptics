@@ -134,7 +134,18 @@ IMAGE_INSTALL:append:myna2 = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11', '${XORG_MATCHBOX_DESKTOP}', '${WAYLAND_PACKAGES}', d)} \
 "
 
+# install matchbox desktop for X backend in 2610
+IMAGE_INSTALL:append:klamath = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', '${XORG_MATCHBOX_DESKTOP}', '${WAYLAND_PACKAGES}', d)} \
+"
+
 IMAGE_INSTALL:append:myna2 = " \
+    ${TEE_OPTEE} \
+    brcm-patchram-plus \
+    synasdk-brcm-bt-start \
+"
+
+IMAGE_INSTALL:append:klamath = " \
     ${TEE_OPTEE} \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
