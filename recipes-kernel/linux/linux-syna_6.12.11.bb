@@ -10,7 +10,6 @@ SRC_URI = " \
     ${SYNA_SRC_LINUX_6_12} \
     file://add-full-hid-support.cfg \
     file://iptables.cfg \
-    file://${SYNA_KERNEL_CONFIG_FILE} \
     git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-6.12;destsuffix=${KMETA} \
 "
 
@@ -31,6 +30,16 @@ SRC_URI += "${@bb.utils.contains('KGDB_ENABLE', '1', ' \
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://add-docker.cfg', '', d)}"
 
 python () {
+    # append defconfig if exists
+    import os
+    defconfig = d.getVar('THISDIR') + '/files/' + d.getVar('SYNA_KERNEL_CONFIG_FILE')
+    if not os.path.exists(defconfig):
+        d.setVar("KBUILD_DEFCONFIG", "${SYNA_KERNEL_CONFIG_FILE}")
+        d.setVar("KCONFIG_MODE", "--alldefconfig")
+    else :
+        append_src_uri = d.getVar('SRC_URI') + " file://" + d.getVar('SYNA_KERNEL_CONFIG_FILE')
+        d.setVar("SRC_URI", append_src_uri)
+
     # OpenBMC loads in kernel features via other mechanisms so this check
     # in the kernel-yocto.bbclass is not required
     d.setVar("KERNEL_DANGLING_FEATURES_WARN_ONLY","1")
