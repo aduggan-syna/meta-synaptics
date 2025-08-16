@@ -39,56 +39,59 @@ do_image_synausbimg[depends] += " \
     synasdk-tzk:do_deploy \
     ${EXTRA_FW_DEPENDS} \
 "
-
 IMAGE_CMD:synausbimg () {
 
 # Check that the needed files are available
-    [ -f ${DEPLOY_DIR_IMAGE}/gen3_erom.bin.usb ]
-    [ -f ${DEPLOY_DIR_IMAGE}/gen3_scs.bin.usb ]
-    [ -f ${DEPLOY_DIR_IMAGE}/gen3_bkl.bin.usb ]
-    [ -f ${DEPLOY_DIR_IMAGE}/gen3_boot_monitor.bin.usb ]
-    [ -f ${DEPLOY_DIR_IMAGE}/gen3_scs_param.bin.usb ]
-    [ -f ${DEPLOY_DIR_IMAGE}/gen3_sysinit.bin.usb ]
-    [ -f ${DEPLOY_DIR_IMAGE}/gen3_miniloader.bin.usb ]
-    [ -f ${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg ]
-    [ -f ${DEPLOY_DIR_IMAGE}/tee.subimg ]
-    [ -f ${DEPLOY_DIR_IMAGE}/Image-${MACHINE}.bin ]
-    [ -f ${DEPLOY_DIR_IMAGE}/core-image-initramfs-boot-${MACHINE}.cpio.gz ]
+    [ -f "${DEPLOY_DIR_IMAGE}/gen3_erom.bin.usb" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/gen3_scs.bin.usb" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/gen3_bkl.bin.usb" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/gen3_boot_monitor.bin.usb" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/gen3_scs_param.bin.usb" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/gen3_sysinit.bin.usb" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/gen3_miniloader.bin.usb" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/tee.subimg" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/Image-${MACHINE}.bin" ]
+    [ -f "${DEPLOY_DIR_IMAGE}/core-image-initramfs-boot-${MACHINE}.cpio.gz" ]
 
 # Create the SYNAIMG sub-directory
-    if [ -d ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR} ]; then
-        rm -rf ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}
+    if [ -d "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}" ]; then
+        rm -rf "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}"
     fi
-    mkdir -p ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}
+    mkdir -p "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}"
 
 # Add a "tag"
-     touch ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/TAG--${IMAGE_NAME}--TAG
+    touch "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/TAG--${IMAGE_NAME}--TAG"
 
-    cp ${DEPLOY_DIR_IMAGE}/gen3_erom.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-    cp ${DEPLOY_DIR_IMAGE}/gen3_scs.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-    cp ${DEPLOY_DIR_IMAGE}/gen3_bkl.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-    cp ${DEPLOY_DIR_IMAGE}/gen3_boot_monitor.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-    cp ${DEPLOY_DIR_IMAGE}/gen3_scs_param.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-    cp ${DEPLOY_DIR_IMAGE}/gen3_sysinit.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-    cp ${DEPLOY_DIR_IMAGE}/gen3_sysinit.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-    cp ${DEPLOY_DIR_IMAGE}/gen3_miniloader.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-    cp ${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_uboot.bin.usb
-    dd if=${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_uboot.bin.usb of=${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_uboot.bin.usb.header bs=1 count=512
-    cp ${DEPLOY_DIR_IMAGE}/tee.subimg ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_tzk.bin.usb
-    dd if=${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_tzk.bin.usb of=${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_tzk.bin.usb.header bs=1 count=512
-    cat ${DEPLOY_DIR_IMAGE}/Image-${MACHINE}.bin | gzip -1 > ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/Image.gz
-    for f in ${DEPLOY_DIR_IMAGE}/*.dtb
+    cp "${DEPLOY_DIR_IMAGE}/gen3_erom.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+    cp "${DEPLOY_DIR_IMAGE}/gen3_scs.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+    cp "${DEPLOY_DIR_IMAGE}/gen3_bkl.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+    cp "${DEPLOY_DIR_IMAGE}/gen3_boot_monitor.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+    cp "${DEPLOY_DIR_IMAGE}/gen3_scs_param.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+    cp "${DEPLOY_DIR_IMAGE}/gen3_sysinit.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+    cp "${DEPLOY_DIR_IMAGE}/gen3_sysinit.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+    cp "${DEPLOY_DIR_IMAGE}/gen3_miniloader.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+    cp "${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_uboot.bin.usb"
+    dd if="${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_uboot.bin.usb" of="${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_uboot.bin.usb.header" bs=1 count=512
+    cp "${DEPLOY_DIR_IMAGE}/tee.subimg" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_tzk.bin.usb"
+    dd if="${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_tzk.bin.usb" of="${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/gen3_tzk.bin.usb.header" bs=1 count=512
+    gzip -c -1 "${DEPLOY_DIR_IMAGE}/Image-${MACHINE}.bin" > "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/Image.gz"
+    for f in "${DEPLOY_DIR_IMAGE}"/*.dtb
     do
-        if [ ! -L $f ]; then
-            dtb_base_name=` basename $f | awk -F '--' '{print $1}'`
-            cp $f ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/$dtb_base_name.dtb
+        if [ ! -L "$f" ]; then
+            dtb_base_name=$(basename "$f" | awk -F '--' '{print $1}')
+            cp "$f" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/${dtb_base_name}.dtb"
         fi
     done
-    cp ${DEPLOY_DIR_IMAGE}/core-image-initramfs-boot-${MACHINE}.cpio.gz ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/ramdisk.cpio.gz
 
-    if [ ${MACHINE} == "sl1680usb" ]; then
-        cp ${DEPLOY_DIR_IMAGE}/gen3_ddr_phy_fw_0.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
-        cp ${DEPLOY_DIR_IMAGE}/gen3_ddr_phy_fw_1.bin.usb ${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/
+    cp "${DEPLOY_DIR_IMAGE}/core-image-initramfs-boot-${MACHINE}.cpio.gz" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/ramdisk.cpio.gz"
+
+    if [ "${MACHINE}" = "sl1680usb" ]; then
+        cp "${DEPLOY_DIR_IMAGE}/gen3_ddr_phy_fw_0.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
+        cp "${DEPLOY_DIR_IMAGE}/gen3_ddr_phy_fw_1.bin.usb" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/"
     fi
 
+    if [ ! -d "${IMGDEPLOYDIR}" ]; then
+        mkdir "${IMGDEPLOYDIR}"
+    fi
 }
