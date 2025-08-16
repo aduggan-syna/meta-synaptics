@@ -37,39 +37,38 @@ do_compile () {
         echo 'preboot build failed!'
         exit 1
     fi
-
 }
 
 do_deploy() {
-    if [ ${MACHINE} == "sl1620usb" ] || [ ${MACHINE} == "sl1640usb" ] || [ ${MACHINE} == "sl1680usb" ]; then
-        cat target/preboot/intermediate/release/K0_BOOT_store.bin > ${DEPLOYDIR}/gen3_scs.bin.usb
-        cat target/preboot/intermediate/release/K0_TEE_store.bin >> ${DEPLOYDIR}/gen3_scs.bin.usb
-        cat target/preboot/intermediate/release/K1_BOOT_A_store.bin >> ${DEPLOYDIR}/gen3_scs.bin.usb
-        cat target/preboot/intermediate/release/K1_BOOT_B_store.bin >> ${DEPLOYDIR}/gen3_scs.bin.usb
-        cat target/preboot/intermediate/release/K1_TEE_A_store.bin >> ${DEPLOYDIR}/gen3_scs.bin.usb
+    if [ "${MACHINE}" = "sl1620usb" ] || [ "${MACHINE}" = "sl1640usb" ] || [ "${MACHINE}" = "sl1680usb" ]; then
+        cat target/preboot/intermediate/release/K0_BOOT_store.bin > "${DEPLOYDIR}/gen3_scs.bin.usb"
+        cat target/preboot/intermediate/release/K0_TEE_store.bin >> "${DEPLOYDIR}/gen3_scs.bin.usb"
+        cat target/preboot/intermediate/release/K1_BOOT_A_store.bin >> "${DEPLOYDIR}/gen3_scs.bin.usb"
+        cat target/preboot/intermediate/release/K1_BOOT_B_store.bin >> "${DEPLOYDIR}/gen3_scs.bin.usb"
+        cat target/preboot/intermediate/release/K1_TEE_A_store.bin >> "${DEPLOYDIR}/gen3_scs.bin.usb"
 
-        cat target/preboot/intermediate/release/K0_BOOT_store.bin > ${DEPLOYDIR}/gen3_bkl.bin.usb
-        cat target/preboot/intermediate/release/K0_TEE_store.bin >> ${DEPLOYDIR}/gen3_bkl.bin.usb
-        cat target/preboot/intermediate/release/K1_BOOT_A_store.bin >> ${DEPLOYDIR}/gen3_bkl.bin.usb
-        cat target/preboot/intermediate/release/K1_BOOT_B_store.bin >> ${DEPLOYDIR}/gen3_bkl.bin.usb
-        cat target/preboot/intermediate/release/K1_TEE_A_store.bin >> ${DEPLOYDIR}/gen3_bkl.bin.usb
-        cat target/preboot/intermediate/release/bcm_kernel.bin >> ${DEPLOYDIR}/gen3_bkl.bin.usb
-        cat target/preboot/intermediate/release/K1_TEE_B_store.bin >> ${DEPLOYDIR}/gen3_bkl.bin.usb
-        cat target/preboot/intermediate/release/K1_TEE_C_store.bin >> ${DEPLOYDIR}/gen3_bkl.bin.usb
-        cat target/preboot/intermediate/release/K1_TEE_D_store.bin >> ${DEPLOYDIR}/gen3_bkl.bin.usb
+        cat target/preboot/intermediate/release/K0_BOOT_store.bin > "${DEPLOYDIR}/gen3_bkl.bin.usb"
+        cat target/preboot/intermediate/release/K0_TEE_store.bin >> "${DEPLOYDIR}/gen3_bkl.bin.usb"
+        cat target/preboot/intermediate/release/K1_BOOT_A_store.bin >> "${DEPLOYDIR}/gen3_bkl.bin.usb"
+        cat target/preboot/intermediate/release/K1_BOOT_B_store.bin >> "${DEPLOYDIR}/gen3_bkl.bin.usb"
+        cat target/preboot/intermediate/release/K1_TEE_A_store.bin >> "${DEPLOYDIR}/gen3_bkl.bin.usb"
+        cat target/preboot/intermediate/release/bcm_kernel.bin >> "${DEPLOYDIR}/gen3_bkl.bin.usb"
+        cat target/preboot/intermediate/release/K1_TEE_B_store.bin >> "${DEPLOYDIR}/gen3_bkl.bin.usb"
+        cat target/preboot/intermediate/release/K1_TEE_C_store.bin >> "${DEPLOYDIR}/gen3_bkl.bin.usb"
+        cat target/preboot/intermediate/release/K1_TEE_D_store.bin >> "${DEPLOYDIR}/gen3_bkl.bin.usb"
 
-        install -m 0644 target/preboot/intermediate/release/erom.bin ${DEPLOYDIR}/gen3_erom.bin.usb
-        install -m 0644 target/preboot/intermediate/release/boot_monitor.bin ${DEPLOYDIR}/gen3_boot_monitor.bin.usb
-        install -m 0644 target/preboot/intermediate/release/scs_data_param.sign ${DEPLOYDIR}/gen3_scs_param.bin.usb
-        install -m 0644 target/preboot/intermediate/release/sysinit_en.bin ${DEPLOYDIR}/gen3_sysinit.bin.usb
-        install -m 0644 target/preboot/intermediate/release/miniloader_en.bin ${DEPLOYDIR}/gen3_miniloader.bin.usb
+        install -m 0644 target/preboot/intermediate/release/erom.bin "${DEPLOYDIR}/gen3_erom.bin.usb"
+        install -m 0644 target/preboot/intermediate/release/boot_monitor.bin "${DEPLOYDIR}/gen3_boot_monitor.bin.usb"
+        install -m 0644 target/preboot/intermediate/release/scs_data_param.sign "${DEPLOYDIR}/gen3_scs_param.bin.usb"
+        install -m 0644 target/preboot/intermediate/release/sysinit_en.bin "${DEPLOYDIR}/gen3_sysinit.bin.usb"
+        install -m 0644 target/preboot/intermediate/release/miniloader_en.bin "${DEPLOYDIR}/gen3_miniloader.bin.usb"
 
-        if [ ${MACHINE} == "sl1680usb" ]; then
-             install -m 0644 target/preboot/intermediate/release/gen3_ddr_phy_fw_0.bin ${DEPLOYDIR}/gen3_ddr_phy_fw_0.bin.usb
-             install -m 0644 target/preboot/intermediate/release/gen3_ddr_phy_fw_1.bin ${DEPLOYDIR}/gen3_ddr_phy_fw_1.bin.usb
+        if [ "${MACHINE}" = "sl1680usb" ]; then
+             install -m 0644 target/preboot/intermediate/release/gen3_ddr_phy_fw_0.bin "${DEPLOYDIR}/gen3_ddr_phy_fw_0.bin.usb"
+             install -m 0644 target/preboot/intermediate/release/gen3_ddr_phy_fw_1.bin "${DEPLOYDIR}/gen3_ddr_phy_fw_1.bin.usb"
         fi
     else
-        install -m 0644 target/preboot/preboot_esmt.bin ${DEPLOYDIR}/preboot.subimg
+        install -m 0644 target/preboot/preboot_esmt.bin "${DEPLOYDIR}/preboot.subimg"
     fi
 }
 
