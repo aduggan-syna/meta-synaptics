@@ -157,7 +157,6 @@ IMAGE_INSTALL:append:myna2 = " \
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
     kernel-module-sm \
-    kernel-module-i2c-dyndmx-pinctrl \
     kernel-module-phy-berlin-pcie \
     kernel-module-pcie-berlin \
     kernel-module-berlin-ir \
@@ -176,6 +175,7 @@ IMAGE_INSTALL:append:dolphin = " \
     synasdk-v4l2isp-daemon \
     synasdk-vpu-plugin \
     kernel-module-hrx-v4l2 \
+    kernel-module-i2c-dyndmx-pinctrl \
 "
 
 IMAGE_INSTALL:append:platypus = " \
