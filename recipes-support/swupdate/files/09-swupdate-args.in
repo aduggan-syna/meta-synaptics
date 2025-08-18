@@ -1,6 +1,7 @@
 rootfs=$(swupdate -g)
 
 fw_setenv upgrade_available 0
+fw_setenv bootcount 0
 
 rootfs_num=$(echo "$rootfs" | grep -o '[0-9]*$')
 
