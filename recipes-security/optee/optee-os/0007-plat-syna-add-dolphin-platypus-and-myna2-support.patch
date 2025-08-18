@@ -1,4 +1,4 @@
-From 1d9eaf5aeac52b5d70abbd5c0d5857e37633b4d2 Mon Sep 17 00:00:00 2001
+From f4dadc583298ee6957858a8400e4cf1cfc9e20d7 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 09:17:01 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -86,7 +86,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arm/plat-synaptics/common/syna_entrypoint.S    |    31 +
  .../common/syna_fastcall/fc_bootstage.c            |    39 +
  .../common/syna_fastcall/fc_memoryregion.c         |   112 +
- .../common/syna_fastcall/fc_verifyimage.c          |   108 +
+ .../common/syna_fastcall/fc_verifyimage.c          |   298 +
  .../common/syna_fastcall/syna_fastcall.h           |    16 +
  .../plat-synaptics/common/syna_fastcall_entry.c    |   176 +
  core/arch/arm/plat-synaptics/common/syna_setup.c   |   248 +
@@ -98,7 +98,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  core/arch/arm/plat-synaptics/common/tz_list.h      |    73 +
  core/arch/arm/plat-synaptics/common/tz_umem_mgr.c  |  1271 +
  core/arch/arm/plat-synaptics/common/tz_umem_mgr.h  |   130 +
- core/arch/arm/plat-synaptics/conf.mk               |    69 +
+ core/arch/arm/plat-synaptics/conf.mk               |    71 +
  .../plat-synaptics/driver/apb_timer/apb_timer.c    |   160 +
  .../arm/plat-synaptics/driver/apb_timer/sub.mk     |     2 +
  core/arch/arm/plat-synaptics/driver/bcm/bcmImg.h   |    38 +
@@ -126,10 +126,10 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  core/arch/arm/plat-synaptics/driver/mzone/mz_szc.c |   152 +
  core/arch/arm/plat-synaptics/driver/mzone/mz_szc.h |    22 +
  core/arch/arm/plat-synaptics/driver/mzone/sub.mk   |     2 +
- .../arm/plat-synaptics/driver/mzone/szc_zone.c     |   271 +
+ .../arm/plat-synaptics/driver/mzone/szc_zone.c     |   264 +
  .../arm/plat-synaptics/driver/protor/prot_setup.c  |    50 +
  .../arm/plat-synaptics/driver/protor/prot_setup.h  |    12 +
- .../arch/arm/plat-synaptics/driver/protor/protor.c |    95 +
+ .../arch/arm/plat-synaptics/driver/protor/protor.c |   101 +
  .../arch/arm/plat-synaptics/driver/protor/protor.h |    19 +
  core/arch/arm/plat-synaptics/driver/protor/sub.mk  |     3 +
  .../driver/regfirewall/regfirewall.c               |   135 +
@@ -140,7 +140,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../plat-synaptics/driver/regfirewall/rf_setup.c   |    20 +
  .../plat-synaptics/driver/regfirewall/rf_setup.h   |    12 +
  .../arm/plat-synaptics/driver/regfirewall/sub.mk   |     2 +
- core/arch/arm/plat-synaptics/driver/sub.mk         |     8 +
+ core/arch/arm/plat-synaptics/driver/sub.mk         |     9 +
  core/arch/arm/plat-synaptics/driver/szc/sub.mk     |     4 +
  .../arm/plat-synaptics/driver/szc/syscall_mpt.c    |   511 +
  core/arch/arm/plat-synaptics/driver/szc/szc.h      |    49 +
@@ -164,19 +164,19 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arch/arm/plat-synaptics/inc/tee_ta_perm_ctrl.h |    38 +
  .../arm/plat-synaptics/inc/tee_ta_perm_rule_def.h  |   120 +
  core/arch/arm/plat-synaptics/kern.ld.S             |   505 +
- core/arch/arm/plat-synaptics/main.c                |   220 +
- core/arch/arm/plat-synaptics/platform_config.h     |   116 +
+ core/arch/arm/plat-synaptics/main.c                |   223 +
+ core/arch/arm/plat-synaptics/platform_config.h     |   141 +
  core/arch/arm/plat-synaptics/sub.mk                |    28 +
  core/arch/arm/plat-synaptics/syscall/scall_syna.c  |   135 +
  core/arch/arm/plat-synaptics/syscall/sub.mk        |    11 +
- core/arch/arm/plat-synaptics/syscall/svc_syna.c    |   275 +
+ core/arch/arm/plat-synaptics/syscall/svc_syna.c    |   299 +
  core/arch/arm/plat-synaptics/syscall/svc_syna.h    |    88 +
  .../arm/plat-synaptics/syscall/svc_syna_entry.h    |    13 +
  .../arm/plat-synaptics/syscall/syna_scall_a64.S    |    47 +
  .../plat-synaptics/syscall/syscall_globaldata.c    |    94 +
  .../arm/plat-synaptics/syscall/syscall_mutex.c     |   149 +
  core/arch/arm/plat-synaptics/syscall/syscall_sa.c  |   220 +
- .../arm/plat-synaptics/syscall/syscall_securekey.c |   132 +
+ .../arm/plat-synaptics/syscall/syscall_securekey.c |   143 +
  .../arm/plat-synaptics/syscall/syscall_semaphore.c |   226 +
  .../arch/arm/plat-synaptics/syscall/syscall_umem.c |   272 +
  core/arch/arm/plat-synaptics/tz/mem_region.h       |   213 +
@@ -194,7 +194,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../tz/tz_boot_param_value_platypus.c              |   608 +
  core/arch/arm/plat-synaptics/tz/tz_errcode.h       |    44 +
  core/arch/arm/plat-synaptics/tz/tz_perm.h          |    89 +
- 188 files changed, 312848 insertions(+)
+ 188 files changed, 313103 insertions(+)
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap.h
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap_sm.h
@@ -299290,10 +299290,10 @@ index 0000000..3274dc5
 +}
 diff --git a/core/arch/arm/plat-synaptics/common/syna_fastcall/fc_verifyimage.c b/core/arch/arm/plat-synaptics/common/syna_fastcall/fc_verifyimage.c
 new file mode 100644
-index 0000000..4596444
+index 0000000..b216861
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/common/syna_fastcall/fc_verifyimage.c
-@@ -0,0 +1,108 @@
+@@ -0,0 +1,298 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -299313,8 +299313,226 @@ index 0000000..4596444
 +#include "bcm/bcm_genx_verify.h"
 +#include "bcm/bcm_hw_function.h"
 +#include "syna_fastcall.h"
++#include <mm/core_memprot.h>
++#include <mm/core_mmu.h>
++#include <mm/mobj.h>
++#include <tee/cache.h>
 +
++#ifdef CFG_IMAGE_NO_ENCRYPTION
++static struct mobj *get_param_mobj(paddr_t pa, size_t len)
++{
++	int result = TZ_ERROR_GENERIC;
++	struct mobj *mobj = NULL;
++	paddr_t *pages = NULL;
++	int i;
++	void *va;
++	int num_pages;
 +
++	//DMSG(" %s(), line %d pa = 0x%08" PRIxPA " len = 0x%" PRIxPASZ, __func__, __LINE__, pa, len);
++
++	num_pages = len / SMALL_PAGE_SIZE + 1;
++	if (core_pbuf_is(CORE_MEM_NSEC_SHM, pa, len)) {
++		va = phys_to_virt(pa, MEM_AREA_NSEC_SHM, 1);
++		if (!va) {
++			EMSG("Fail to transfer va to pa address.\n");
++			result = TZ_ERROR_BAD_PARAMETERS;
++			goto out;
++		}
++		mobj = mobj_shm_alloc(pa, len, 0);
++	} else {
++		if (pa & SMALL_PAGE_MASK) {
++			EMSG("Command buffer spans across page boundary pa = 0x%08" PRIxPA, pa);
++			result = TZ_ERROR_BAD_PARAMETERS;
++			goto out;
++		}
++		pages = malloc(sizeof(paddr_t) *num_pages);
++		if (!pages) {
++			result = TZ_ERROR_OUT_OF_MEMORY;
++			goto out;
++		}
++		memset(pages, 0, sizeof(paddr_t) *num_pages);
++		for (i = 0; i < num_pages; i++) {
++			pages[i] = pa + i * SMALL_PAGE_SIZE;
++		}
++		mobj = mobj_mapped_shm_alloc(pages, num_pages, 0, 0);
++	}
++	result = TZ_SUCCESS;
++
++out:
++	if (pages) {
++		memset(pages, 0, sizeof(paddr_t) *num_pages);
++		free(pages);
++	}
++
++	if (result == TZ_SUCCESS)
++		return mobj;
++
++	if (mobj) {
++		mobj_dec_map(mobj);
++		mobj_put(mobj);
++	}
++	return NULL;
++}
++
++#define SIGN_LEN 616
++
++static int memcpy_page(paddr_t dst, paddr_t src, size_t len)
++{
++	int result = TZ_ERROR_GENERIC;
++	struct mobj *src_mobj = NULL;
++	struct mobj *dst_mobj = NULL;
++	void *src_va = NULL;
++	void *dst_va = NULL;
++	paddr_t pa_src;
++	paddr_t pa_dst;
++	pa_src = (~SMALL_PAGE_MASK) & src;
++	pa_dst = (~SMALL_PAGE_MASK) & (uintptr_t)dst;
++
++	if (len > SMALL_PAGE_SIZE)
++		return TZ_ERROR_NOT_SUPPORTED;
++
++	src_mobj = get_param_mobj(pa_src, SMALL_PAGE_SIZE);
++	if (!src_mobj) {
++		EMSG("Fail to get mobj for src @ 0x%08" PRIxPA, pa_src);
++		result = TZ_ERROR_COMMUNICATION;
++		goto out;
++	}
++
++	src_va = mobj_get_va(src_mobj, src - pa_src, SMALL_PAGE_SIZE);
++	//DMSG(" %s(), line %d src_va = 0x%p", __func__, __LINE__, src_va);
++	if (!src_va) {
++		EMSG("Fail to get va address.\n");
++		result = TZ_ERROR_COMMUNICATION;
++		goto out;
++	}
++
++	dst_mobj = get_param_mobj(pa_dst, SMALL_PAGE_SIZE);
++	if (!dst_mobj) {
++		EMSG("Fail to get mobj for dst @0x%08" PRIxPA, pa_dst);
++		result = TZ_ERROR_COMMUNICATION;
++		goto out;
++	}
++	dst_va = mobj_get_va(dst_mobj, dst - pa_dst, SMALL_PAGE_SIZE);
++	//DMSG(" %s(), line %d dst_va = 0x%p", __func__, __LINE__, dst_va);
++	if (!dst_va) {
++		EMSG("Fail to get va address.\n");
++		result = TZ_ERROR_COMMUNICATION;
++		goto out;
++	}
++
++	memcpy(dst_va, src_va, len);
++
++	cache_operation(TEE_CACHEFLUSH, dst_va, SMALL_PAGE_SIZE);
++
++	result =  TZ_SUCCESS;
++
++out:
++	if (src_mobj) {
++		mobj_dec_map(src_mobj);
++		mobj_put(src_mobj);
++	}
++	if (dst_mobj) {
++		mobj_dec_map(dst_mobj);
++		mobj_put(dst_mobj);
++	}
++	return result;
++}
++
++static int memclr_page(paddr_t dst, size_t len)
++{
++	int result = TZ_ERROR_GENERIC;
++	struct mobj *dst_mobj = NULL;
++	void *dst_va = NULL;
++	paddr_t pa_dst;
++	pa_dst = (~SMALL_PAGE_MASK) & (uintptr_t)dst;
++
++	if (len > SMALL_PAGE_SIZE)
++		return TZ_ERROR_NOT_SUPPORTED;
++
++	dst_mobj = get_param_mobj(pa_dst, SMALL_PAGE_SIZE);
++	if (!dst_mobj) {
++		EMSG("Fail to get mobj for dst @0x%08" PRIxPA , pa_dst);
++		result = TZ_ERROR_COMMUNICATION;
++		goto out;
++	}
++	dst_va = mobj_get_va(dst_mobj, dst - pa_dst, SMALL_PAGE_SIZE);
++	DMSG(" %s(), line %d dst_va = 0x%p.\n", __func__, __LINE__, dst_va);
++	if (!dst_va) {
++		EMSG("Fail to get va address.\n");
++		result = TZ_ERROR_COMMUNICATION;
++		goto out;
++	}
++
++	memset(dst_va, 0, len);
++
++	cache_operation(TEE_CACHEFLUSH, dst_va, SMALL_PAGE_SIZE);
++
++	result =  TZ_SUCCESS;
++
++out:
++	if (dst_mobj) {
++		mobj_dec_map(dst_mobj);
++		mobj_put(dst_mobj);
++	}
++	return result;
++}
++
++static tz_errcode_t verify_clear_image(paddr_t src, unsigned long src_len,
++		paddr_t dst, unsigned long *dst_len)
++{
++	int result = TZ_ERROR_GENERIC;
++	paddr_t pa_src;
++	paddr_t pa_dst;
++	size_t len;
++	size_t cp_len;
++
++	if (!src_len|| src_len < SIGN_LEN)
++		return TZ_ERROR_BAD_PARAMETERS;
++
++	DMSG(" %s(), line %d src = 0x%08" PRIxPA " src_len = 0x%lx, dst = 0x%08" PRIxPA " dst_len = 0x%p.\n",
++			__func__, __LINE__, src, src_len, dst, dst_len);
++
++	if (src_len < SMALL_PAGE_SIZE) {
++		result = memcpy_page(dst, src + SIGN_LEN,  src_len - SIGN_LEN);
++		return result;
++	}
++
++	cp_len = SMALL_PAGE_SIZE;
++	result = memcpy_page(dst, src + SIGN_LEN,  cp_len);
++	if (result != TZ_SUCCESS) {
++		EMSG("fail to copy memory.\n");
++		return TZ_ERROR_ACCESS_CONFLICT;
++	}
++
++	pa_src = src + SIGN_LEN + cp_len;
++	pa_dst = dst + cp_len;
++
++	len = src_len - cp_len - SIGN_LEN;
++
++	do {
++		if (len < SMALL_PAGE_SIZE) {
++			cp_len = len;
++		} else
++			cp_len = SMALL_PAGE_SIZE;
++
++		result = memcpy_page(pa_dst, pa_src, cp_len);
++		if (result != TZ_SUCCESS)
++			goto out;
++
++		pa_src += cp_len;
++		pa_dst += cp_len;
++		len -= cp_len;
++	} while (len > 0);
++
++	return TZ_SUCCESS;
++out:
++	while(pa_dst) {
++		memclr_page(pa_dst, SMALL_PAGE_SIZE);
++		pa_dst -= SMALL_PAGE_SIZE;
++	}
++	return result;
++}
++#endif
 +/** tz_sw_verify_image.
 + *
 + * @param src		source buffer address
@@ -299325,8 +299543,8 @@ index 0000000..4596444
 + *
 + * @return		error code
 + */
-+static tz_errcode_t tz_sw_verify_image(paddr_t src, unsigned long src_len,
-+		void *dst, unsigned long *dst_len, unsigned long code_type)
++tz_errcode_t tz_sw_verify_image(paddr_t src, unsigned long src_len,
++		void *dst, unsigned long *dst_len, unsigned long __unused code_type)
 +{
 +	int result = TZ_ERROR_GENERIC;
 +
@@ -299336,47 +299554,14 @@ index 0000000..4596444
 +				tz_get_boot_stage());
 +		return TZ_ERROR_ACCESS_DENIED;
 +	}
-+#if 0
-+	if (!src || !src_len || !dst || !dst_len) {
-+		EMSG("bad parameters, src=0x%08x, src_len=0x%08x, dst=0x%08x\n",
-+				src, src_len, dst);
++
++	// dst address is not needed in genx flow
++	if (!src || !src_len) {
++		EMSG("bad parameters, src=0x%08" PRIxPA ", src_len=0x%lx\n",
++				src, src_len);
 +		return TZ_ERROR_BAD_PARAMETERS;
 +	}
-+
-+	if (code_type != 5) {
-+		result = TZ_ERROR_NOT_SUPPORTED;
-+		EMSG("tz_sw_verify_image failed, ret=%08x\n", result);
-+		return result;
-+	}
-+
-+	const struct mem_region *mr = mr_find_region(virt_to_phys((void *)dst_len), sizeof(unsigned long));
-+	if (!mr) {
-+		EMSG("mr_find_region error\n");
-+		return TZ_ERROR_ACCESS_DENIED;
-+	}
-+	if (!TEE_MR_USER_IS_TZCORE(mr)) {
-+		EMSG("dst_len 0x%x is not in tzk stack\n", dst_len);
-+		return TZ_ERROR_ACCESS_DENIED;
-+	}
-+
-+	mr = mr_find_region(dst, *dst_len);
-+	if (!mr) {
-+		EMSG("mr_find_region error\n");
-+		return TZ_ERROR_ACCESS_DENIED;
-+	}
-+	if (TZ_IS_NNA(MR_PERM(mr))) {
-+		EMSG("out 0x%x is not non secure memory\n", dst);
-+		return TZ_ERROR_ACCESS_DENIED;
-+	}
-+#else
-+		// dst address is not needed in genx flow
-+		if (!src || !src_len) {
-+			EMSG("bad parameters, src=0x%08" PRIxPA ", src_len=0x%lx\n",
-+					src, src_len);
-+			return TZ_ERROR_BAD_PARAMETERS;
-+		}
-+#endif
-+
++#ifdef CFG_BCM
 +	result = verify_image(src, src_len, dst, (unsigned int*)dst_len, code_type, 1);
 +	if (result) {
 +		EMSG("verify image fail, src=0x%08" PRIxPA ", len=0x%lx, dst=0x%p",
@@ -299384,7 +299569,12 @@ index 0000000..4596444
 +		/* we use generic for we don't know the exact error code */
 +		return TZ_ERROR_GENERIC;
 +	}
-+
++#elif defined(CFG_IMAGE_NO_ENCRYPTION)
++	result = verify_clear_image(src, src_len, (paddr_t)dst, (unsigned long*)dst_len);
++	return result;
++#else
++	return TZ_ERROR_NOT_SUPPORTED;
++#endif
 +	return TZ_SUCCESS;
 +}
 +
@@ -302984,14 +303174,13 @@ index 0000000..c858ead
 +#endif /* _TZ_UMEM_MGR_H_ */
 diff --git a/core/arch/arm/plat-synaptics/conf.mk b/core/arch/arm/plat-synaptics/conf.mk
 new file mode 100644
-index 0000000..4c80149
+index 0000000..0737020
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/conf.mk
-@@ -0,0 +1,69 @@
+@@ -0,0 +1,71 @@
 +PLATFORM_FLAVOR ?= platypus
 +
 +include core/arch/arm/cpu/cortex-armv8-0.mk
-+$(call force,CFG_TEE_CORE_NB_CORE,4)
 +$(call force,CFG_GENERIC_BOOT,y)
 +$(call force,CFG_WITH_ARM_TRUSTED_FW,y)
 +$(call force,CFG_WITH_LPAE,y)
@@ -303002,20 +303191,12 @@ index 0000000..4c80149
 +$(call force,CFG_CORE_ASLR,n)
 +$(call force,CFG_CORE_LARGE_PHYS_ADDR,y)
 +$(call force,CFG_CORE_PREALLOC_EL0_TBLS,y)
-+$(call force, CFG_WITH_SOFTWARE_PRNG,n)
 +
 +$(call force,CFG_CORE_RODATA_NOEXEC,y)
 +$(call force,CFG_TEE_CORE_MALLOC_DEBUG,y)
 +
-+$(call force,CFG_BCM,y)
-+$(call force,CFG_RF,y)
-+$(call force,CFG_MASTER_PROTECT,y)
-+$(call force,CFG_MZONE,y)
 +
 +$(call force,CFG_GENX,y)
-+$(call force,CFG_SECURE_TIME_SYNA,y)
-+$(call force,CFG_APB_TIMER,y)
-+$(call force,CFG_SCALL_SYNA,y)
 +
 +ifeq ($(PLATFORM_FLAVOR),dolphin)
 +$(call force,CFG_SZC,y)
@@ -303035,6 +303216,17 @@ index 0000000..4c80149
 +$(call force,CFG_SZC,y)
 +$(call force,CFG_SZC_ZONE,y)
 +endif
++
++CFG_WITH_SOFTWARE_PRNG ?=n
++CFG_TEE_CORE_NB_CORE ?= 4
++CFG_SCALL_SYNA ?= y
++CFG_SYNA_TA ?=y
++CFG_BCM ?= y
++CFG_RF ?= y
++CFG_MASTER_PROTECT ?= y
++CFG_MZONE ?= y
++CFG_SECURE_TIME_SYNA ?= y
++CFG_APB_TIMER ?= y
 +
 +supported-ta-targets = ta_arm64
 +CFG_CRYPTO_WITH_CE ?= y
@@ -305514,10 +305706,10 @@ index 0000000..494f0fb
 +srcs-$(CFG_SZC_ZONE) += szc_zone.c
 diff --git a/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c b/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c
 new file mode 100644
-index 0000000..0cd90f3
+index 0000000..b898e2b
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c
-@@ -0,0 +1,271 @@
+@@ -0,0 +1,264 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -305531,7 +305723,6 @@ index 0000000..0cd90f3
 +#include "mem_region_userdata.h"
 +#include "mem_region.h"
 +#include "mr_setup.h"
-+#include "Galois_memmap.h"
 +#include "tz_boot_param_value.h"
 +#include "tz_errcode.h"
 +#include <assert.h>
@@ -305541,12 +305732,6 @@ index 0000000..0cd90f3
 +
 +#define SZC_ZONE_NUM_ZONES_MAX      16
 +#define SZC_ZONE_NUM_MASTERS_MAX    32
-+
-+#if defined(PLATFORM_FLAVOR_dolphin) || defined(PLATFORM_FLAVOR_platypus)
-+#define SZC_BASE                    (vaddr_t)phys_to_virt_io(MEMMAP_MPT_REG_BASE, MEMMAP_MPT_REG_SIZE)
-+#elif defined(PLATFORM_FLAVOR_myna2)
-+#define SZC_BASE                    (vaddr_t)phys_to_virt_io(MEMMAP_MPTS_REG_BASE, MEMMAP_MPTS_REG_SIZE)
-+#endif
 +
 +#define SZC_ZONE_BASE               (SZC_BASE + RA_SZC_AllZone)
 +#define SZC_ZONE(z)                 (SZC_ZONE_BASE + (z) * 28)
@@ -305576,7 +305761,7 @@ index 0000000..0cd90f3
 +	}
 +	writel(val, addr);
 +}
-+#elif defined(PLATFORM_FLAVOR_myna2)
++#elif defined(PLATFORM_FLAVOR_myna2) || defined(PLATFORM_FLAVOR_klamath)
 +
 +static void szc_set_zone_enable(unsigned int enable)
 +{
@@ -305756,7 +305941,7 @@ index 0000000..0cd90f3
 +	// enable SZC for each master
 +	for (i = 0; i < SZC_ZONE_NUM_MASTERS_MAX; i++)
 +		szc_set_zone_enable_per_master(i, 1);
-+#elif defined(PLATFORM_FLAVOR_myna2)
++#elif defined(PLATFORM_FLAVOR_myna2) || defined(PLATFORM_FLAVOR_klamath)
 +	// enable All SZC zone
 +	szc_set_zone_enable(0xffffffff);
 +#else
@@ -305865,10 +306050,10 @@ index 0000000..3af25ea
 +#endif	/* _PROT_SETUP_H_ */
 diff --git a/core/arch/arm/plat-synaptics/driver/protor/protor.c b/core/arch/arm/plat-synaptics/driver/protor/protor.c
 new file mode 100644
-index 0000000..43abe77
+index 0000000..52ed734
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/protor/protor.c
-@@ -0,0 +1,95 @@
+@@ -0,0 +1,101 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -305878,7 +306063,6 @@ index 0000000..43abe77
 +#include <string.h>
 +#include "protor.h"
 +#include "io.h"
-+#include "Galois_memmap.h"
 +#include "soc.h"
 +#include "prot_id.h"
 +#include "tz_boot_param_value.h"
@@ -305886,7 +306070,6 @@ index 0000000..43abe77
 +#include <assert.h>
 +#include <mm/core_memprot.h>
 +
-+#define MEMMAP_SOC_REG_VA_BASE	(vaddr_t)phys_to_virt_io(MEMMAP_SOC_REG_BASE, MEMMAP_SOC_REG_SIZE)
 +
 +#define PROTOR_REG_BASE 	(MEMMAP_SOC_REG_VA_BASE + RA_SOC_protOR)
 +
@@ -305900,7 +306083,15 @@ index 0000000..43abe77
 +
 +#define PROTOR_REG_NUM		PROT_ID_MAX
 +
++#ifdef CFG_BCM
 +void bcm_add_bg_check_register(uintptr_t addr, uint32_t data);
++#else
++static void bcm_add_bg_check_register(uintptr_t __unused addr, uint32_t __unused data)
++{
++	return;
++}
++#endif
++
 +#define pt_writel(v, a) do {               \
 +		io_write32(a, v);                    \
 +		bcm_add_bg_check_register(a, v); \
@@ -306989,10 +307180,10 @@ index 0000000..094cc30
 +srcs-y += rf_drv_$(PLATFORM_FLAVOR).c
 diff --git a/core/arch/arm/plat-synaptics/driver/sub.mk b/core/arch/arm/plat-synaptics/driver/sub.mk
 new file mode 100644
-index 0000000..4b7a02f
+index 0000000..41333d8
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/sub.mk
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,9 @@
 +global-incdirs-y += .
 +subdirs-$(CFG_BCM) += bcm
 +subdirs-$(CFG_RF) += regfirewall
@@ -307000,6 +307191,7 @@ index 0000000..4b7a02f
 +subdirs-$(CFG_MZONE) += mzone
 +subdirs-$(CFG_SZC) += szc
 +subdirs-$(CFG_APB_TIMER) += apb_timer
++subdirs-$(CFG_APPCRYPTO) += appcrypto
 +
 diff --git a/core/arch/arm/plat-synaptics/driver/szc/sub.mk b/core/arch/arm/plat-synaptics/driver/szc/sub.mk
 new file mode 100644
@@ -309910,10 +310102,10 @@ index 0000000..3a5753b
 +#endif /*CFG_CORE_SANITIZE_KADDRESS*/
 diff --git a/core/arch/arm/plat-synaptics/main.c b/core/arch/arm/plat-synaptics/main.c
 new file mode 100644
-index 0000000..ab1597d
+index 0000000..263f602
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/main.c
-@@ -0,0 +1,220 @@
+@@ -0,0 +1,223 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -309939,23 +310131,25 @@ index 0000000..ab1597d
 +#include <tee/cache.h>
 +#include <kernel/tee_common_otp.h>
 +#include "syna_fastcall_entry.h"
++#ifdef CFG_BCM
 +#include "bcm/bcm_random.h"
 +#include "bcm_mailbox.h"
 +#include "bcm_cmd.h"
 +#include "bcm_execute_cmd.h"
 +#include "bcm_primitive.h"
-+
++#endif
 +
 +static struct serial8250_uart_data console_data;
 +
 +register_phys_mem(MEM_AREA_RAM_SEC, TZDRAM_BOOT_PARAM, CORE_MMU_PGDIR_SIZE);
-+#if 0
-+register_phys_mem_pgdir(MEM_AREA_IO_SEC, CONSOLE_UART_BASE,
-+			CORE_MMU_PGDIR_SIZE);
 +
-+register_phys_mem_pgdir(MEM_AREA_IO_SEC, GIC_BASE, CORE_MMU_PGDIR_SIZE);
-+#else
 +register_phys_mem(MEM_AREA_IO_SEC, 0xf6000000, 0x4000000);
++
++#ifdef BERLIN_DEVICE1_SIZE
++register_phys_mem(MEM_AREA_IO_SEC, BERLIN_DEVICE1_BASE, BERLIN_DEVICE1_SIZE);
++#endif
++#ifdef BERLIN_DEVICE2_SIZE
++register_phys_mem(MEM_AREA_IO_SEC, BERLIN_DEVICE2_BASE, BERLIN_DEVICE2_SIZE);
 +#endif
 +
 +#ifdef DRAM0_BASE
@@ -309983,6 +310177,7 @@ index 0000000..ab1597d
 +	register_serial_console(&console_data.chip);
 +}
 +
++#ifdef CFG_BCM
 +unsigned long plat_get_aslr_seed(void)
 +{
 +	unsigned int seed = 0;
@@ -309997,7 +310192,7 @@ index 0000000..ab1597d
 +
 +	return seed;
 +}
-+
++#endif
 +
 +#if defined(CFG_RPMB_FS)
 +#define REE_RPMB_KEY_SIZE	32
@@ -310136,10 +310331,10 @@ index 0000000..ab1597d
 +#endif
 diff --git a/core/arch/arm/plat-synaptics/platform_config.h b/core/arch/arm/plat-synaptics/platform_config.h
 new file mode 100644
-index 0000000..1e9576d
+index 0000000..2b5c0b6
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/platform_config.h
-@@ -0,0 +1,116 @@
+@@ -0,0 +1,141 @@
 +/* SPDX-License-Identifier: BSD-2-Clause */
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -310179,6 +310374,7 @@ index 0000000..1e9576d
 +#define TEE_SHMEM_START		(TZDRAM_BASE + TZDRAM_SIZE)
 +#define TEE_SHMEM_SIZE		0x00400000
 +#endif
++
 +#define DRAM0_BASE	(0x4100000)
 +#define DRAM0_SIZE	(0x7F000000 - DRAM0_BASE)
 +#define DRAM1_BASE	(0x80000000)
@@ -310199,7 +310395,13 @@ index 0000000..1e9576d
 +#if defined(PLATFORM_FLAVOR_platypus)
 +/* UART */
 +#define CONSOLE_UART_BASE	0xf7fcd000
-+#define MEMMAP_MPT_REG_BASE	0xF9000000
++#define MEMMAP_MPT_REG_BASE 0xF9000000
++#define MEMMAP_MPT_REG_SIZE 0x40000
++#define SZC_BASE			(vaddr_t)phys_to_virt_io(MEMMAP_MPT_REG_BASE, 0x40000)
++
++#define MEMMAP_SOC_REG_BASE  0xF7CA0000
++#define MEMMAP_SOC_REG_SIZE  0x10000
++#define MEMMAP_SOC_REG_VA_BASE	(vaddr_t)phys_to_virt_io(MEMMAP_SOC_REG_BASE, MEMMAP_SOC_REG_SIZE)
 +
 +#define MAX_SZC_NUM 4
 +#define SZC_RULE_NUM_RULES_MAX      16
@@ -310212,7 +310414,13 @@ index 0000000..1e9576d
 +
 +#elif  defined(PLATFORM_FLAVOR_dolphin)
 +#define CONSOLE_UART_BASE	0xf7fcd000
-+#define MEMMAP_MPT_REG_BASE	0xF9000000
++#define MEMMAP_MPT_REG_BASE 0xF9000000
++#define MEMMAP_MPT_REG_SIZE 0x40000
++#define SZC_BASE			(vaddr_t)phys_to_virt_io(MEMMAP_MPT_REG_BASE, MEMMAP_MPT_REG_SIZE)
++
++#define MEMMAP_SOC_REG_BASE  0xF7CA0000
++#define MEMMAP_SOC_REG_SIZE  0x10000
++#define MEMMAP_SOC_REG_VA_BASE	(vaddr_t)phys_to_virt_io(MEMMAP_SOC_REG_BASE, MEMMAP_SOC_REG_SIZE)
 +
 +#define MAX_SZC_NUM 5
 +#define SZC_RULE_NUM_RULES_MAX      16
@@ -310235,8 +310443,15 @@ index 0000000..1e9576d
 +#elif  defined(PLATFORM_FLAVOR_myna2)
 +#define CONSOLE_UART_BASE	0xF7E81400
 +
++#define MEMMAP_SOC_REG_BASE  0xF7CA0000
++#define MEMMAP_SOC_REG_SIZE  0x10000
++#define MEMMAP_SOC_REG_VA_BASE	(vaddr_t)phys_to_virt_io(MEMMAP_SOC_REG_BASE, MEMMAP_SOC_REG_SIZE)
++
 +//#define  MEMMAP_MPTS_REG_BASE 0xF9000000
-+#define MEMMAP_MPT_REG_BASE	0xF9000000
++#define MEMMAP_MPT_REG_BASE 0xF9000000
++#define MEMMAP_MPT_REG_SIZE 0x40000
++
++#define SZC_BASE			(vaddr_t)phys_to_virt_io(MEMMAP_MPT_REG_BASE, MEMMAP_MPT_REG_SIZE)
 +
 +#define CONFIG_SZC_ICTL_IRQ		GIC_IID_SPI(IRQ_szc_intr)
 +
@@ -310244,8 +310459,13 @@ index 0000000..1e9576d
 +#error "Unknown platform flavor"
 +#endif
 +
++#ifdef CONFIG_QEMU
++#define CONSOLE_BAUDRATE		57600
++#define CONSOLE_UART_CLK_IN_HZ	24000000
++#else
 +#define CONSOLE_BAUDRATE		115200
 +#define CONSOLE_UART_CLK_IN_HZ	25000000
++#endif
 +
 +/* SoC Timer: clock 200MHz */
 +#define CONFIG_TIMER_CLOCK		(200 * 1000000)
@@ -310450,10 +310670,10 @@ index 0000000..71b9fe1
 +
 diff --git a/core/arch/arm/plat-synaptics/syscall/svc_syna.c b/core/arch/arm/plat-synaptics/syscall/svc_syna.c
 new file mode 100644
-index 0000000..1438c52
+index 0000000..4305a5e
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/syscall/svc_syna.c
-@@ -0,0 +1,275 @@
+@@ -0,0 +1,299 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -310471,8 +310691,10 @@ index 0000000..1438c52
 +
 +#include "mr_setup.h"
 +#include "svc_syna.h"
++#ifdef CFG_BCM
 +#include "bcm_execute_cmd.h"
 +#include "bcm_genx_verify.h"
++#endif
 +#include "mem_region_userdata.h"
 +#include "hal_soc.h"
 +#ifdef CFG_TA_PERM_CHECK
@@ -310480,7 +310702,9 @@ index 0000000..1438c52
 +#endif
 +#include "addr_range_check.h"
 +#include "tz_boot_param_value.h"
++#include "hal_soc.h"
 +
++extern int soc_get_otp_raw_data(uint32_t row, uint8_t *buffer);
 +
 +TEE_Result syscall_syna_mr_filter(void *region, uint32_t *max_num,
 +		unsigned long attr_mask, unsigned long attr_val)
@@ -310536,6 +310760,7 @@ index 0000000..1438c52
 +	return  copy_to_user(mr, m, sizeof(*m));
 +}
 +
++#ifdef CFG_BCM
 +TEE_Result syscall_syna_verify_image(const void *in, size_t inLen, void *out,
 +		uint32_t *outLen, uint32_t codeType)
 +{
@@ -310623,7 +310848,26 @@ index 0000000..1438c52
 +	/* call secure processor to execute command */
 +	return sp_exec_cmd_ex(&cmd, sizeof(cmd), (BCM_MAILBOX_STATUS *)result, result_len, delay);
 +}
++#else
++TEE_Result syscall_syna_verify_image(const void *in __unused, size_t inLen __unused, void *out __unused,
++		uint32_t *outLen __unused, uint32_t codeType __unused)
++{
++	return TEE_ERROR_NOT_SUPPORTED;
++}
 +
++TEE_Result syscall_syna_exec_cmd(uint32_t cmd_id __unused, const void *param __unused,
++		uint32_t param_len __unused, const void *result __unused, uint32_t result_len __unused)
++{
++	return TEE_ERROR_NOT_SUPPORTED;
++}
++
++TEE_Result syscall_syna_exec_cmd_ex(uint32_t cmd_id __unused, const void *param __unused,
++		uint32_t param_len __unused, const void *result __unused,
++		uint32_t result_len __unused, uint32_t delay __unused)
++{
++	return TEE_ERROR_NOT_SUPPORTED;
++}
++#endif
 +
 +static int is_rf_protected_register(paddr_t pa, size_t len)
 +{
@@ -311378,10 +311622,10 @@ index 0000000..4bd5ffa
 +
 diff --git a/core/arch/arm/plat-synaptics/syscall/syscall_securekey.c b/core/arch/arm/plat-synaptics/syscall/syscall_securekey.c
 new file mode 100644
-index 0000000..2910f99
+index 0000000..321f540
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/syscall/syscall_securekey.c
-@@ -0,0 +1,132 @@
+@@ -0,0 +1,143 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -311389,6 +311633,7 @@ index 0000000..2910f99
 +
 +#include <trace.h>
 +#include "tee_api_syna.h"
++#ifdef CFG_BCM
 +#include "bcm_mailbox.h"
 +#include "bcm_primitive.h"
 +#include "bcm_execute_cmd.h"
@@ -311409,7 +311654,7 @@ index 0000000..2910f99
 +	BCM_MAILBOX_STATUS status = {0};
 +	struct SecureKeyParam* buffer = NULL;
 +	paddr_t phy_addr;
-+	size_t len;	
++	size_t len;
 +	struct ts_session *s = ts_get_current_session();
 +	const TEE_UUID *uuid = NULL;
 +	struct SecureKeyParam* sk = (struct SecureKeyParam *)buff;
@@ -311466,7 +311711,7 @@ index 0000000..2910f99
 +	BCM_MAILBOX_STATUS status = {0};
 +	struct SecureKeyParam* buffer;
 +	paddr_t phy_addr;
-+	size_t len;	
++	size_t len;
 +	struct ts_session *s = ts_get_current_session();
 +	const TEE_UUID *uuid = NULL;
 +	struct SecureKeyParam* sk = (struct SecureKeyParam *)buff;
@@ -311514,6 +311759,16 @@ index 0000000..2910f99
 +		free(buffer);
 +	return result;
 +}
++#else
++TEE_Result syscall_syna_get_securekey(void *buff __unused)
++{
++	return TEE_ERROR_NOT_SUPPORTED;
++}
++TEE_Result syscall_syna_get_securekey2(void * buff __unused)
++{
++	return TEE_ERROR_NOT_SUPPORTED;
++}
++#endif
 diff --git a/core/arch/arm/plat-synaptics/syscall/syscall_semaphore.c b/core/arch/arm/plat-synaptics/syscall/syscall_semaphore.c
 new file mode 100644
 index 0000000..47297d9
