@@ -260,6 +260,7 @@ IMAGE_BUILDINFO_VARS:append = " SYNA_SDK_REVISION"
 
 #Use systemd
 INIT_MANAGER = "systemd"
+ROOT_HOME = "/home/root"
 
 #Use and bundle initramfs
 INITRAMFS_IMAGE_BUNDLE = "1"
@@ -278,3 +279,4 @@ IMAGE_FSTYPES += " synaimg ext4 ext4.gz"
 
 GLIBC_GENERATE_LOCALES = "zh_CN.UTF-8 en_GB.UTF-8 en_US.UTF-8"
 IMAGE_LINGUAS = "zh-cn en-gb en-us"
+
