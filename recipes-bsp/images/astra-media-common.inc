@@ -172,7 +172,6 @@ IMAGE_INSTALL:append:myna2 = " \
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
     synasdk-drivers-sm \
-    synasdk-drivers-i2c-dyndmx-pinctrl \
     synasdk-drivers-phy-berlin-pcie \
     synasdk-drivers-pcie-berlin \
     synasdk-drivers-berlin-ir \
@@ -193,6 +192,7 @@ IMAGE_INSTALL:append:dolphin = " \
     synasdk-vpu-plugin \
     synasdk-drivers-isp \
     synasdk-v4l2isp-qtapp \
+    kernel-module-i2c-dyndmx-pinctrl \
 "
 
 IMAGE_INSTALL:append:platypus = " \
