@@ -11,12 +11,11 @@ ADBD_RPACKAGES = " initramfs-module-debug \
                             kernel-module-dwc2 \
                             kernel-module-pwm-berlin \
                             kernel-module-phy-syna-usb \
-                            kernel-module-i2c-dyndmx-pinctrl \
                             android-tools-adbd \
                             android-tools-conf-configfs"
 
-PACKAGE_INSTALL:append:sl1640usb = " ${ADBD_RPACKAGES} \
-                            kernel-module-i2c-dyndmx-pinctrl"
+PACKAGE_INSTALL:append:sl1640usb = " ${ADBD_RPACKAGES}"
+
 PACKAGE_INSTALL:append:sl1680spi = " initramfs-module-debug"
 
 PACKAGE_INSTALL:append:sl1680usb = " ${ADBD_RPACKAGES} \
