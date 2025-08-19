@@ -175,7 +175,6 @@ IMAGE_INSTALL:append:dolphin = " \
     synasdk-v4l2isp-daemon \
     synasdk-vpu-plugin \
     kernel-module-hrx-v4l2 \
-    kernel-module-i2c-dyndmx-pinctrl \
 "
 
 IMAGE_INSTALL:append:platypus = " \
