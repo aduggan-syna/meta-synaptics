@@ -192,7 +192,7 @@ IMAGE_INSTALL:append:dolphin = " \
     synasdk-vpu-plugin \
     synasdk-drivers-isp \
     synasdk-v4l2isp-qtapp \
-    kernel-module-i2c-dyndmx-pinctrl \
+    synasdk-drivers-i2c-dyndmx-pinctrl \
 "
 
 IMAGE_INSTALL:append:platypus = " \
