@@ -14,4 +14,7 @@ SRC_URI += " \
     file://0008-kmssink-enable-playback-on-leasedrmfd.patch \
     file://0009-kmsink-update-dispwin-2-max-mode-size.patch \
 "
+EXTRA_OECONF:append = " --enable-nice"
+
+PACKAGECONFIG:append = " webrtc srtp"
 
