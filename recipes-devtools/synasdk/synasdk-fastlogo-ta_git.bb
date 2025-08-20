@@ -39,7 +39,7 @@ do_compile() {
     export TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR}
 
     cd ${S}
-    make -f Makefile.op TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} CROSS_COMPILE=${HOST_PREFIX} SoC_Ver=${SOC_VER} O=${B}/out
+    make -f Makefile.op TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} CROSS_COMPILE=${HOST_PREFIX} SoC_Ver=${SOC_VER} Single_Instance=y O=${B}/out
 }
 
 do_install() {
