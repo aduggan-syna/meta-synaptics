@@ -1,0 +1,84 @@
+From 1bd21034641a95f2ba30ea47ac7eda52d1da57ff Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Wed, 16 Jul 2025 13:06:38 +0800
+Subject: [PATCH] syna: store and restore all SRAM during suspend/resume
+
+Jira: https://synacsm.atlassian.net/browse/CSMSA-85
+
+Change-Id: Id33ff6f661f3a11ba110a869313edd7b98db7e24
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/soc/dolphin/plat_pm.c  | 4 ++--
+ plat/syna/berlin/soc/myna2/plat_pm.c    | 4 ++--
+ plat/syna/berlin/soc/platypus/plat_pm.c | 4 ++--
+ 3 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/plat/syna/berlin/soc/dolphin/plat_pm.c b/plat/syna/berlin/soc/dolphin/plat_pm.c
+index b580003..89d6d5b 100644
+--- a/plat/syna/berlin/soc/dolphin/plat_pm.c
++++ b/plat/syna/berlin/soc/dolphin/plat_pm.c
+@@ -198,7 +198,7 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ 	suspend_handler_t suspend_func;
+ 
+ 	/* Save the MPT sram to ddr */
+-	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, suspend_size);
++	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, SRAM_BACKUP_SIZE);
+ 
+ 	/*
+ 	 * Copy code to SRAM, and jump to it later
+@@ -223,7 +223,7 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ void berlin_resume_from_sram(void)
+ {
+ 	/* Restore the sram from ddr */
+-	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, suspend_size);
++	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, SRAM_BACKUP_SIZE);
+ }
+ 
+ void berlin_get_sys_suspend_power_state(psci_power_state_t *req_state)
+diff --git a/plat/syna/berlin/soc/myna2/plat_pm.c b/plat/syna/berlin/soc/myna2/plat_pm.c
+index 6f3de77..e62ecb7 100644
+--- a/plat/syna/berlin/soc/myna2/plat_pm.c
++++ b/plat/syna/berlin/soc/myna2/plat_pm.c
+@@ -361,7 +361,7 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ 
+ 	assert(suspend_size <= SRAM_BACKUP_SIZE);
+ 	/* Save the MPT sram to ddr */
+-	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, suspend_size);
++	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, SRAM_BACKUP_SIZE);
+ 
+ 	/*
+ 	 * Copy code to SRAM, and jump to it later
+@@ -391,7 +391,7 @@ void berlin_resume_from_sram(void)
+ {
+ 	/* Restore the sram from ddr */
+ 
+-	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, suspend_size);
++	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, SRAM_BACKUP_SIZE);
+ 
+ }
+ 
+diff --git a/plat/syna/berlin/soc/platypus/plat_pm.c b/plat/syna/berlin/soc/platypus/plat_pm.c
+index 88a72d5..660e83e 100644
+--- a/plat/syna/berlin/soc/platypus/plat_pm.c
++++ b/plat/syna/berlin/soc/platypus/plat_pm.c
+@@ -377,7 +377,7 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ 
+ 	assert(suspend_size <= SRAM_BACKUP_SIZE);
+ 	/* Save the MPT sram to ddr */
+-	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, suspend_size);
++	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, SRAM_BACKUP_SIZE);
+ 
+ 	/*
+ 	 * Copy code to SRAM, and jump to it later
+@@ -406,7 +406,7 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ void berlin_resume_from_sram(void)
+ {
+ 	/* Restore the sram from ddr */
+-	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, suspend_size);
++	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, SRAM_BACKUP_SIZE);
+ }
+ 
+ void berlin_get_sys_suspend_power_state(psci_power_state_t *req_state)
+-- 
+2.7.4
+
