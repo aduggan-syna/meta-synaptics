@@ -28,10 +28,10 @@ EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  O=${OUT}"
 
 do_install() {
-    install -d ${D}${base_libdir}/optee_armtz/
-    install -m 0755 ${OUT}/*.ta ${D}${base_libdir}/optee_armtz/
-    install -m 0755 ${OUT}/*.elf ${D}${base_libdir}/optee_armtz/
+    install -d ${D}${nonarch_base_libdir}/optee_armtz/
+    install -m 0755 ${OUT}/*.ta ${D}${nonarch_base_libdir}/optee_armtz/
+    install -m 0755 ${OUT}/*.elf ${D}${nonarch_base_libdir}/optee_armtz/
 }
 
-FILES:${PN} = "${base_libdir}/optee_armtz/"
+FILES:${PN} = "${nonarch_base_libdir}/optee_armtz/"
 INSANE_SKIP:${PN} += " already-stripped"

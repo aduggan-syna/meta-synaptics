@@ -58,6 +58,11 @@ FILES_SOLIBSDEV = ""
 
 do_install:append() {
 
+    if [ "${libdir}" != "${nonarch_libdir}" ]; then
+        install -d ${D}${libdir}
+        mv ${D}${nonarch_libdir}/* ${D}${libdir}/
+        rm -rf ${D}${nonarch_libdir}
+    fi
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d ${D}${systemd_system_unitdir}
         install -m 0644 ${WORKDIR}/isp_media_server.service ${D}${systemd_system_unitdir}
