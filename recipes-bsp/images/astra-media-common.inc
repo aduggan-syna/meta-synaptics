@@ -52,17 +52,6 @@ WAYLAND_PACKAGES = " \
 IMAGE_INSTALL:append = " \
     kernel-modules \
     linux-firmware-syna \
-    kernel-module-syna-axi-meter \
-    kernel-module-bluetooth-lpm \
-    kernel-module-bluetooth-rfkill \
-    kernel-module-hl7593 \
-    kernel-module-rt5739 \
-    kernel-module-tps6286x-regulator \
-    kernel-module-dwc3-syna \
-    kernel-module-phy-syna-usb \
-    kernel-module-berlin-chipid \
-    kernel-module-rpi-panel-attiny-regulator \
-    kernel-module-pvrsrvkm \
 "
 
 IMAGE_INSTALL:append = " \
@@ -147,20 +136,12 @@ IMAGE_INSTALL:append:myna2 = " \
 
 IMAGE_INSTALL:append:myna2 = " \
     ${TEE_OPTEE} \
-    kernel-module-leds-tlc5917 \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
-    kernel-module-syna-dvfs \
-    kernel-module-dolphin-hwmon \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
-    kernel-module-sm \
-    kernel-module-phy-berlin-pcie \
-    kernel-module-pcie-berlin \
-    kernel-module-berlin-ir \
-    kernel-module-dolphin-hwmon \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
     synasdk-synap-module \
@@ -174,13 +155,10 @@ IMAGE_INSTALL:append:dolphin = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-v4l2isp-daemon \
     synasdk-vpu-plugin \
-    kernel-module-hrx-v4l2 \
 "
 
 IMAGE_INSTALL:append:platypus = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
-    kernel-module-sunplus \
-    kernel-module-syna-dvfs \
     synasdk-vpu-plugin \
 "
 

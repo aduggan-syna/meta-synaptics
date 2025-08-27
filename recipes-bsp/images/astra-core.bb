@@ -33,7 +33,6 @@ IMAGE_INSTALL:append:myna2 = " \
     ${TEE_OPTEE} \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
-    kernel-module-syna-dvfs \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
@@ -44,7 +43,6 @@ PLATYPUS_DOLPHIN_INSTALL = " \
 
 IMAGE_INSTALL:append:platypus = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
-    kernel-module-sunplus \
 "
 
 IMAGE_INSTALL:append:dolphin = "${PLATYPUS_DOLPHIN_INSTALL}"
