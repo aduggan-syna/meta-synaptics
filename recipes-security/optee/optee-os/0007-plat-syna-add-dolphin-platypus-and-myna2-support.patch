@@ -1,4 +1,4 @@
-From 2395c5de2197a7b5abd575fabd3aa79f00163622 Mon Sep 17 00:00:00 2001
+From 1d9eaf5aeac52b5d70abbd5c0d5857e37633b4d2 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 09:17:01 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -96,8 +96,8 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arm/plat-synaptics/common/tz_granule_table.c   |   201 +
  .../arm/plat-synaptics/common/tz_granule_table.h   |    14 +
  core/arch/arm/plat-synaptics/common/tz_list.h      |    73 +
- core/arch/arm/plat-synaptics/common/tz_umem_mgr.c  |  1284 +
- core/arch/arm/plat-synaptics/common/tz_umem_mgr.h  |   129 +
+ core/arch/arm/plat-synaptics/common/tz_umem_mgr.c  |  1271 +
+ core/arch/arm/plat-synaptics/common/tz_umem_mgr.h  |   130 +
  core/arch/arm/plat-synaptics/conf.mk               |    69 +
  .../plat-synaptics/driver/apb_timer/apb_timer.c    |   160 +
  .../arm/plat-synaptics/driver/apb_timer/sub.mk     |     2 +
@@ -178,7 +178,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  core/arch/arm/plat-synaptics/syscall/syscall_sa.c  |   220 +
  .../arm/plat-synaptics/syscall/syscall_securekey.c |   132 +
  .../arm/plat-synaptics/syscall/syscall_semaphore.c |   226 +
- .../arch/arm/plat-synaptics/syscall/syscall_umem.c |   267 +
+ .../arch/arm/plat-synaptics/syscall/syscall_umem.c |   272 +
  core/arch/arm/plat-synaptics/tz/mem_region.h       |   213 +
  core/arch/arm/plat-synaptics/tz/mem_type.h         |    55 +
  core/arch/arm/plat-synaptics/tz/mr_setup.c         |   155 +
@@ -194,7 +194,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../tz/tz_boot_param_value_platypus.c              |   608 +
  core/arch/arm/plat-synaptics/tz/tz_errcode.h       |    44 +
  core/arch/arm/plat-synaptics/tz/tz_perm.h          |    89 +
- 188 files changed, 312855 insertions(+)
+ 188 files changed, 312848 insertions(+)
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap.h
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap_sm.h
@@ -301571,10 +301571,10 @@ index 0000000..f951d33
 +#endif /*_TZ_LIST_H_*/
 diff --git a/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c b/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c
 new file mode 100644
-index 0000000..63ecc7a
+index 0000000..c641032
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c
-@@ -0,0 +1,1284 @@
+@@ -0,0 +1,1271 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -301699,7 +301699,6 @@ index 0000000..63ecc7a
 +	return found ? taperm : NULL;
 +}
 +
-+#if 0
 +static struct umem_user *umem_find_user(struct umem *um, uint32_t task_id)
 +{
 +	struct umem_user *user = NULL;
@@ -301712,22 +301711,6 @@ index 0000000..63ecc7a
 +	return user;
 +}
 +
-+static int umem_map_pa_2_va(struct tz_sw_task_context *tc, scatter_list_t *s_list,
-+						void *va, uint32_t mt)
-+{
-+	int i = 0;
-+	uint32_t pa = 0, size = 0;
-+
-+	for (i = 0; i < s_list->num; i++) {
-+		pa = s_list->s_item[i].addr;
-+		size = s_list->s_item[i].npage * SMALL_PAGE_SIZE;
-+		mm_map(&tc->mm, (void *)pa, va, size, mt);
-+		va += size;
-+	}
-+
-+	return 0;
-+}
-+#endif
 +static void umem_free_taperm_list(struct umem *um)
 +{
 +	struct umem_ta_perm *taperm = LIST_FIRST(&um->perm);
@@ -301968,29 +301951,6 @@ index 0000000..63ecc7a
 +
 +	return mt;
 +}
-+#if 0
-+
-+static int umem_assign_virtual_address(struct umem *um)
-+{
-+	if (um->type == UMEM_SHAREDMEMORY) {
-+		/* use (va = pa + 0x94000000)
-+		 * it's due to many users are using TEE_VirtToPhys.
-+		 * hope to use vpool to assign the address in future
-+		 */
-+		um->vm_start = (void *)(um->s_list->s_item[0].addr + SHM_SPACE_START);
-+	} else {
-+		if (um->mt == MT_USER_CACHED_S)
-+			um->vm_start = vm_mgr_allocate(um->size, SECURE_VPOOL);
-+		else
-+			um->vm_start = vm_mgr_allocate(um->size, NON_SECURE_VPOOL);
-+	}
-+
-+	if (um->vm_start == 0)
-+		return TEE_ERROR_SHORT_BUFFER;
-+
-+	return TEE_SUCCESS;
-+}
-+#endif
 +void umem_operation_lock(void)
 +{
 +	mutex_lock(&h);
@@ -302000,29 +301960,6 @@ index 0000000..63ecc7a
 +{
 +	mutex_unlock(&h);
 +}
-+#if 0
-+void *umem_allocate_tzkmemory(size_t size)
-+{
-+	void *mem = NULL;
-+	if((size & (SMALL_PAGE_SIZE - 1)) != 0)
-+		return NULL;
-+
-+	mem = (void *)virt_to_phys((unsigned long)malloc(size));
-+
-+	if (mem == NULL) {
-+		EMSG("tzk heap dried up\n");
-+		// umem_dump();
-+	}
-+
-+	DMSG(("shared memory allocated: %x\n", mem);
-+
-+	return mem;
-+}
-+void umem_free_sharedmemory(void *mem)
-+{
-+	free((void *)phys_to_virt((unsigned long)mem));
-+}
-+#endif
 +
 +int umem_check_memory_region(paddr_t mem, size_t size)
 +{
@@ -302480,19 +302417,55 @@ index 0000000..63ecc7a
 +	uint32_t prot = TEE_MATTR_URW | TEE_MATTR_PRW;
 +	uint32_t vm_flags = 0;
 +	vm_flags |= VM_FLAG_SHAREABLE;
++	struct umem_user *user = NULL;
++	unsigned int task_id;
 +
 +	um = umem_find(mem_id);
 +	if (um == NULL)
 +		return TEE_ERROR_BAD_PARAMETERS;
 +
-+	mobj = um->mobj;
-+	res = vm_map_pad(&utc->uctx, &v, um->size, prot, vm_flags, mobj, um->offs, 0, 0, 0);
-+	if (res == TEE_SUCCESS) {
-+		um->vm_start =v;
-+		*va = (void *)v;
-+		*size = um->size;
++	task_id = utc->uctx.vm_info.asid;
++	DMSG("asid = 0x%x memid = 0x%x", task_id, mem_id);
++	user = umem_find_user(um, task_id);
++	if (user) {
++		if (user->vm_start) {
++			EMSG("memory id is already mapped @ 0x%08" PRIxVA, mem_id, user->vm_start);
++			return  TEE_ERROR_ACCESS_CONFLICT;
++		}
++	} else {
++		user = malloc(sizeof(struct umem_user));
++		memset(user, 0, sizeof(struct umem_user));
++		user->task_id = task_id;
++		LIST_INSERT_HEAD(&um->user, user, list);
++		um->refcnt++;
 +	}
 +
++	mobj = um->mobj;
++	res = vm_map_pad(&utc->uctx, &v, um->size, prot, vm_flags, mobj, um->offs, 0, 0, 0);
++	if (res != TEE_SUCCESS) {
++		EMSG("Fail to map memory for memid 0x%x, res = 0x%x", mem_id, res);
++		res =  TEE_ERROR_ACCESS_CONFLICT;
++		goto out;
++	}
++
++	user->refcnt++;
++	user->vm_start = v;
++
++
++	*va = user->vm_start;
++
++	if(size)
++		*size = um->size;
++	res = TEE_SUCCESS;
++	DMSG("asid = 0x%x, memid = 0x%x, va = 0x%x, refcnt = 0x%x user refcnt=0x%x",
++			task_id, mem_id, user->vm_start, um->refcnt, user->refcnt);
++out:
++	if (res && user && !user->refcnt) {
++		um->refcnt--;
++		LIST_REMOVE(user, list);
++		memset(user, sizeof(*user), 0);
++		free(user);
++	}
 +	return res;
 +}
 +
@@ -302503,46 +302476,52 @@ index 0000000..63ecc7a
 +	struct umem *um = NULL;
 +	TEE_Result res = TEE_SUCCESS;
 +	vaddr_t va;
++	unsigned int task_id;
++	struct umem_user *user = NULL;
 +
 +	um = umem_find(mem_id);
 +	if (um == NULL)
 +		return TEE_ERROR_BAD_PARAMETERS;
 +
-+	va = um->vm_start;
++	task_id = utc->uctx.vm_info.asid;
++	DMSG("asid = 0x%x memid = 0x%x", task_id, mem_id);
 +
-+	res = vm_get_flags(&utc->uctx, va, um->size, &vm_flags);
-+	if (res)
-+		return res;
-+
-+	if (vm_flags & VM_FLAG_PERMANENT)
++	user = umem_find_user(um, task_id);
++	if (!user) {
++		EMSG("memid 0x%x is not mapped", mem_id);
 +		return TEE_ERROR_ACCESS_DENIED;
-+
-+	return vm_unmap(&utc->uctx, um->vm_start, um->size);
-+
-+	//return umem_task_unmap_memory(this->task_id, mem_id);
-+}
-+
-+#if 0
-+int umem_unmap_memory_by_address(void *va)
-+{
-+	int ret = TEE_ERROR_GENERIC;
-+	struct umem *um = NULL;
-+
-+	/* if input param is only va, give a size of 4KB */
-+	um = umem_find_by_address(va, SMALL_PAGE_SIZE);
-+
-+	if (!um) {
-+		EMSG("can't find the va\n");
-+		ret = TEE_ERROR_BAD_PARAMETERS;
-+		goto out;
 +	}
 +
-+	ret = umem_unmap_memory(um->umid);
++	va = user->vm_start;
 +
-+out:
-+	return ret;
++	res = vm_get_flags(&utc->uctx, va, um->size, &vm_flags);
++	if (res) {
++		EMSG("Fail to mem id 0x%x vm flags res =0x%x", mem_id, res);
++		return res;
++	}
++	if (vm_flags & VM_FLAG_PERMANENT)
++		return TEE_ERROR_ACCESS_DENIED;
++	DMSG("memid = 0x%x, va = 0x%x, refcnt = 0x%x user refcnt=0x%x",
++			mem_id, user->vm_start, um->refcnt, user->refcnt);
++
++	user->refcnt--;
++	if(user->refcnt > 0) {
++		return TEE_SUCCESS;
++	}
++
++	res = vm_unmap(&utc->uctx, user->vm_start, um->size);
++	if (res != TEE_SUCCESS) {
++		EMSG("Fail to umap memid 0x%x", mem_id);
++		return res;
++	}
++
++	LIST_REMOVE(user, list);
++	memset(user, 0, sizeof(*user));
++	free(user);
++	um->refcnt--;
++	return TEE_SUCCESS;
 +}
-+#endif
++
 +int umem_get_memory_size(uint32_t mem_id, size_t *size)
 +{
 +	struct umem *um = NULL;
@@ -302717,14 +302696,16 @@ index 0000000..63ecc7a
 +	return TEE_SUCCESS;
 +}
 +
-+static int umem_refcnt_inc(struct umem *um)
++static int umem_refcnt_inc(struct umem *um, struct user_ta_ctx *utc)
 +{
++	struct umem_user *user = NULL;
++	uint32_t task_id = -1;
++
 +	if (!um)
 +		return TEE_ERROR_BAD_PARAMETERS;
++	DMSG("memid = 0x%x", um->umid);
 +
-+#if 0
-+	struct umem_user *user;
-+	//uint32_t task_id = this->task_id;
++	task_id = utc->uctx.vm_info.asid;
 +
 +	user = umem_find_user(um, task_id);
 +	if (user) {
@@ -302742,19 +302723,24 @@ index 0000000..63ecc7a
 +	user->task_id = task_id;
 +	user->refcnt++;
 +	LIST_INSERT_HEAD(&um->user, user, list);
-+#endif
 +	um->refcnt++;
++	DMSG("memid = 0x%x,  refcnt = 0x%x user refcnt=0x%x",
++			um->umid, um->refcnt, user->refcnt);
++
 +	return TEE_SUCCESS;
 +}
 +
-+static int umem_refcnt_dec(struct umem *um)
++static int umem_refcnt_dec(struct umem *um, struct user_ta_ctx *utc)
 +{
++	struct umem_user *user = NULL;
++	uint32_t task_id = -1;
++	TEE_Result res = TEE_ERROR_GENERIC;
++
 +	if (!um)
 +		return TEE_ERROR_BAD_PARAMETERS;
-+#if 0
-+	struct umem_user *user;
-+	uint32_t task_id = this->task_id;
 +
++	task_id = utc->uctx.vm_info.asid;
++	DMSG("asid = 0x%x, memid = 0x%x", task_id, um->umid);
 +
 +	user = umem_find_user(um, task_id);
 +	if (!user) {
@@ -302765,24 +302751,25 @@ index 0000000..63ecc7a
 +	if(user->refcnt > 0)
 +		return TEE_SUCCESS;
 +
++	if (user->vm_start)	 {
++		res = vm_unmap(&utc->uctx, user->vm_start, um->size);
++		if (res != TEE_SUCCESS) {
++			EMSG("fail to unmap memid 0x%x, res = 0x%x", um->umid, res);
++			return res;
++		}
++	}
++	DMSG("asid = 0x%x memid = 0x%x,  refcnt = 0x%x user refcnt=0x%x",
++			task_id, um->umid, um->refcnt-1, user->refcnt);
++
 +	LIST_REMOVE(user, list);
++	memset(user, sizeof(*user), 0);
 +	free(user);
 +	um->refcnt--;
 +
-+	if (LIST_EMPTY(&um->user) && (um->type != UMEM_SHAREDMEMORY) && um->vm_start) {
-+		vm_mgr_free(um->vm_start);
-+		um->vm_start = NULL;
-+		DMSG("task %s:  mem_id = 0x%x, release virtual address\n",
-+			tz_sw_task_name(task_id), mem_id);
-+	}
-+#else
-+	if (um->refcnt > 0)
-+		um->refcnt--;
-+#endif
 +	return TEE_SUCCESS;
 +}
 +
-+int umem_refcnt_op(uint32_t mem_id, uint32_t type, uint32_t *refc)
++int umem_refcnt_op(struct user_ta_ctx *utc, uint32_t mem_id, uint32_t type, uint32_t *refc)
 +{
 +	int ret = TEE_ERROR_GENERIC;
 +	struct umem *um = NULL;
@@ -302799,10 +302786,10 @@ index 0000000..63ecc7a
 +		ret = TEE_SUCCESS;
 +		break;
 +	case UMEM_REFC_INC:
-+		ret = umem_refcnt_inc(um);
++		ret = umem_refcnt_inc(um, utc);
 +		break;
 +	case UMEM_REFC_DEC:
-+		ret = umem_refcnt_dec(um);
++		ret = umem_refcnt_dec(um, utc);
 +		break;
 +	default:
 +		EMSG("Unsupported type 0x%x.\n", type);
@@ -302861,10 +302848,10 @@ index 0000000..63ecc7a
 +service_init(umem_init);
 diff --git a/core/arch/arm/plat-synaptics/common/tz_umem_mgr.h b/core/arch/arm/plat-synaptics/common/tz_umem_mgr.h
 new file mode 100644
-index 0000000..3143665
+index 0000000..c858ead
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/common/tz_umem_mgr.h
-@@ -0,0 +1,129 @@
+@@ -0,0 +1,130 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -302928,6 +302915,7 @@ index 0000000..3143665
 +
 +struct umem_user {
 +	uint32_t task_id;
++	vaddr_t vm_start;
 +	int refcnt;	/* how many times it is mapped to this TA */
 +	LIST_ENTRY(umem_user) list;
 +};
@@ -302984,7 +302972,7 @@ index 0000000..3143665
 +int umem_get_offset_by_memid(uint32_t mem_id, uintptr_t phy_addr, unsigned long *offset);
 +bool umem_check_mem_attr(uint32_t mem_id, uint32_t attr);
 +int umem_add_memory_access_2_whitelist(uint32_t mem_id);
-+int umem_refcnt_op(uint32_t mem_id, uint32_t type, uint32_t *refc);
++int umem_refcnt_op(struct user_ta_ctx *utc, uint32_t mem_id, uint32_t type, uint32_t *refc);
 +int umem_bind_hw_virtaddr(uint32_t mem_id, void *hw_virtaddr);
 +int umem_get_hw_virtaddr(uint32_t mem_id, void **phw_virtaddr);
 +int umem_quick_register_memory(void *mem, size_t size, void **va);
@@ -311760,10 +311748,10 @@ index 0000000..47297d9
 +}
 diff --git a/core/arch/arm/plat-synaptics/syscall/syscall_umem.c b/core/arch/arm/plat-synaptics/syscall/syscall_umem.c
 new file mode 100644
-index 0000000..f06eec9
+index 0000000..5e43163
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/syscall/syscall_umem.c
-@@ -0,0 +1,267 @@
+@@ -0,0 +1,272 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -312006,11 +311994,16 @@ index 0000000..f06eec9
 +
 +TEE_Result syscall_syna_refcnt_op(uint32_t mem_id, uint32_t type, uint32_t *refc)
 +{
-+	int ret = 0;
++	struct ts_session *s = ts_get_current_session();
++	struct user_ta_ctx *utc = NULL;
++	TEE_Result ret = TEE_SUCCESS;
++
++	utc = to_user_ta_ctx(s->ctx);
++
 +
 +	umem_operation_lock();
 +
-+	ret = umem_refcnt_op(mem_id, type, refc);
++	ret = umem_refcnt_op(utc, mem_id, type, refc);
 +
 +	umem_operation_unlock();
 +	return ret;

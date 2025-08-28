@@ -1,4 +1,4 @@
-From d699ec0eebe197d323c7a20895e31ede90b54a17 Mon Sep 17 00:00:00 2001
+From 03f107365cd7c608a6f2f854f79f7ccfe5aa336c Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
 Date: Tue, 5 Aug 2025 14:00:20 +0800
 Subject: [PATCH] plat: syna: add vpp zone
@@ -51,10 +51,10 @@ index fb52b86..90e90e0 100644
  		if (TEE_MR_USER_IS_ION(mr + i) && MR_IS_NONSECURE(mr + i) && MR_IS_UNCACHEABLE(mr + i)) {
  			nsec_nc_paddr = mr[i].base;
 diff --git a/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c b/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c
-index 63ecc7a..0353e17 100644
+index c641032..a2a72f5 100644
 --- a/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c
 +++ b/core/arch/arm/plat-synaptics/common/tz_umem_mgr.c
-@@ -309,8 +309,9 @@ static uint32_t umem_get_mmu_type_from_mz(struct umem *um)
+@@ -292,8 +292,9 @@ static uint32_t umem_get_mmu_type_from_mz(struct umem *um)
  		return WRONG_MMU_ATTRIBUTE;
  	}
  
@@ -66,7 +66,7 @@ index 63ecc7a..0353e17 100644
  			um->s_list->s_item[0].addr, um->s_list->s_item[0].addr + um->size);
  		return WRONG_MMU_ATTRIBUTE;
  	}
-@@ -454,7 +455,7 @@ int umem_check_memory_region(paddr_t mem, size_t size)
+@@ -391,7 +392,7 @@ int umem_check_memory_region(paddr_t mem, size_t size)
  	if (!mr)
  		return TEE_ERROR_ACCESS_DENIED;
  
@@ -75,7 +75,7 @@ index 63ecc7a..0353e17 100644
  		return TEE_ERROR_BAD_PARAMETERS;
  
  	return TEE_SUCCESS;
-@@ -535,6 +536,9 @@ static bool umem_find_mobj(struct umem *um, scatter_list_t *s_list)
+@@ -472,6 +473,9 @@ static bool umem_find_mobj(struct umem *um, scatter_list_t *s_list)
  
  		if (umem_from_mobj(um, syna_pt_mobj, pa, sz))
  			return true;
