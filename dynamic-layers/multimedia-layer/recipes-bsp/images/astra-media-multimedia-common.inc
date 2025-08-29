@@ -11,5 +11,6 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-bad-videoparsersbad \
     gstreamer1.0-plugins-bad-dash \
     gstreamer1.0-plugins-ugly-x264 \
+    gstreamer1.0-plugins-bad-aom \
     v4l-utils \
 "

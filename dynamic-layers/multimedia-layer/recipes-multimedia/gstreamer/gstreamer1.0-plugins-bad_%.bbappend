@@ -3,6 +3,7 @@ EXTRA_OEMESON:remove = "-Dfdkaac=disabled"
 
 PACKAGECONFIG[fdkaac] = "-Dfdkaac=enabled,-Dfdkaac=disabled,fdk-aac"
 PACKAGECONFIG:append = " kms"
+PACKAGECONFIG:append = " aom"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/gstreamer1.0-plugins-bad:"
 
