@@ -45,6 +45,7 @@ EARLY_TA_CFG:sl1680spi = ""
 EARLY_TA_CFG:sl1620spi = ""
 EARLY_TA_CFG:sl1640spi = ""
 EXTRA_OEMAKE += "${EARLY_TA_CFG}"
+EXTRA_OEMAKE += " CFG_TEE_CORE_LOG_LEVEL=1 "
 
 do_install:append() {
     # Launch script to generate required configurations (ex. ${syna_chip_rev})
