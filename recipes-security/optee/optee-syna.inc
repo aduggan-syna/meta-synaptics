@@ -13,14 +13,17 @@ SRC_URI += " \
     file://0008-libutee-add-syna-syscalls.patch \
     file://0009-core-support-berlin-secure-and-non-secure-heap.patch \
     file://0010-plat-syna-add-vpp-zone.patch \
+    file://0011-optee-klamath-bringup.patch \
 "
 OPTEEMACHINE = "synaptics"
 SYNA_CHIP:myna2 = "myna2"
 SYNA_CHIP:dolphin = "dolphin"
-SYNA_CHIP:platypus= "platypus"
+SYNA_CHIP:platypus = "platypus"
+SYNA_CHIP:klamath = "klamath"
 
 COMPATIBLE_MACHINE:myna2 = "sl1620"
 COMPATIBLE_MACHINE:platypus = "sl1640"
 COMPATIBLE_MACHINE:dolphin = "sl1680"
+COMPATIBLE_MACHINE:klamath = "sl2610"
 
 EXTRA_OEMAKE += " PLATFORM_FLAVOR=${SYNA_CHIP} "
