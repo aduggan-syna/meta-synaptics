@@ -7,16 +7,18 @@ HOMEPAGE = "https://www.khronos.org/vulkan/"
 BUGTRACKER = "https://github.com/KhronosGroup/Vulkan-Headers"
 SECTION = "libs"
 
-LICENSE = "Apache-2.0"
+LICENSE = "Apache-2.0 & MIT"
 LIC_FILES_CHKSUM = "file://LICENSE.md;md5=1bc355d8c4196f774c8b87ed1a8dd625"
-SRC_URI = "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-1.3.280.0.tar.gz"
-SRC_URI[sha256sum] = "14caa991988be6451755ad1c81df112f4b6f2bea05f0cf2888a52d4d0f0910f6"
+SRC_URI = "git://github.com/KhronosGroup/Vulkan-Headers.git;branch=main;protocol=https"
 
-S = "${WORKDIR}/Vulkan-Headers-vulkan-sdk-1.3.280.0"
+SRCREV = "577baa05033cf1d9236b3d078ca4b3269ed87a2b"
+
+S = "${WORKDIR}/git"
 
 inherit cmake
-RDEPENDS:${PN} += "python3-core"
 
 FILES:${PN} += "${datadir}/vulkan"
+RDEPENDS:${PN} += "python3-core"
+
 
 UPSTREAM_CHECK_GITTAGREGEX = "sdk-(?P<pver>\d+(\.\d+)+)"
