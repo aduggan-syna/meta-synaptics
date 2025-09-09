@@ -20,6 +20,7 @@ SRC_URI:append= " \
             file://0004-myna2-add-pvd-support-and-adjust-voltage-in-suspend-.patch \
             file://0005-plat-syna-fix-build-error-with-gcc13.patch \
             file://0005-syna-store-and-restore-all-SRAM-during-suspend-resum.patch \
+            file://0006-plat-syna-refine-code-structure.patch \
         "
 
 require recipes-devtools/synasdk/synasdk-config.inc
