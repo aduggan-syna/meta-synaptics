@@ -4,6 +4,7 @@ IMAGE_INSTALL:append = " \
     synasdk-oobe-resources \
     wlan-gui \
     python3-pyqt5 \
+    bluetooth-gui \
 "
 IMAGE_INSTALL:append:dolphin = " \
     python3-pip \

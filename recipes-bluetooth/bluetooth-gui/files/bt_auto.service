@@ -1,0 +1,12 @@
+[Unit]
+Description=Turn on Bluetooth on boot
+After=bluetooth.service
+Requires=bluetooth.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bt_auto
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

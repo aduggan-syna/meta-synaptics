@@ -1,0 +1,4 @@
+#!/bin/sh
+sleep 7
+echo -e 'power on\nexit' | bluetoothctl
+
