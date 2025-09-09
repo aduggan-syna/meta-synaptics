@@ -21,6 +21,7 @@ SRC_URI:append= " \
             file://0005-plat-syna-fix-build-error-with-gcc13.patch \
             file://0005-syna-store-and-restore-all-SRAM-during-suspend-resum.patch \
             file://0006-plat-syna-refine-code-structure.patch \
+            file://0007-plat-syna-add-klamath-support.patch \
         "
 
 require recipes-devtools/synasdk/synasdk-config.inc
