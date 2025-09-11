@@ -15,7 +15,7 @@ IMAGE_TYPES:append:syna = " \
 SYNAREALMACH:platypus = "sl1640"
 SYNAREALMACH:myna2 = "sl1620"
 SYNAREALMACH:sl1680 = "sl1680"
-SYNAREALMACH:sl2610 = "sl2610"
+SYNAREALMACH:sl2619 = "sl2619"
 
 EXTRA_FW_DEPENDS = ""
 EXTRA_FW_DEPENDS:dolphin = "synasdk-fw-enc:do_deploy"
@@ -120,7 +120,7 @@ IMAGE_CMD:synaimg () {
 # Check files required for firmware.subimg, and create it (GenX only!)
 # From synasdk-fw-enc
     case "${SYNAREALMACH}" in
-        sl1620|sl1640|sl1680|sl2610)
+        sl1620|sl1640|sl1680|sl2619)
             firmware_sub_args=""
             [ -f "${DEPLOY_DIR_IMAGE}/tsp.fw" ] && firmware_sub_args="${firmware_sub_args} -i TSPF -d ${DEPLOY_DIR_IMAGE}/tsp.fw"
             [ -f "${DEPLOY_DIR_IMAGE}/dsp.fw" ] && firmware_sub_args="${firmware_sub_args} -i DSPF -d ${DEPLOY_DIR_IMAGE}/dsp.fw"

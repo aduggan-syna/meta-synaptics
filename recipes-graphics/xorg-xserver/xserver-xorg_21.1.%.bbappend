@@ -51,7 +51,7 @@ python __anonymous() {
     elif machine == "sl1620":
         d.appendVar("SRC_URI", " file://xorg_conf")
         d.setVar("XORG_CONF_FILE", "xorg_conf")
-    elif machine == "sl2610":
+    elif machine == "sl2619":
         d.appendVar("SRC_URI", " file://xorg_conf")
         d.setVar("XORG_CONF_FILE", "xorg_conf")
     else:
