@@ -1,0 +1,10 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: GLESv2
+Description: OpenGL ES 2.x library
+Version: 2.0
+Libs: -L${libdir} -lmali
+Cflags: -I${includedir}

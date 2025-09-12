@@ -1,0 +1,12 @@
+prefix=/usr
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+gbmbackendspath=/usr/lib/gbm
+
+Name: gbm
+Description: Mali gbm library
+Version: 22.3.5
+Libs: -L${libdir} -lmali
+Cflags: -I${includedir}
+
