@@ -28,6 +28,7 @@ SRC_URI += "${@bb.utils.contains('KGDB_ENABLE', '1', ' \
     file://debug_info.cfg \
     file://kgdb.cfg', '', d)}"
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://add-docker.cfg', '', d)}"
+SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'file://selinux.cfg', '', d)}"
 
 python () {
     # append defconfig if exists

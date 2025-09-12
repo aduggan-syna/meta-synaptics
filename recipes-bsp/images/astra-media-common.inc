@@ -120,6 +120,8 @@ IMAGE_INSTALL:append = " \
     opencv \
     "
 
+IMAGE_INSTALL:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'selinux', ' packagegroup-core-selinux', '', d)}"
+
 # install xfce desktop for X backend in 1680
 IMAGE_INSTALL:append:dolphin = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11', '${XORG_XFCE}', '${WAYLAND_PACKAGES}', d)} \
