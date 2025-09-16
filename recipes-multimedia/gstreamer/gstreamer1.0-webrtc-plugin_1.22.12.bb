@@ -10,7 +10,7 @@ SRC_URI = "git://gitlab.freedesktop.org/gstreamer/gst-plugins-rs.git;protocol=ht
            "
 
 # Using gstreamer tag 1.22.8 from gst-plugin-rs
-SRCREV = "a4703c8997068d38395dea1f9426561efd2cba24"
+SRCREV = "a84bbc66f30573b62871db163c48afef75adf6ec"
 
 S = "${WORKDIR}/git"
 
