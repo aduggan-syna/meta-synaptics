@@ -7,3 +7,6 @@ conf/machine/sl1680spi.conf
 conf/machine/sl1680usb.conf
 conf/machine/sl1620spi.conf
 conf/machine/sl1640spi.conf
+conf/machine/sl2611.conf
+conf/machine/sl2615.conf
+conf/machine/sl2619.conf
