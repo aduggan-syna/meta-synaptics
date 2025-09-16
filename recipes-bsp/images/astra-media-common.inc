@@ -197,4 +197,4 @@ ROOTFS_POSTPROCESS_COMMAND += "mount_usb; add_version; "
 
 LICENSE = "MIT"
 
-inherit core-image
+inherit_defer ${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'selinux-image', 'core-image', d)}
