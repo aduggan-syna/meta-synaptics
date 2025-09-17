@@ -4,7 +4,11 @@ SECTION = "multimedia"
 LICENSE = "CLOSED"
 LICENSE_FLAGS = "Synaptics-EULA"
 
-DEPENDS = "virtual/egl virtual/libgles2 libdrm mesa"
+DEPENDS = "virtual/egl virtual/libgles2 libdrm"
+DEPENDS:append:myna2 = " mesa"
+DEPENDS:append:platypus = " mesa"
+DEPENDS:append:dolphin = " mesa"
+DEPENDS:append:klamath = " synasdk-gpu-mali"
 
 SRC_URI = "${SYNA_SRC_APPLICATION}"
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/syna-compositor"
