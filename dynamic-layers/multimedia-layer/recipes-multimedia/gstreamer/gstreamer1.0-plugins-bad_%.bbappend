@@ -1,5 +1,6 @@
 PACKAGECONFIG:append = "fdkaac"
 EXTRA_OEMESON:remove = "-Dfdkaac=disabled"
+PACKAGECONFIG:remove:klamath = "vulkan"
 
 PACKAGECONFIG[fdkaac] = "-Dfdkaac=enabled,-Dfdkaac=disabled,fdk-aac"
 PACKAGECONFIG:append = " kms"
