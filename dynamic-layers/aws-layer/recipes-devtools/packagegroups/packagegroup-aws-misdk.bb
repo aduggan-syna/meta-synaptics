@@ -30,4 +30,5 @@ RDEPENDS:${PN}-dev = "\
     aws-iot-device-sdk-cpp-v2-dev \
     nng-dev \
     nng-staticdev \
+    subprocess-dev \
 "
