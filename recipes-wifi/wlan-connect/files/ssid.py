@@ -4,7 +4,7 @@ import os
 import json
 
 # File to track connection frequency
-USAGE_FILE = os.path.expanduser("/etc/.wifi_usage")
+USAGE_FILE = os.path.expanduser("/etc/wifi_usage")
 def load_usage():
     """Load connection frequency data from a file."""
     if os.path.exists(USAGE_FILE):
@@ -35,24 +35,27 @@ def find_wireless_interface():
 def scan_ssids():
     """Scan for available Wi-Fi networks."""
     try:
-        # Run the iw command to scan Wi-Fi networks
-        result = subprocess.run(['iw', 'dev', 'wlan0', 'scan'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=10)
-
-        if result.returncode != 0:
-            print(f"Error running iw command: {result.stderr}")
-            return []
-
+        result = subprocess.run(['iw', 'dev', 'wlan0', 'scan'], capture_output=True, text=True, timeout=10)
+        result = result.stdout
         ssids = set()
-        for line in result.stdout.splitlines():
+        ssid_dict = {}
+        bss_blocks = result.split("BSS ")
+        for line in bss_blocks:
             # Look for SSID lines
             match = re.search(r'SSID: (.+)', line)
             if match:
                 ssid = match.group(1).strip()
                 ssids.add(ssid)
+                if re.search(r'RSN:\s+\* Version: 1', line):
+                    auth_match = re.search(r'Authentication suites: (.+)', line)
+                    auth = auth_match.group(1).strip()
+                else:
+                    auth = ""
+                ssid_dict[ssid] = auth
         usage = load_usage()
         ssids = list(ssids)
         sorted_ssids = sorted(ssids, key=lambda x: -usage.get(x,0))
-        return sorted_ssids
+        return [list(ssids), ssid_dict]
     except Exception as e:
         print(f"Error scanning SSIDs: {e}")
         return []
@@ -65,3 +68,4 @@ if __name__ == "__main__":
         networks = scan_ssids()
     else:
         print("Error: No wireless interface found.")
+

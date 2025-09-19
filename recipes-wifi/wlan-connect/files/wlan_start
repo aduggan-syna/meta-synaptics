@@ -2,12 +2,23 @@
 
 stty erase ^H
 
-AUTO_CONNECT_FILE="/etc/.wifi_autoconnect"
-USAGE_FILE="/etc/.wifi_usage"
+AUTO_CONNECT_FILE="/etc/wifi_autoconnect"
+USAGE_FILE="/etc/wifi_usage"
 SERVICE_MODE=false
+SCAN_BLOCK=$(fw_printenv -n SCAN_BLOCK 2>/dev/null)
 
-out=$(echo 1 > /sys/class/rfkill/rfkill1/state 2>&1)
-check_command "echo 1 > /sys/class/rfkill/rfkill1/state" "$out"
+# Function to check if a command is successful
+check_command() {
+    if [ $? -ne 0 ]; then
+        echo "Error: $1 failed. Output: $2"
+        exit 1
+    fi
+}
+
+# Function to print messages
+message() {
+    echo "$1"
+}
 
 # Check if running as a service
 if [ "$1" = "--service" ]; then
@@ -15,11 +26,26 @@ if [ "$1" = "--service" ]; then
     echo "Setting the service mode flag"
 fi
 
+killall udhcpc 2>/dev/null
+killall wpa_supplicant 2>/dev/null
+
 echo "Stopping services managing wlan0..."
 systemctl stop wpa_supplicant@wlan0.service 2>/dev/null
 systemctl stop systemd-networkd 2>/dev/null
 systemctl stop NetworkManager 2>/dev/null
 systemctl stop wpa_supplicant 2>/dev/null
+
+
+rfkill list | awk -F: '/^[0-9]+:.*Wireless LAN/ {print $1}' | while read -r rfkill_id; do
+
+    blocked=$(rfkill list "$rfkill_id" | awk '/Soft blocked:/ {print $3}')
+    if [ "$blocked" = "yes" ]; then
+        out=$(echo 1 > /sys/class/rfkill/rfkill${rfkill_id}/state 2>&1)
+        check_command "echo 1 > /sys/class/rfkill/rfkill${rfkill_id}/state" "$out"
+    else
+        check_command "skip unblock for rfkill${rfkill_id}" "already unblocked"
+    fi
+done
 
 # Check the status of wlan_start.service
 SERVICE_NAME="wlan_start.service"
@@ -40,28 +66,18 @@ else
     exit 1
 fi
 
-# Function to check if a command is successful
-check_command() {
-    if [ $? -ne 0 ]; then
-        echo "Error: $1 failed. Output: $2"
-        exit 1
-    fi
-}
-
-# Function to print messages
-message() {
-    echo "$1"
-}
+#Start the DNS service
+systemctl start dns.service 2>/dev/null
 
 INTERFACE=$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1)
 if [ -z "$INTERFACE" ];  then
         echo "Error: No wireless interface found."
-            exit 1
+        exit 1
 fi
 
 # Bring up the interface
 message "Bringing up the interface..."
-out=$(ifconfig $INTERFACE up 2>&1)
+out=$(ifconfig "$INTERFACE" up 2>&1)
 check_command "ifconfig $INTERFACE up" "$out"
 
 # Create the WPA Supplicant configuration directory if it doesn't exist
@@ -78,32 +94,65 @@ if [ -f "$AUTO_CONNECT_FILE" ]; then
     AUTO_CONNECT_PSK=$(echo "$TO_CONNECT_CREDENTIALS" | cut -d: -f2)
 fi
 
-
+AUTH=$(python3 -c "import sys; sys.path.append('/usr/bin'); from ssid import scan_ssids; d=scan_ssids()[1]; print(d[\"$AUTO_CONNECT_SSID\"])")
 if [ "$SERVICE_MODE" = true ]; then
     # If running as a service, only auto-connect if SSID is configured
     echo "Outer if condition: service mode == true"
     if [ -n "$AUTO_CONNECT_SSID" ]; then
         CONFIG_FILE="/etc/wpa_supplicant/wpa_supplicant-$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1).conf"
-cat <<EOF > "$CONFIG_FILE"
+        if [ ${#AUTO_CONNECT_PSK} = 0 ]; then
+                cat <<EOF > "$CONFIG_FILE"
+                 ctrl_interface=/var/run/wpa_supplicant
+                 ctrl_interface_group=0
+                 update_config=1
+
+                 network={
+                     ssid="$AUTO_CONNECT_SSID"
+                     key_mgmt=NONE
+                     scan_ssid=1
+                 }
+                EOF
+       else
+   if [[ "$AUTH" == *"PSK"* ]]; then
+
+              cat <<EOF > "$CONFIG_FILE"
+              ctrl_interface=/var/run/wpa_supplicant
+              ctrl_interface_group=0
+              update_config=1
+
+              network={
+                  ssid="$AUTO_CONNECT_SSID"
+                  psk=$AUTO_CONNECT_PSK
+                  key_mgmt=WPA-PSK
+                  scan_ssid=1
+              }
+               EOF
+else
+	cat << EOF > "$CONFIG_FILE"
 ctrl_interface=/var/run/wpa_supplicant
 ctrl_interface_group=0
 update_config=1
 
 network={
-    ssid="$AUTO_CONNECT_SSID"
-    psk=$AUTO_CONNECT_PSK
-    key_mgmt=WPA-PSK
-    scan_ssid=1
-}
+	ssid="$AUTO_CONNECT_SSID"
+	psk="$AUTO_CONNECT_PSK"
+	key_mgmt=SAE
+	scan_ssid=1
+	ieee80211w=2
+	}
 EOF
-
+   fi
+        fi
         # Restart network services
+	if [ "$SCAN_BLOCK" = "1" ]; then
+	    exit 0
+	fi
         message "Restarting network services..."
         out=$(systemctl restart systemd-networkd.service 2>&1)
         check_command "systemctl restart systemd-networkd.service" "$out"
         out=$(systemctl restart wpa_supplicant@$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1).service 2>&1)
         check_command "systemctl restart wpa_supplicant@<interface>.service" "$out"
-
+        udhcpc -i "$INTERFACE"
         echo "Auto-connect successful to $AUTO_CONNECT_SSID."
         exit 0
     else
@@ -113,9 +162,12 @@ EOF
     fi
 fi
 
+# Create WPA Supplicant configuration file
+CONFIG_FILE="/etc/wpa_supplicant/wpa_supplicant-$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1).conf"
+
 # Interactive Mode: Display all SSIDs and prompt user
 python3 /usr/bin/ssid.py
-AVAILABLE_SSIDS=$(python3 -c "import sys; sys.path.append('/usr/bin'); from ssid import scan_ssids; print('\n'.join(scan_ssids()))")
+AVAILABLE_SSIDS=$(python3 -c "import sys; sys.path.append('/usr/bin'); from ssid import scan_ssids; li = scan_ssids()[0]; print('\n'.join(li))")
 
 echo "Available Networks:"
 echo "$AVAILABLE_SSIDS"
@@ -131,11 +183,10 @@ if [ -z "$SSID" ]; then
     exit 1
 fi
 
+
+AUTH=$(python3 -c "import sys; sys.path.append('/usr/bin'); from ssid import scan_ssids; d=scan_ssids()[1]; print(d[\"$SSID\"])")
 # Prompt for enabling auto-connect
 read -p "Do you want to enable auto-connect for $SSID? (yes/no): " AUTOCONNECT_CHOICE
-
-# Create WPA Supplicant configuration file
-CONFIG_FILE="/etc/wpa_supplicant/wpa_supplicant-$(iw dev | awk '$1=="Interface"{print $2}' | head -n 1).conf"
 
 if [ -n "$PASSWORD" ]; then
     # Generate the WPA Pre-shared Key (PSK) using wpa_passphrase
@@ -150,11 +201,17 @@ if [ -n "$PASSWORD" ]; then
 
 #Auto-connect Save the PSK to a file
 if [[ "$AUTOCONNECT_CHOICE" == "yes" || "$AUTOCONNECT_CHOICE" == "y" ]]; then
+            if [[ *"$AUTH"* == "PSK" ]]; then
     echo "$SSID:$PSK" > "$AUTO_CONNECT_FILE"
+            else
+                echo "$SSID:$PASSWORD" > "$AUTO_CONNECT_FILE"
+
     echo "Auto-connect enabled for SSID: $SSID."
+            fi
 else
     echo "Auto-connect disabled."
 fi
+   if [[ "$AUTH" == *"PSK"* ]]; then
 
     cat <<EOF > "$CONFIG_FILE"
 ctrl_interface=/var/run/wpa_supplicant
@@ -168,6 +225,21 @@ network={
     scan_ssid=1
 }
 EOF
+else
+	cat << EOF > "$CONFIG_FILE"
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+update_config=1
+
+network={
+	ssid="$SSID"
+	psk="$PASSWORD"
+	key_mgmt=SAE
+	scan_ssid=1
+	ieee80211w=2
+	}
+EOF
+   fi
 else
 # Create WPA Supplicant configuration file for open networks
     cat <<EOF > "$CONFIG_FILE"
@@ -245,5 +317,6 @@ while [[ $(iw dev $INTERFACE link) == *"Not connected."* ]]; do
 done
 
 sleep 12
+udhcpc -i "$INTERFACE"
 echo "Successfully connected to the network. "
-iw dev $INTERFACE link
+iw dev "$INTERFACE" link

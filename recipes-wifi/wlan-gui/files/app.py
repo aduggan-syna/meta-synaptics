@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QListWidget, QListWidgetItem, QLabel, QPushButton,
     QVBoxLayout, QHBoxLayout, QLineEdit, QRadioButton,QSizePolicy
 )
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QSize, QTimer
 import scan_wifi
 import json, os
 import connection
@@ -12,9 +12,10 @@ import subprocess
 import time
 import shutil
 
-USAGE_FILE = os.path.expanduser("/etc/.wifi_usage")
-AUTO_CONNECT_FILE = os.path.expanduser("/etc/.wifi_autoconnect")
-SAVED_PASSWORD_FILE = os.path.expanduser("/etc/.wifi_saved_password")
+CONFIG_DIR = "/etc"
+AUTO_CONNECT_FILE = os.path.join(CONFIG_DIR, "wifi_autoconnect")
+SAVED_PASSWORD_FILE = os.path.join(CONFIG_DIR, "wifi_saved_password")
+USAGE_FILE = os.path.join(CONFIG_DIR, "wifi_usage")
 
 def load_usage():
     return json.load(open(USAGE_FILE, 'r')) if os.path.exists(USAGE_FILE) else {}
@@ -97,13 +98,25 @@ class WiFiManager(QWidget):
         layout.addWidget(self.search_box)
         layout.addWidget(self.menu_widget)
 
+        self.password_input = QLineEdit()
+
         self.setLayout(layout)
         self.load_ssids()
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.load_ssids)
+        self.timer.start(15000)
+
+    def resume_scanning(self):
+        if not self.timer.isActive():
+            self.timer.start(15000)
 
     def load_ssids(self):
         bring_up_wlan0()
         self.menu_widget.clear()
-        self.ssid_list = scan_wifi.scan_ssids()
+        self.ssid_ret = scan_wifi.scan_ssids()
+        self.ssid_list = self.ssid_ret[0]
+        self.ssid_dict = self.ssid_ret[1]
         connected_ssid = get_connected_ssid()
         usage = load_usage()
         self.ssid_list.sort(key=lambda x: -usage.get(x, 0))
@@ -154,6 +167,8 @@ class WiFiManager(QWidget):
                 self.menu_widget.addItem(item)
 
     def open_wifi_setup(self, item):
+        if self.timer.isActive():
+            self.timer.stop()
         currentItem  = item.text().replace("✔ ", "").split(" (Connected)")[0]
         self.selected_ssid = currentItem
         connected_ssid = get_connected_ssid()
@@ -178,7 +193,7 @@ class WiFiManager(QWidget):
             saved_password_dict = load_saved_password_file()
             if currentItem in saved_password_dict:
                 self.psk = saved_password_dict[currentItem]
-                connection_status = connection.wifi_connection(currentItem, self.psk)
+                connection_status = connection.wifi_connection(self.selected_ssid, self.psk, self.ssid_dict[self.selected_ssid], self.password_input.text())
                 if not connection_status:
                     self.layout().addWidget(QLabel("*Failed to connect. Check saved password."))
                 else:
@@ -254,7 +269,10 @@ class WiFiManager(QWidget):
         saved_password_dict = load_saved_password_file()
         if self.selected_ssid in saved_password_dict:
             self.psk = saved_password_dict[self.selected_ssid]
-            connection_status = connection.wifi_connection(self.selected_ssid, self.psk)
+            if 'SAE' in self.ssid_dict[self.selected_ssid]:
+                connection_status = connection.wifi_connection(self.selected_ssid, self.password_input.text(), self.ssid_dict[self.selected_ssid], self.password_input.text())
+            else:
+                connection_status = connection.wifi_connection(self.selected_ssid, self.psk, self.ssid_dict[self.selected_ssid], self.password_input.text())
             if not connection_status:
                 self.layout_outside.addWidget(QLabel("*Failed to connect. Check saved password."))
             else:
@@ -269,7 +287,7 @@ class WiFiManager(QWidget):
                 def check_command(success, message):
                     if not success:
                         print(f"Error: {message} failed.")
-                        sys.exit(1)
+                        return False
                 try:
                     result = subprocess.run(
                         ["wpa_passphrase", self.selected_ssid, self.password_input.text()],
@@ -289,7 +307,12 @@ class WiFiManager(QWidget):
                     sys.exit(1)
                 return psk
             self.psk = extract_psk()
-        connection_status = connection.wifi_connection(self.selected_ssid, self.psk)
+            if self.psk is False:
+                return
+        if 'SAE' in self.ssid_dict[self.selected_ssid] and 'PSK' not in self.ssid_dict[self.selected_ssid]:
+            connection_status = connection.wifi_connection(self.selected_ssid, self.password_input.text(), self.ssid_dict[self.selected_ssid], self.password_input.text())
+        else:
+            connection_status = connection.wifi_connection(self.selected_ssid, self.psk, self.ssid_dict[self.selected_ssid], self.password_input.text())
         if not connection_status:
             error_label_pass = QLabel("* Password is incorrect")
             error_label_pass.setStyleSheet("color: white;")
@@ -298,13 +321,20 @@ class WiFiManager(QWidget):
 
         if self.auto_connect_radio.isChecked():
             with open(AUTO_CONNECT_FILE, "w") as file:
-                file.write(f"{self.selected_ssid}:{self.psk}\n")
+                if 'SAE' in self.ssid_dict[self.selected_ssid]:
+                    file.write(f"{self.selected_ssid}:{self.password_input.text()}\n")
+                else:
+                    file.write(f"{self.selected_ssid}:{self.psk}\n")
 
         self.refresh_ssids_connect(self.selected_ssid)
         self.increment_wifi_usage()
-        saved_password_dict[self.selected_ssid] = self.psk
+        if 'SAE' in self.ssid_dict[self.selected_ssid]:
+            saved_password_dict[self.selected_ssid] = self.password_input.text()
+        else:
+            saved_password_dict[self.selected_ssid] = self.psk
         self.save_password(saved_password_dict)
         self.setup_window.close()
+        self.resume_scanning()
 
     def save_usage(self,usage):
         """Save connection frequency data to a file."""
@@ -315,6 +345,8 @@ class WiFiManager(QWidget):
             json.dump(saved_password_dict, f, indent=4)
 
     def disconnect_functionality(self):
+        subprocess.run(["killall", "udhcpc"])
+        subprocess.run(["killall", "wpa_supplicant"])
         subprocess.run(["systemctl", "stop",  "wpa_supplicant@wlan0.service"])
         remove_wpa_supplicant()
         time.sleep(3)
@@ -330,6 +362,7 @@ class WiFiManager(QWidget):
 
 if __name__ == "__main__":
     result = subprocess.run(["systemctl", "enable", "wlan_start.service"], check=True, text=True, capture_output=True)
+    result = subprocess.run(["systemctl", "start", "dns.service"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     subprocess.run("echo 1 > /sys/class/rfkill/rfkill1/state", shell=True)
     bring_up_wlan0()
     if "QT_QPA_PLATFORM" not in os.environ:
@@ -343,3 +376,4 @@ if __name__ == "__main__":
     window = WiFiManager()
     window.show()
     sys.exit(app.exec_())
+

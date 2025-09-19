@@ -1,0 +1,13 @@
+[Unit]
+Description=To use systemd conf for the DNS resolution
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/wlan_dns
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
