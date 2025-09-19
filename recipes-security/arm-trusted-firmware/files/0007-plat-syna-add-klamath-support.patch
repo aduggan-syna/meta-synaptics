@@ -1,4 +1,4 @@
-From 4aca07dcc00fa3608b005f00b3f6b32c616a8b97 Mon Sep 17 00:00:00 2001
+From 1436f790b892d4b658adc1cf5de75d0203f8be4d Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Tue, 9 Sep 2025 09:58:49 +0800
 Subject: [PATCH] plat:syna: add klamath support
@@ -6,6 +6,11 @@ Subject: [PATCH] plat:syna: add klamath support
 Change-Id: Ibf0cbe3bde56ef0134b35e4c3a206e2d177f99ce
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 ---
+ plat/syna/berlin/common/berlin_common.mk           |     2 +
+ plat/syna/berlin/common/drivers/mailbox/sm_ipc.c   |    69 +
+ plat/syna/berlin/common/drivers/mailbox/sm_ipc.h   |    22 +
+ plat/syna/berlin/common/drivers/mailbox/syna_ipc.c |     2 +-
+ plat/syna/berlin/include/platform_def.h            |     4 +-
  plat/syna/berlin/include/soc/klamath/berlin_def.h  |   119 +
  plat/syna/berlin/include/soc/klamath/cpu_wrp.h     |  4896 ++++
  plat/syna/berlin/include/soc/klamath/ctypes.h      |   126 +
@@ -28,11 +33,14 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/soc/klamath/berlin_soc.mk         |    31 +
  plat/syna/berlin/soc/klamath/clock.c               |    94 +
  plat/syna/berlin/soc/klamath/mc.c                  |   202 +
- plat/syna/berlin/soc/klamath/plat_pm.c             |   433 +
+ plat/syna/berlin/soc/klamath/plat_pm.c             |   299 +
  plat/syna/berlin/soc/klamath/plat_setup.c          |    24 +
  plat/syna/berlin/soc/klamath/suspend.S             |    21 +
- plat/syna/berlin/soc/klamath/suspend.c             |   174 +
- 26 files changed, 68228 insertions(+)
+ plat/syna/berlin/soc/klamath/suspend.c             |   179 +
+ plat/syna/berlin/suspend/berlin_suspend.mk         |     8 +
+ 32 files changed, 68203 insertions(+), 3 deletions(-)
+ create mode 100644 plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
+ create mode 100644 plat/syna/berlin/common/drivers/mailbox/sm_ipc.h
  create mode 100644 plat/syna/berlin/include/soc/klamath/berlin_def.h
  create mode 100644 plat/syna/berlin/include/soc/klamath/cpu_wrp.h
  create mode 100755 plat/syna/berlin/include/soc/klamath/ctypes.h
@@ -60,9 +68,154 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  create mode 100644 plat/syna/berlin/soc/klamath/suspend.S
  create mode 100644 plat/syna/berlin/soc/klamath/suspend.c
 
+diff --git a/plat/syna/berlin/common/berlin_common.mk b/plat/syna/berlin/common/berlin_common.mk
+index 53458fa..2fb2dc0 100644
+--- a/plat/syna/berlin/common/berlin_common.mk
++++ b/plat/syna/berlin/common/berlin_common.mk
+@@ -63,6 +63,8 @@ endif
+ ifeq (${SYNA_IPC}, 1)
+ BL31_SOURCES		+=	\
+ 				${COMMON_DIR}/drivers/mailbox/syna_ipc.c \
++				${COMMON_DIR}/drivers/mailbox/sm_ipc.c
++PLAT_INCLUDES		+=	-I${COMMON_DIR}/drivers/mailbox
+ $(eval $(call add_define,CFG_SYNA_IPC))
+ endif
+ 
+diff --git a/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c b/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
+new file mode 100644
+index 0000000..ed74ea5
+--- /dev/null
++++ b/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
+@@ -0,0 +1,69 @@
++/*
++ * Copyright (c) 2025, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++#include <common/debug.h>
++#include "syna_ipc.h"
++#include "sm_ipc.h"
++
++#define IPC_MB_TIMEOUT (1000*10)
++
++void sm_system_off(void)
++{
++	int ret = 0;
++
++	ipc_mailbox_set_msg(SM_SYSTEM_OFF, IPC_MAILBOX_ID);
++
++	ret = ipc_mailbox_wait_msg_done(IPC_MAILBOX_ID, IPC_MB_TIMEOUT);
++	if (ret != 0) {
++		ERROR("IPC command timeout!");
++	}
++
++}
++
++void sm_system_reset(void)
++{
++	int ret = 0;
++	ipc_mailbox_set_msg(SM_SYSTEM_RESET, IPC_MAILBOX_ID);
++
++	ret = ipc_mailbox_wait_msg_done(IPC_MAILBOX_ID, IPC_MB_TIMEOUT);
++	if (ret != 0) {
++		ERROR("IPC command timeout!");
++	}
++
++}
++
++void sm_system_warmdown(unsigned int power_state)
++{
++	unsigned int cmd = -1;
++	int ret = 0;
++
++	if (power_state) {
++		cmd = SM_SYSTEM_SUSPEND_WFI;
++	} else {
++		cmd = SM_SYSTEM_SUSPEND_POWEROFF;
++	}
++
++	ipc_mailbox_set_msg(cmd, IPC_MAILBOX_ID);
++
++	ret = ipc_mailbox_wait_msg_done(IPC_MAILBOX_ID, IPC_MB_TIMEOUT);
++	if (ret != 0) {
++		ERROR("IPC command timeout!");
++	}
++}
++
++void sm_do_system_warmup(void)
++{
++	int ret = 0;
++
++	ipc_mailbox_set_msg(SM_SYSTEM_WARMUP, IPC_MAILBOX_ID);
++
++	ret = ipc_mailbox_wait_msg_done(IPC_MAILBOX_ID, IPC_MB_TIMEOUT);
++
++	if (ret != 0) {
++		ERROR("IPC command timeout!");
++	}
++}
++
++
+diff --git a/plat/syna/berlin/common/drivers/mailbox/sm_ipc.h b/plat/syna/berlin/common/drivers/mailbox/sm_ipc.h
+new file mode 100644
+index 0000000..08d01ab
+--- /dev/null
++++ b/plat/syna/berlin/common/drivers/mailbox/sm_ipc.h
+@@ -0,0 +1,22 @@
++/*
++ * Copyright (c) 2025, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#ifndef _SM_IPC_
++#define _SM_IPC_
++
++#define SM_SYSTEM_RESET					0xAFF1500E
++#define SM_SYSTEM_OFF					0xAFF2500D
++#define SM_SYSTEM_SUSPEND_POWEROFF		0xAFF3500C
++#define SM_SYSTEM_SUSPEND_WFI			0xAFF4500B
++#define SM_SYSTEM_WARMUP				0xAFF5500A
++
++#define IPC_MAILBOX_ID			3
++
++void sm_system_off(void);
++void sm_system_reset(void);
++void sm_system_suspend(void);
++void sm_system_warmdown(unsigned int power_state);
++#endif // _SM_IPC_
+diff --git a/plat/syna/berlin/common/drivers/mailbox/syna_ipc.c b/plat/syna/berlin/common/drivers/mailbox/syna_ipc.c
+index f294bb9..236f60b 100644
+--- a/plat/syna/berlin/common/drivers/mailbox/syna_ipc.c
++++ b/plat/syna/berlin/common/drivers/mailbox/syna_ipc.c
+@@ -64,7 +64,7 @@ int ipc_mailbox_wait_msg_done(int mailbox_id, int timeout_us)
+         {
+             return 0;
+         }
+-        udelay(1);
++        //udelay(1);
+         timeout_us -= 1;
+     }
+ 
+diff --git a/plat/syna/berlin/include/platform_def.h b/plat/syna/berlin/include/platform_def.h
+index 2ac2568..6ed81bf 100644
+--- a/plat/syna/berlin/include/platform_def.h
++++ b/plat/syna/berlin/include/platform_def.h
+@@ -44,9 +44,9 @@
+  * End of BL3-1 follows BL3-2
+  */
+ #define BL32_BASE			BL31_LIMIT
+-#define BL32_BOOT_PARAM		0x101000
++#define BL32_BOOT_PARAM		0x00101000
+ 
+-#define BL33_BASE			0x01080000
++#define BL33_BASE			0x4100000
+ #define DTB_BASE			0x09000000
+ /*******************************************************************************
+  * Platform specific page table and MMU setup constants
 diff --git a/plat/syna/berlin/include/soc/klamath/berlin_def.h b/plat/syna/berlin/include/soc/klamath/berlin_def.h
 new file mode 100644
-index 0000000..ec458fd
+index 0000000..f90ebb4
 --- /dev/null
 +++ b/plat/syna/berlin/include/soc/klamath/berlin_def.h
 @@ -0,0 +1,119 @@
@@ -107,9 +260,9 @@ index 0000000..ec458fd
 +#define TCTL_BASE					0xF7E31000
 +
 +/* uart */
-+#define UART_0_BASE					0xe5030000
-+#define BERLIN_UART_CLOCK			24000000
-+#define BERLIN_UART_BAUDRATE		57600
++#define UART_0_BASE                  0xe5030000
++#define BERLIN_UART_CLOCK            25000000
++#define BERLIN_UART_BAUDRATE		115200
 +
 +/* GIC */
 +//MEMMAP_GIC_REG_BASE 
@@ -67770,10 +67923,10 @@ index 0000000..6f3cb94
 +}
 diff --git a/plat/syna/berlin/soc/klamath/plat_pm.c b/plat/syna/berlin/soc/klamath/plat_pm.c
 new file mode 100644
-index 0000000..c5339d0
+index 0000000..a942bfd
 --- /dev/null
 +++ b/plat/syna/berlin/soc/klamath/plat_pm.c
-@@ -0,0 +1,433 @@
+@@ -0,0 +1,299 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -67801,8 +67954,7 @@ index 0000000..c5339d0
 +#include "nexus_fw_include/mcu_cpu_ss.h"
 +#include "nexus_fw_include/nexus_klamath_memmap.h"
 +#include "nexus_fw_include/mcu_gbl_cfg.h"
-+
-+extern bakery_lock_t berlin_pm_lock;
++#include "sm_ipc.h"
 +
 +int berlin_set_wakeup_sources(u_register_t x1, u_register_t x2, u_register_t x3, u_register_t x4);
 +#define RESET_nCPUPORESET_0    0
@@ -67956,22 +68108,12 @@ index 0000000..c5339d0
 +
 +int berlin_soc_pwr_domain_suspend_finish(const psci_power_state_t *target_state)
 +{
-+#if 0
-+	unsigned int target_cpu;
-+	target_cpu = plat_my_core_pos();
-+
-+	/*
-+	 * disable PMU so that CPU will not be powered down
-+	 * after excute WFI instruction
-+	 */
-+	mmio_write_32(MEMMAP_CA7_REG_BASE +  RA_CPU_REG_Cpu0ExtPmu + 4*target_cpu, 0);
-+#else
 +	/*
 +	 * Set the CPUPWRCTLR.CORE_PWRDN_EN bit to 0
 +	 * so that CPU will not be powered down after excute WFI instruction
 +	 */
 +	arm_set_PWRCTLR(0);
-+#endif
++
 +	return PSCI_E_SUCCESS;
 +
 +}
@@ -67979,174 +68121,14 @@ index 0000000..c5339d0
 +void berlin_soc_init(void)
 +{
 +	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_CFG, 0x3);
-+
-+	mmio_write_32(MCU_PERIF_REGION(START_MCU_SECCTRL_S + RA_MCS_SEC_REG_SOC_INTF_REGION3 + RA_MCS_SOC_INTF_REGION_START), 0xa00);
-+	mmio_write_32(MCU_PERIF_REGION(START_MCU_SECCTRL_S + RA_MCS_SEC_REG_SOC_INTF_REGION3 + RA_MCS_SOC_INTF_REGION_END), 0xaff);
-+	mmio_write_32(MCU_PERIF_REGION(START_MCU_SECCTRL_S + RA_MCS_SEC_REG_SOC_INTF_REGION3 + RA_MCS_SOC_INTF_REGION_OFFSET), 0x600);
-+	mmio_write_32(MCU_PERIF_REGION(START_MCU_SECCTRL_S + RA_MCS_SEC_REG_SOC_INTF_REGION3 + RA_MCS_SOC_INTF_REGION_VALID), 1);
-+
-+	// set pdma channel(0 - 31) to NS    START_MCU_PDMA_S
-+	mmio_write_32(MCU_DMA_CRYPT_REGION(START_MCU_PDMA_S), 0xffffffff);
-+	mmio_write_32(MCU_PERIF_REGION(START_MCU_GBL_S + RA_mcu_gbl_cfg_mcu_pdma_dst_req_mask), 0xffffffff);
-+	mmio_write_32(MCU_PERIF_REGION(START_MCU_GBL_S + RA_mcu_gbl_cfg_mcu_pdma_src_req_mask), 0xffffffff);
-+
-+	//set all ppc0 and ppc1 controlled devices to NS
-+	mmio_write_32(MCU_PERIF_REGION(START_MCU_SECCTRL_S + RA_MCS_SEC_REG_PPC_NS_0), 0xffffffff);
-+	mmio_write_32(MCU_PERIF_REGION(START_MCU_SECCTRL_S + RA_MCS_SEC_REG_PPC_NS_1), 0xffffffff);
-+
 +	// GPIO, SPI, SPI, UART non-Secure access allowed
 +	mmio_write_32(START_SOC_REG + RA_SOC_PERIF_PPC0_CTRL2, 0xffff);
 +
-+	// MCU2SoC mapping
-+	mmio_write_32(START_SOC_REG + RA_SOC_SYSMGR_INTF_REGION6 + RA_MCS_SOC_INTF_REGION_START, 0xe51);
-+	mmio_write_32(START_SOC_REG + RA_SOC_SYSMGR_INTF_REGION6 + RA_MCS_SOC_INTF_REGION_END, 0xe51);
-+	mmio_write_32(START_SOC_REG + RA_SOC_SYSMGR_INTF_REGION6 + RA_MCS_SOC_INTF_REGION_OFFSET, 0x5af);
-+	mmio_write_32(START_SOC_REG + RA_SOC_SYSMGR_INTF_REGION6 + RA_MCS_SOC_INTF_REGION_VALID, 0x1);
-+
++	mmio_write_32(0xf7e10420, 0xffffffff);
++	udelay(10);
 +	mmio_write_32(START_PDMA_REG, 0xffffffff);
 +	mmio_write_32(START_CHIP_CTRL_REG + RA_Gbl_pdma_dst_req_mask, 0xffffffff);
 +	mmio_write_32(START_CHIP_CTRL_REG + RA_Gbl_pdma_src_req_mask, 0xffffffff);
-+}
-+
-+#if 0
-+static int cpu_pch_wait_active(int core, int active, int timeout_ms)
-+{
-+	while(1)
-+	{
-+        unsigned int value = CPU_PCH(core);
-+
-+		if (((value & MSK32CPU_PCH_PCH_ACTIVE)>>LSb32CPU_PCH_PCH_ACTIVE) == active)
-+		{
-+			return 0;
-+		}
-+		if (timeout_ms <= 0)
-+		{
-+			ERROR("wait PCH_%d active:0x%x timeout, CPU_PCH:0x%x\n", core, active, value);
-+			return -1;
-+		}
-+		udelay(1000);
-+		timeout_ms--;
-+	}
-+}
-+
-+static int cpu_pch_req_state(int core, int state, int timeout_ms)
-+{
-+
-+ //   unsigned int value;
-+
-+    state &= MSK32CPU_PCH_PCH_STATE>>LSb32CPU_PCH_PCH_STATE;
-+
-+    CPU_PCH(core) = 0; // write 0 to clear
-+   // arm_DMB();
-+    CPU_PCH(core) = (state << LSb32CPU_PCH_PCH_STATE); // set state first
-+    //arm_DMB();
-+    CPU_PCH(core) = (state << LSb32CPU_PCH_PCH_STATE) | MSK32CPU_PCH_PCH_REQ; // set request
-+
-+	while(1)
-+	{
-+        unsigned int value = CPU_PCH(core);
-+
-+        if (value & MSK32CPU_PCH_PCH_ACCEPT)
-+        {
-+            return 1;
-+        }
-+
-+        if (value & MSK32CPU_PCH_PCH_DENY)
-+        {
-+            INFO("set PCH_%d state:%d denied, CPU_PCH:0x%x\n", core, state, value);
-+
-+            // retry
-+            CPU_PCH(core) = (state << LSb32CPU_PCH_PCH_STATE); // set state first
-+            //arm_DMB();
-+            CPU_PCH(core) = (state << LSb32CPU_PCH_PCH_STATE) | MSK32CPU_PCH_PCH_REQ; // set request
-+        }
-+
-+        if (timeout_ms <= 0)
-+        {
-+            INFO("wait PCH_%d ack timeout, CPU_PCH:0x%x\n", core, value);
-+            return -1;
-+        }
-+        udelay(1000);
-+        timeout_ms--;
-+    }
-+}
-+
-+int berlin_soc_manual_domain_off(unsigned int target_cpu)
-+{
-+#if 1
-+	unsigned int val;
-+	int ret;
-+
-+	val = mmio_read_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_CFG);
-+	val |= 1 << target_cpu;
-+	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_CFG, val);
-+
-+	CPU_PCH(target_cpu) = 0;
-+
-+	/* disable CPMU for manual mode */
-+	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_Cpu0ExtPmu + 4*target_cpu, 0);
-+	// make sure the following steps are done by the request CPU
-+	//arm_set_PWRCTLR(1);
-+	//isb();
-+	// wfi
-+
-+	// After core executes WFI it will change PACTIVE value to 0x0, CPMU will wait for this and then change PSTATE to 0x0 and assert PREQ.
-+	ret = cpu_pch_wait_active(target_cpu, 0, 10);
-+	if (ret != 0) {
-+		// return -1;
-+	}
-+
-+	ret = cpu_pch_req_state(target_cpu, 0, 10);
-+	if (ret != 1) {
-+		// return -1;
-+	}
-+
-+	/* assert reset */
-+	val = mmio_read_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_RESET_0 + 4*target_cpu);
-+	val &= ~(1 << RESET_nCPUPORESET_0);
-+	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_RESET_0 + 4*target_cpu, val);
-+	/* turn on isolation cells */
-+	val = mmio_read_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_PWRSW_0 +  4*target_cpu);
-+	val &= ~(1 << nCPU_ISO_MODE_EN);
-+	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_PWRSW_0 +  4*target_cpu, val);
-+
-+	/* PWRSW_CNTRL1_I */
-+	val = mmio_read_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_PWRSW_0 +  4*target_cpu);
-+	val &= ~(1 << PWRSW_CNTRL1_I);
-+	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_PWRSW_0 +  4*target_cpu, val);
-+
-+	/* PWRSW_CNTRL2_I */
-+	val = mmio_read_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_PWRSW_0 +  4*target_cpu);
-+	val &= ~(1<< PWRSW_CNTRL2_I);
-+	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_PWRSW_0 +  4*target_cpu, val);
-+
-+	/* PWRSW_CNTRL_MEM_I */
-+	val = mmio_read_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_PWRSW_0 +  4*target_cpu);
-+	val &= ~(1<< PWRSW_CNTRL_MEM_I);
-+	mmio_write_32(MEMMAP_CA7_REG_BASE + RA_CPU_REG_PWRSW_0 +  4*target_cpu, val);
-+#else
-+	/* enable PMU, then sencondary CPUs can be powered down by CPMU
-+	 * The CPU should Set the CPUPWRCTLR.CORE_PWRDN_EN bit to 1 then in WFI mode
-+	 */
-+	mmio_write_32(MEMMAP_CA7_REG_BASE +  RA_CPU_REG_Cpu0ExtPmu + 4*target_cpu, 1);
-+#endif
-+
-+
-+	return PSCI_E_SUCCESS;
-+}
-+#endif
-+static inline void reset_soc(void)
-+{
-+	*(volatile uint32_t*)SOC_RESET_CTRL_BASE = 1;
-+}
-+
-+void __dead2 berlin_system_reset(void)
-+{
-+	INFO("Berlin System Reset ......\n");
-+	reset_soc();
-+	while (1);
-+	ERROR("Berlin System reset: should not be here.\n");
-+	panic();
 +}
 +
 +extern unsigned char *nagra_boot_p;
@@ -68164,7 +68146,7 @@ index 0000000..c5339d0
 +
 +	assert(suspend_size <= SRAM_BACKUP_SIZE);
 +	/* Save the MPT sram to ddr */
-+	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, suspend_size);
++	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, SRAM_BACKUP_SIZE);
 +
 +	/*
 +	 * Copy code to SRAM, and jump to it later
@@ -68194,7 +68176,7 @@ index 0000000..c5339d0
 +{
 +	/* Restore the sram from ddr */
 +
-+	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, suspend_size);
++	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, SRAM_BACKUP_SIZE);
 +
 +}
 +
@@ -68204,9 +68186,46 @@ index 0000000..c5339d0
 +
 +	/* lower affinities use PLAT_MAX_OFF_STATE */
 +	req_state->pwr_domain_state[MPIDR_AFFLVL0] = PLAT_MAX_OFF_STATE;
-+	req_state->pwr_domain_state[MPIDR_AFFLVL1] = BERLIN_ACTIVE_STANDBY;
-+	req_state->pwr_domain_state[MPIDR_AFFLVL2] = BERLIN_ACTIVE_STANDBY;
++	req_state->pwr_domain_state[MPIDR_AFFLVL1] = BERLIN_SUSPEND;
++	req_state->pwr_domain_state[MPIDR_AFFLVL2] = BERLIN_SUSPEND;
 +}
++
++void __dead2 berlin_system_off(void)
++{
++	INFO("Berlin System Off .......\n");
++	sm_system_off();
++	while (1);
++	ERROR("Berlin System Off: should not be here.\n");
++	panic();
++}
++
++#if 0
++void __dead2 berlin_system_reset(void)
++{
++	INFO("Berlin System Reset ......\n");
++	sm_system_reset();
++	while (1);
++	ERROR("Berlin System reset: should not be here.\n");
++	panic();
++}
++#else
++static inline void reset_soc(void)
++{
++	unsigned int mcu_gbl_base = MCU_PERIF_REGION(START_MCU_GBL_SEC_S);
++
++	mmio_write_32(mcu_gbl_base + RA_mcu_gbl_cfg_sec_reset_trigger, 1);
++}
++
++void __dead2 berlin_system_reset(void)
++{
++	INFO("Berlin System Reset ......\n");
++	reset_soc();
++	while (1);
++	ERROR("Berlin System reset: should not be here.\n");
++	panic();
++}
++
++#endif
 diff --git a/plat/syna/berlin/soc/klamath/plat_setup.c b/plat/syna/berlin/soc/klamath/plat_setup.c
 new file mode 100644
 index 0000000..eb177b1
@@ -68266,10 +68285,10 @@ index 0000000..bfe31e8
 +	.word   . - suspend_entry
 diff --git a/plat/syna/berlin/soc/klamath/suspend.c b/plat/syna/berlin/soc/klamath/suspend.c
 new file mode 100644
-index 0000000..9e425c7
+index 0000000..c73777b
 --- /dev/null
 +++ b/plat/syna/berlin/soc/klamath/suspend.c
-@@ -0,0 +1,174 @@
+@@ -0,0 +1,179 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -68287,6 +68306,7 @@ index 0000000..9e425c7
 +#include <drivers/ti/uart/uart_16550.h>
 +#include <lib/xlat_tables/xlat_tables_v2.h>
 +#include <lib/mmio.h>
++#include "sm_ipc.h"
 +
 +#pragma weak berlin_idle
 +#pragma weak berlin_suspend
@@ -68333,9 +68353,13 @@ index 0000000..9e425c7
 +
 +void berlin_suspend(unsigned int power_state, void *param)
 +{
++	tos_suspend(param, power_state);
++
 +	mem_suspend();
 +
 +	clock_suspend();
++
++	sm_system_warmdown(power_state);
 +}
 +
 +void berlin_resume(void)
@@ -68444,6 +68468,25 @@ index 0000000..9e425c7
 +
 +	return x0;
 +}
+diff --git a/plat/syna/berlin/suspend/berlin_suspend.mk b/plat/syna/berlin/suspend/berlin_suspend.mk
+index 070735a..f6d4cb5 100644
+--- a/plat/syna/berlin/suspend/berlin_suspend.mk
++++ b/plat/syna/berlin/suspend/berlin_suspend.mk
+@@ -72,6 +72,14 @@ MODULE_SOURCES+=	\
+ $(eval $(call add_define,CFG_SYNA_APPCRYPTO))
+ endif
+ 
++ifeq (${SYNA_IPC}, 1)
++MODULE_SOURCES+=	\
++				${COMMON_DIR}/drivers/mailbox/syna_ipc.c \
++				${COMMON_DIR}/drivers/mailbox/sm_ipc.c
++PLAT_INCLUDES		+=	-I${COMMON_DIR}/drivers/mailbox
++$(eval $(call add_define,CFG_SYNA_IPC))
++endif
++
+ ifeq (${ENABLE_PVD}, 1)
+ MODULE_SOURCES      += ${SOC_DIR}/i2c.c			\
+                        ${SOC_DIR}/i2c_pvd_tps62868.c
 -- 
 2.7.4
 
