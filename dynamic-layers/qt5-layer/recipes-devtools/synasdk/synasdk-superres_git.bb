@@ -4,7 +4,7 @@ LICENSE = "Apache-2.0"
 
 DEPENDS += "qtbase qtdeclarative glib-2.0 gstreamer1.0 \
             gstreamer1.0-plugins-base gstreamer1.0-plugins-bad udev \
-            synasdk-syna-player-framework qtmultimedia"
+            synasdk-syna-player-framework qtmultimedia wayland"
 RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins \
         gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
         gstreamer1.0-plugins-bad udev"
@@ -21,6 +21,7 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=4158a261ca7f2525513e31ba9c50ae98"
 
 inherit pkgconfig
 inherit qmake5
+
 
 do_install () {
     install -d ${D}${bindir}
