@@ -79,8 +79,8 @@ IMAGE_CMD:synausbimg () {
     for f in "${DEPLOY_DIR_IMAGE}"/*.dtb
     do
         if [ ! -L "$f" ]; then
-            dtb_base_name=$(basename "$f" | awk -F '--' '{print $1}')
-            cp "$f" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/${dtb_base_name}.dtb"
+            dtb_file_name=$(basename "$f")
+            cp "$f" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/${dtb_file_name}"
         fi
     done
 
