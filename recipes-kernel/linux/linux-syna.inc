@@ -12,6 +12,7 @@ require recipes-kernel/linux/linux-yocto.inc
 
 EXTRA_KERNEL_CONFIGME_DEPENDS = ""
 do_kernel_configme[depends] += "${EXTRA_KERNEL_CONFIGME_DEPENDS}"
+do_bundle_initramfs[depends] += "core-image-initramfs-boot:do_image_complete"
 
 # No extensions to the linux kernel version
 LINUX_VERSION_EXTENSION = ""
