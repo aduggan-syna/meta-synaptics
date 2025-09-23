@@ -9,6 +9,7 @@ S = "${WORKDIR}/git"
 SRC_URI = " \
     ${SYNA_SRC_LINUX_6_12} \
     file://add-full-hid-support.cfg \
+    file://devmem.cfg \
     file://iptables.cfg \
     git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-6.12;destsuffix=${KMETA} \
 "
