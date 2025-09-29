@@ -1,4 +1,4 @@
-From 2afca0a30fc226aa77ed00733f50fc5e761e4282 Mon Sep 17 00:00:00 2001
+From e2ce89a29932ecd431940af7be9ec64d0707fa1c Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Fri, 5 Sep 2025 09:47:07 +0800
 Subject: [PATCH] optee: klamath bringup
@@ -30,15 +30,12 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../driver/appcrypto/appcrypto_rng.c               |   121 +
  .../plat-synaptics/driver/appcrypto/bcm_drv_rng.c  |    85 +
  .../arm/plat-synaptics/driver/appcrypto/sub.mk     |     4 +
- core/arch/arm/plat-synaptics/driver/mzone/mz_szc.c |     4 +-
  .../arm/plat-synaptics/driver/mzone/szc_zone.c     |     4 +-
  .../driver/regfirewall/rf_drv_klamath.c            |   223 +
  core/arch/arm/plat-synaptics/platform_config.h     |    33 +
  core/arch/arm/plat-synaptics/sub.mk                |     2 +-
- core/arch/arm/plat-synaptics/tz/mem_region.h       |     4 +-
  .../tz/tz_boot_param_value_klamath.c               |   121 +
- lib/libutee/include/mem_region.h                   |     4 +-
- 32 files changed, 58786 insertions(+), 9 deletions(-)
+ 29 files changed, 58780 insertions(+), 3 deletions(-)
  create mode 100644 core/arch/arm/plat-synaptics/chip/klamath/hal_soc.c
  create mode 100644 core/arch/arm/plat-synaptics/chip/klamath/include/SZC.h
  create mode 100755 core/arch/arm/plat-synaptics/chip/klamath/include/ctypes.h
@@ -58614,21 +58611,6 @@ index 0000000..b05d83b
 +srcs-y += appcrypto_lock.c
 +srcs-y += appcrypto_rng.c
 +#srcs-y += bcm_drv_rng.c
-diff --git a/core/arch/arm/plat-synaptics/driver/mzone/mz_szc.c b/core/arch/arm/plat-synaptics/driver/mzone/mz_szc.c
-index c9f49a4..59b11da 100644
---- a/core/arch/arm/plat-synaptics/driver/mzone/mz_szc.c
-+++ b/core/arch/arm/plat-synaptics/driver/mzone/mz_szc.c
-@@ -48,8 +48,8 @@ static uint32_t _mz_convert_perm(uint32_t perm)
- 	return perm_val;
- }
- 
--static int mz_set_zone(int chip_id, int zone_id, uint32_t start_addr,
--			uint32_t size, int perm)
-+static int mz_set_zone(int chip_id, int zone_id, uint64_t start_addr,
-+			uint64_t size, int perm)
- {
- 	uintptr_t reg_base = 0;
- 	uint32_t val = 0;
 diff --git a/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c b/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c
 index b898e2b..1cfbf7b 100644
 --- a/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c
@@ -58937,21 +58919,6 @@ index f713b4a..8938091 100644
  
  srcs-y += main.c
  srcs-y += common/syna_entrypoint.S
-diff --git a/core/arch/arm/plat-synaptics/tz/mem_region.h b/core/arch/arm/plat-synaptics/tz/mem_region.h
-index 2e5660c..74a7c99 100644
---- a/core/arch/arm/plat-synaptics/tz/mem_region.h
-+++ b/core/arch/arm/plat-synaptics/tz/mem_region.h
-@@ -181,8 +181,8 @@ struct rf_master_group {
- /* memory region */
- struct mem_region {
- 	char			name[32];
--	uint32_t		base;	/* base address */
--	uint32_t		size;
-+	uint64_t		base;	/* base address */
-+	uint64_t		size;
- 	uint32_t		attr;	/* attributes */
- 	uint32_t		reserved;
- 
 diff --git a/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_klamath.c b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_klamath.c
 new file mode 100644
 index 0000000..b097ded
@@ -59079,21 +59046,6 @@ index 0000000..b097ded
 +
 +};
 +const uint32_t szc_rule_num = ARRAY_SIZE(szc_rule_param);
-diff --git a/lib/libutee/include/mem_region.h b/lib/libutee/include/mem_region.h
-index a543870..3c235e6 100644
---- a/lib/libutee/include/mem_region.h
-+++ b/lib/libutee/include/mem_region.h
-@@ -180,8 +180,8 @@ struct rf_master_group {
- /* memory region */
- struct mem_region {
- 	char			name[32];
--	uint32_t		base;	/* base address */
--	uint32_t		size;
-+	uint64_t		base;	/* base address */
-+	uint64_t		size;
- 	uint32_t		attr;	/* attributes */
- 	uint32_t		reserved;
- 
 -- 
 2.7.4
 
