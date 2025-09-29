@@ -27,6 +27,10 @@ SRC_URI:append:myna2 = " \
     file://myna2_brcm_bt_start.patch \
 "
 
+SRC_URI:append:klamath = " \
+    file://klamath_brcm_bt_start.patch \
+"
+
 do_patch(){
     if [ "${MACHINE}" = "sl1680" ]; then
         cd ${WORKDIR}
@@ -36,6 +40,11 @@ do_patch(){
     if [ "${MACHINE}" = "sl1620" ]; then
         cd ${WORKDIR}
         patch -p1 < myna2_brcm_bt_start.patch
+    fi
+
+    if [ "${MACHINE}" = "sl2619" ]; then
+        cd ${WORKDIR}
+        patch -p1 < klamath_brcm_bt_start.patch
     fi
 }
 
