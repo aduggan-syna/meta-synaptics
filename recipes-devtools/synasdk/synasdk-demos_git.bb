@@ -15,7 +15,7 @@ DEPENDS = " \
 
 SRC_URI = "${SYNA_SRC_DEMOS}"
 
-S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/demos"
+S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/demos/codec-demo"
 
 SRCREV = "${SYNA_SRCREV_DEMOS}"
 
@@ -35,37 +35,22 @@ TARGET_HW:klamath = "klamath"
 
 V4L2_ENABLE = "1"
 V4L2_ENABLE:myna2 = "0"
+V4L2_ENABLE:klamath = "0"
 
 CLEANBROKEN = "1"
 
+inherit meson pkgconfig
 
+EXTRA_OEMESON = ""
 
-do_compile() {
-    topdir="${WORKDIR}/${SYNA_SOURCE_PREFIX}"
-    outdir_intermediate="${B}/demos"
-    mkdir -p "${outdir_intermediate}"
-
-    DESTDIR="${outdir_intermediate}" \
-    SDKTARGETSYSROOT="${STAGING_DIR_TARGET}" \
-    TOPDIR="${WORKDIR}/${SYNA_SOURCE_PREFIX}" \
-    CURR_MACH="${TARGET_HW}" \
-    V4L2_ENABLE="${V4L2_ENABLE}" \
-    ${MAKE} -C ${S}
-
-    DESTDIR="${outdir_intermediate}" \
-    SDKTARGETSYSROOT="${STAGING_DIR_TARGET}" \
-    TOPDIR="${WORKDIR}/${SYNA_SOURCE_PREFIX}" \
-    CURR_MACH="${TARGET_HW}" \
-    V4L2_ENABLE="${V4L2_ENABLE}" \
-    ${MAKE} -C ${S} install
-}
+EXTRA_OECONF += " -Dcurr_mach=${TARGET_HW} -Dv4l2_enable=${V4L2_ENABLE}"
 
 do_install () {
     install -d ${D}${bindir}
     for i in \
         codec-demo;
     do
-        install -m 0755 ${B}/demos/usr/bin/$i ${D}${bindir}
+        install -m 0755 ${B}/$i ${D}${bindir}
     done
 
     install -d ${D}${rootdir}
