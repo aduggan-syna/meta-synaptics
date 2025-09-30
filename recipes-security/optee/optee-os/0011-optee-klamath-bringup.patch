@@ -1,4 +1,4 @@
-From e2ce89a29932ecd431940af7be9ec64d0707fa1c Mon Sep 17 00:00:00 2001
+From 9176c11c2b2ce022845454857f31f17ad469a120 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Fri, 5 Sep 2025 09:47:07 +0800
 Subject: [PATCH] optee: klamath bringup
@@ -23,7 +23,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../plat-synaptics/chip/klamath/include/prot_id.h  |    30 +
  .../arm/plat-synaptics/chip/klamath/include/soc.h  |  4892 ++++
  .../arm/plat-synaptics/chip/klamath/include/szc.h  |    66 +
- .../plat-synaptics/chip/klamath/include/szc_mst.h  |    92 +
+ .../plat-synaptics/chip/klamath/include/szc_mst.h  |    74 +
  core/arch/arm/plat-synaptics/chip/klamath/sub.mk   |     2 +
  core/arch/arm/plat-synaptics/conf.mk               |    13 +
  .../driver/appcrypto/appcrypto_lock.c              |    80 +
@@ -34,8 +34,8 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../driver/regfirewall/rf_drv_klamath.c            |   223 +
  core/arch/arm/plat-synaptics/platform_config.h     |    33 +
  core/arch/arm/plat-synaptics/sub.mk                |     2 +-
- .../tz/tz_boot_param_value_klamath.c               |   121 +
- 29 files changed, 58780 insertions(+), 3 deletions(-)
+ .../tz/tz_boot_param_value_klamath.c               |   120 +
+ 29 files changed, 58761 insertions(+), 3 deletions(-)
  create mode 100644 core/arch/arm/plat-synaptics/chip/klamath/hal_soc.c
  create mode 100644 core/arch/arm/plat-synaptics/chip/klamath/include/SZC.h
  create mode 100755 core/arch/arm/plat-synaptics/chip/klamath/include/ctypes.h
@@ -53163,7 +53163,7 @@ index 0000000..f8f2a14
 +#endif /* __PLAT_DEF_H__ */
 diff --git a/core/arch/arm/plat-synaptics/chip/klamath/include/prot_id.h b/core/arch/arm/plat-synaptics/chip/klamath/include/prot_id.h
 new file mode 100644
-index 0000000..5de733d
+index 0000000..15649bc
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/klamath/include/prot_id.h
 @@ -0,0 +1,30 @@
@@ -53181,9 +53181,9 @@ index 0000000..5de733d
 +	PROT_ID_CPU,
 +	PROT_ID_AIO,
 +	PROT_ID_VIO,
++	PROT_ID_CIO,
 +	PROT_ID_GPU,
 +	PROT_ID_NPU,
-+	PROT_ID_SYSMGR,
 +	PROT_ID_MTEST,
 +	PROT_ID_GE0,
 +	PROT_ID_GE1,
@@ -58169,33 +58169,15 @@ index 0000000..824f59e
 +#endif /* _SZC_REG_H_ */
 diff --git a/core/arch/arm/plat-synaptics/chip/klamath/include/szc_mst.h b/core/arch/arm/plat-synaptics/chip/klamath/include/szc_mst.h
 new file mode 100644
-index 0000000..881b9ce
+index 0000000..14dd035
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/klamath/include/szc_mst.h
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,74 @@
++// SPDX-License-Identifier: BSD-2-Clause
 +/*
-+ * Copyright (c) 2013-2020 Synaptics International Ltd. and its affiliates.
-+ * All rights reserved.
-+ *
-+ * SYNAPTICS CONFIDENTIAL
-+ *
-+ * The source code contained or described herein and all documents related to
-+ * the source code ("Material") are owned by Synaptics International Ltd or its
-+ * suppliers or licensors. Title to the Material remains with Synaptics
-+ * International Ltd or its suppliers and licensors. The Material contains
-+ * trade secrets and proprietary and confidential information of Synaptics or
-+ * its suppliers and licensors.
-+ * The Material is protected by worldwide copyright and trade secret laws and
-+ * treaty provisions. No part of the Material may be used, copied, reproduced,
-+ * modified, published, uploaded, posted, transmitted, distributed, or
-+ * disclosed in any way without Synaptics's prior express written permission.
-+ *
-+ * No license under any patent, copyright, trade secret or other intellectual
-+ * property right is granted to or conferred upon you by disclosure or delivery
-+ * of the Materials, either expressly, by implication, inducement, estoppel or
-+ * otherwise. Any license under such intellectual property rights must be
-+ * express and approved by Synaptics in writing.
++ * Copyright (c) 2024, Synaptics Incorporated.
 + */
++
 +#ifndef _SZC_MST_H_
 +#define _SZC_MST_H_
 +
@@ -58921,10 +58903,10 @@ index f713b4a..8938091 100644
  srcs-y += common/syna_entrypoint.S
 diff --git a/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_klamath.c b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_klamath.c
 new file mode 100644
-index 0000000..b097ded
+index 0000000..5d79dfd
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/tz/tz_boot_param_value_klamath.c
-@@ -0,0 +1,121 @@
+@@ -0,0 +1,120 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2021, Synaptics Incorporated.
@@ -59027,7 +59009,6 @@ index 0000000..b097ded
 +	// DONOT overit NPU master, it will be set dynamicly
 +	// {PROT_ID_NPU,		MST_ATTR(TZ_BOOT_STAGE_TRUSTZONE, TZM_S)},
 +#endif
-+	{PROT_ID_SYSMGR,	MST_ATTR(TZ_BOOT_STAGE_TRUSTZONE, TZM_S)},
 +	{PROT_ID_MTEST,  	MST_ATTR(TZ_BOOT_STAGE_TRUSTZONE, TZM_N)},
 +	{PROT_ID_GE0,		MST_ATTR(TZ_BOOT_STAGE_TRUSTZONE, TZM_N)},
 +	{PROT_ID_GE1,		MST_ATTR(TZ_BOOT_STAGE_TRUSTZONE, TZM_N)},
