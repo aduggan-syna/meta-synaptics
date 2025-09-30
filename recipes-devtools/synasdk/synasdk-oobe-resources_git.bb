@@ -39,6 +39,7 @@ do_install () {
     ${@bb.utils.contains('MACHINE', 'sl1620', 'cp ${S}/videos/h264/sl1620/* ${D}${rootdir}/demos/videos/h264/; install -d ${D}/usr/share/synap/models; cp -r ${S}/models/object_detection ${D}/usr/share/synap/models/; cp ${S}/config_files/syna_capability_demo_sl1620_config.txt ${D}/${rootdir}/demos/configs/', '', d)}
     ${@bb.utils.contains('MACHINE', 'sl1640', 'cp ${S}/videos/h264/sl1640/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/config_files/syna_capability_demo_sl1640_config.txt ${D}/${rootdir}/demos/configs/', '', d)}
     ${@bb.utils.contains('MACHINE', 'sl1680', 'cp ${S}/videos/h264/sl1680/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/config_files/syna_capability_demo_sl1680_config.txt ${D}/${rootdir}/demos/configs/', '', d)}
+    ${@bb.utils.contains('MACHINE', 'sl2619', 'cp ${S}/videos/h264/sl2619/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/config_files/syna_capability_demo_sl2619_config.txt ${D}/${rootdir}/demos/configs/', '', d)}
 }
 
 PACKAGES = " \
