@@ -151,6 +151,7 @@ IMAGE_INSTALL:append:klamath = " \
     ${TEE_OPTEE} \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
+    synasdk-v4l2isp-test \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
