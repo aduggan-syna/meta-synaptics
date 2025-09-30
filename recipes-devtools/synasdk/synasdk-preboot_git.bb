@@ -6,6 +6,8 @@ LICENSE_FLAGS = "Synaptics-EULA"
 PR = "r1"
 
 inherit deploy
+inherit python3native
+inherit pkgconfig cmake
 
 DEPENDS = " \
     synasdk-tools-native \
@@ -15,7 +17,11 @@ DEPENDS = " \
 # Need security/keys for klamath
 DEPENDS:append:klamath = " \
     synasdk-security-native \
+    gcc-arm-none-eabi-native \
 "
+
+#TODO: Revisit
+S = "${WORKDIR}/git${SRCPV}/release/boot/mcu/cm52/src"
 
 COMPATIBLE_MACHINE = "syna"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -24,6 +30,8 @@ SRC_URI = " \
     ${SYNA_SRC_BOOT} \
     ${SYNA_SRC_PREBOOT} \
 "
+#TODO: Revisit
+OECMAKE_SOURCEPATH = "${WORKDIR}/release/boot/mcu/cm52/src"
 
 # klamath need boot/mcu instead of boot/preboot
 SRC_URI:remove:klamath = "${SYNA_SRC_PREBOOT}"
