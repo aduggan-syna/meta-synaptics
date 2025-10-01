@@ -7,7 +7,7 @@ PR = "r1"
 
 inherit deploy
 inherit python3native
-inherit pkgconfig cmake
+inherit pkgconfig
 
 DEPENDS = " \
     synasdk-tools-native \
@@ -18,10 +18,11 @@ DEPENDS = " \
 DEPENDS:append:klamath = " \
     synasdk-security-native \
     gcc-arm-none-eabi-native \
-"
+    ninja-native\
+   "
 
 #TODO: Revisit
-S = "${WORKDIR}/git${SRCPV}/release/boot/mcu/cm52/src"
+S_klamath  = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/boot/mcu/cm52/src"
 
 COMPATIBLE_MACHINE = "syna"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -30,8 +31,7 @@ SRC_URI = " \
     ${SYNA_SRC_BOOT} \
     ${SYNA_SRC_PREBOOT} \
 "
-#TODO: Revisit
-OECMAKE_SOURCEPATH = "${WORKDIR}/release/boot/mcu/cm52/src"
+
 
 # klamath need boot/mcu instead of boot/preboot
 SRC_URI:remove:klamath = "${SYNA_SRC_PREBOOT}"
@@ -55,6 +55,7 @@ do_compile () {
         exit 1
     fi
 }
+
 
 do_deploy() {
     if [ "${MACHINE}" = "sl1620usb" ] || [ "${MACHINE}" = "sl1640usb" ] || [ "${MACHINE}" = "sl1680usb" ]; then
