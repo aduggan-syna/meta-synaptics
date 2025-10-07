@@ -7,7 +7,8 @@ IMAGE_INSTALL:append = " \
     bluetooth-gui \
     python3-pexpect \
 "
-IMAGE_INSTALL:append:dolphin = " \
+
+DEV_PACKAGES = " \
     python3-pip \
     gstreamer1.0-python \
     python3-venv \
@@ -19,6 +20,15 @@ IMAGE_INSTALL:append:dolphin = " \
     sqlite3 \
     python3-sqlite3 \
 "
+
+IMAGE_INSTALL:append:dolphin = "${DEV_PACKAGES}"
+IMAGE_INSTALL:append:klamath = " \
+    ${DEV_PACKAGES} \
+    python3 \
+    python3-numpy \
+    python3-ensurepip \
+"
+
 IMAGE_INSTALL:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'syna-weston-desktop', '', d)} \
 "
