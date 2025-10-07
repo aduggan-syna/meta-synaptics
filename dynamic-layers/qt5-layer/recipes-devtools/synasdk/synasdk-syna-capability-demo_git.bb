@@ -49,6 +49,10 @@ do_install () {
     if [ "${MACHINE}" = "sl1680" ]; then
         install -m 0644 ${S}/qmls/sl1680-capability-demo.qml ${D}${qmldir}/
     fi
+
+    if [ "${MACHINE}" = "sl2619" ]; then
+        install -m 0644 ${S}/qmls/sl2619-capability-demo.qml ${D}${qmldir}/
+    fi
 }
 
 FILES:${PN} = " \
