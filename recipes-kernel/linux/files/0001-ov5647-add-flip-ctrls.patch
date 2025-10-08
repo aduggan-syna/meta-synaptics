@@ -1,0 +1,170 @@
+From 2cf457e9354682f005810d78d4e0aad0860f02b7 Mon Sep 17 00:00:00 2001
+From: Rohit Shripad Walavalkar <rohit.walavalkar@synaptics.com>
+Date: Tue, 7 Oct 2025 16:08:52 +0530
+Subject: [PATCH] ov5647: add flip ctrls
+
+---
+ drivers/media/i2c/ov5647.c | 81 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 80 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/media/i2c/ov5647.c b/drivers/media/i2c/ov5647.c
+index a727beb9d57e..2bde7d32e5b9 100644
+--- a/drivers/media/i2c/ov5647.c
++++ b/drivers/media/i2c/ov5647.c
+@@ -54,6 +54,8 @@
+ #define OV5647_REG_GAIN_LO		0x350b
+ #define OV5647_REG_VTS_HI		0x380e
+ #define OV5647_REG_VTS_LO		0x380f
++#define OV5647_REG_TIMING_TC_REG20	0x3820
++#define OV5647_REG_TIMING_TC_REG21	0x3821
+ #define OV5647_REG_FRAME_OFF_NUMBER	0x4202
+ #define OV5647_REG_MIPI_CTRL00		0x4800
+ #define OV5647_REG_MIPI_CTRL14		0x4814
+@@ -103,12 +105,14 @@ struct ov5647 {
+ 	struct clk			*xclk;
+ 	struct gpio_desc		*pwdn;
+ 	bool				clock_ncont;
++	bool				upside_down;
+ 	struct v4l2_ctrl_handler	ctrls;
+ 	const struct ov5647_mode	*mode;
+ 	struct v4l2_ctrl		*pixel_rate;
+ 	struct v4l2_ctrl		*hblank;
+ 	struct v4l2_ctrl		*vblank;
+ 	struct v4l2_ctrl		*exposure;
++	struct i2c_client *i2c_client;
+ };
+ 
+ static inline struct ov5647 *to_sensor(struct v4l2_subdev *sd)
+@@ -420,7 +424,7 @@ static struct regval_list ov5647_640x480_10bpp[] = {
+ 	{0x3036, 0x46},
+ 	{0x303c, 0x11},
+ 	{0x3821, 0x07},
+-	{0x3820, 0x41},
++	{0x3820, 0x42},
+ 	{0x370c, 0x03},
+ 	{0x3612, 0x59},
+ 	{0x3618, 0x00},
+@@ -669,6 +673,22 @@ static int ov5647_write_array(struct v4l2_subdev *sd,
+ 	return 0;
+ }
+ 
++static int ov5647_mod_reg(struct v4l2_subdev *sd, u16 reg, u8 mask, u8 val)
++{
++	u8 readval;
++	int ret;
++
++	ret = ov5647_read(sd, reg, &readval);
++	if (ret)
++		return ret;
++
++	readval &= ~mask;
++	val &= mask;
++	val |= readval;
++
++	return ov5647_write(sd, reg, val);
++}
++
+ static int ov5647_set_virtual_channel(struct v4l2_subdev *sd, int channel)
+ {
+ 	u8 channel_id;
+@@ -1206,6 +1226,38 @@ static int ov5647_s_exposure(struct v4l2_subdev *sd, u32 val)
+ 	return ov5647_write(sd, OV5647_REG_EXP_LO, (val & 0xf) << 4);
+ }
+ 
++static int ov5647_set_ctrl_hflip(struct ov5647 *sensor, int value)
++{
++	struct v4l2_subdev *sd = &sensor->sd;
++
++	/*
++	 * TIMING TC REG21:
++	 * - [2]:	ISP mirror
++	 * - [1]:	Sensor mirror
++	 */
++	return ov5647_mod_reg(sd, OV5647_REG_TIMING_TC_REG21,
++			      BIT(2) | BIT(1),
++			      (!(value ^ sensor->upside_down)) ?
++			      (BIT(2) | BIT(1)) : 0);
++}
++
++static int ov5647_set_ctrl_vflip(struct ov5647 *sensor, int value)
++{
++	struct v4l2_subdev *sd = &sensor->sd;
++
++	/* If sensor is mounted upside down, flip logic is inversed */
++
++	/*
++	 * TIMING TC REG20:
++	 * - [2]:	ISP vflip
++	 * - [1]:	Sensor vflip
++	 */
++	return ov5647_mod_reg(sd, OV5647_REG_TIMING_TC_REG20,
++			      BIT(2) | BIT(1),
++			      (value ^ sensor->upside_down) ?
++			      (BIT(2) | BIT(1)) : 0);
++}
++
+ static int ov5647_s_ctrl(struct v4l2_ctrl *ctrl)
+ {
+ 	struct ov5647 *sensor = container_of(ctrl->handler,
+@@ -1261,6 +1313,12 @@ static int ov5647_s_ctrl(struct v4l2_ctrl *ctrl)
+ 		ret = ov5647_write(sd, OV5647_REG_ISPCTRL3D,
+ 				   ov5647_test_pattern_val[ctrl->val]);
+ 		break;
++	case V4L2_CID_HFLIP:
++		ret = ov5647_set_ctrl_hflip(sensor, ctrl->val);
++		break;
++	case V4L2_CID_VFLIP:
++		ret = ov5647_set_ctrl_vflip(sensor, ctrl->val);
++		break;
+ 
+ 	/* Read-only, but we adjust it based on mode. */
+ 	case V4L2_CID_PIXEL_RATE:
+@@ -1287,7 +1345,9 @@ static const struct v4l2_ctrl_ops ov5647_ctrl_ops = {
+ static int ov5647_init_controls(struct ov5647 *sensor)
+ {
+ 	struct i2c_client *client = v4l2_get_subdevdata(&sensor->sd);
++	struct v4l2_fwnode_device_properties props;
+ 	int hblank, exposure_max, exposure_def;
++	int ret;
+ 
+ 	v4l2_ctrl_handler_init(&sensor->ctrls, 9);
+ 
+@@ -1338,9 +1398,27 @@ static int ov5647_init_controls(struct ov5647 *sensor)
+ 				     ARRAY_SIZE(ov5647_test_pattern_menu) - 1,
+ 				     0, 0, ov5647_test_pattern_menu);
+ 
++	v4l2_ctrl_new_std(&sensor->ctrls, &ov5647_ctrl_ops,
++			  V4L2_CID_HFLIP, 0, 1, 1, 0);
++	/* Enable vertical flip by default */
++	v4l2_ctrl_new_std(&sensor->ctrls, &ov5647_ctrl_ops,
++			  V4L2_CID_VFLIP, 0, 1, 1, 1);
++
+ 	if (sensor->ctrls.error)
+ 		goto handler_free;
+ 
++	ret = v4l2_fwnode_device_parse(&sensor->i2c_client->dev, &props);
++	if (ret)
++		goto handler_free;
++
++	if (props.rotation == 180)
++		sensor->upside_down = true;
++
++	ret = v4l2_ctrl_new_fwnode_properties(&sensor->ctrls, &ov5647_ctrl_ops,
++					      &props);
++	if (ret)
++		goto handler_free;
++
+ 	sensor->pixel_rate->flags |= V4L2_CTRL_FLAG_READ_ONLY;
+ 	sensor->hblank->flags |= V4L2_CTRL_FLAG_READ_ONLY;
+ 	sensor->sd.ctrl_handler = &sensor->ctrls;
+@@ -1417,6 +1495,7 @@ static int ov5647_probe(struct i2c_client *client)
+ 		return -EINVAL;
+ 	}
+ 
++	sensor->i2c_client = client;
+ 	mutex_init(&sensor->lock);
+ 
+ 	sensor->mode = OV5647_DEFAULT_MODE;
+-- 
+2.34.1
+
