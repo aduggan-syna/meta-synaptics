@@ -1,0 +1,21 @@
+From ddc863d1ddc13634e8ceae9c684f94adc803c79a Mon Sep 17 00:00:00 2001
+From:  Rajdeep Shyam <rshyam@synaptics.com>
+Date:   Thu Oct 9 12:38:21 2025 +0530
+Subject: [PATCH] ov5647: remove csi drive strenght for 480p
+
+---
+ drivers/media/i2c/ov5647.c | 81 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 80 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/media/i2c/ov5647.c b/drivers/media/i2c/ov5647.c
+index 2bde7d32e5b9..3011d68d79ca 100644
+--- a/drivers/media/i2c/ov5647.c
++++ b/drivers/media/i2c/ov5647.c
+@@ -492,7 +492,6 @@ static struct regval_list ov5647_640x480_10bpp[] = {
+ 	{0x3000, 0x00},
+ 	{0x3001, 0x00},
+ 	{0x3002, 0x00},
+-	{0x3017, 0xe0},
+ 	{0x301c, 0xfc},
+ 	{0x3636, 0x06},
+ 	{0x3016, 0x08},

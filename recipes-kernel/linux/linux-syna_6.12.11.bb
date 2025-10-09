@@ -29,7 +29,10 @@ SRC_URI += "${@bb.utils.contains('KGDB_ENABLE', '1', ' \
     file://kgdb.cfg', '', d)}"
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://add-docker.cfg', '', d)}"
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'file://selinux.cfg', '', d)}"
-SRC_URI += "file://0001-ov5647-add-flip-ctrls.patch"
+SRC_URI += " \
+    file://0001-ov5647-add-flip-ctrls.patch \
+    file://0002-ov5647-remove-csi-drive-stength-480p.patch \
+"
 
 python () {
     # append defconfig if exists
