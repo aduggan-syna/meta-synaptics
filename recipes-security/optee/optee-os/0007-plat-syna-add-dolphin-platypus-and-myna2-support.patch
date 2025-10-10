@@ -1,4 +1,4 @@
-From f4dadc583298ee6957858a8400e4cf1cfc9e20d7 Mon Sep 17 00:00:00 2001
+From 342c0788fbd5d6cc7ff240a304967eeceb25c600 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 09:17:01 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -6,7 +6,7 @@ Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
 Change-Id: Iacde6e76f0e8a382adf2ff0c237815bb1d334148
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 ---
- .../arch/arm/plat-synaptics/chip/dolphin/hal_soc.c |   390 +
+ .../arch/arm/plat-synaptics/chip/dolphin/hal_soc.c |   321 +
  .../chip/dolphin/include/Galois_memmap.h           |  2185 ++
  .../chip/dolphin/include/Galois_memmap_sm.h        |    39 +
  .../chip/dolphin/include/Galois_memmap_soc.h       |    35 +
@@ -32,7 +32,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arm/plat-synaptics/chip/dolphin/include/tsp.h  | 14919 +++++++++++
  .../arm/plat-synaptics/chip/dolphin/mpt_rule.h     |    24 +
  core/arch/arm/plat-synaptics/chip/dolphin/sub.mk   |     2 +
- core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c  |   385 +
+ core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c  |   166 +
  .../chip/myna2/include/Galois_memmap.h             |   665 +
  .../chip/myna2/include/Galois_memmap_sm.h          |    39 +
  .../chip/myna2/include/Galois_memmap_soc.h         |    35 +
@@ -57,7 +57,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../arm/plat-synaptics/chip/myna2/include/tsp.h    | 14846 +++++++++++
  core/arch/arm/plat-synaptics/chip/myna2/sub.mk     |     2 +
  core/arch/arm/plat-synaptics/chip/myna2/szc_mst.h  |    35 +
- .../arm/plat-synaptics/chip/platypus/hal_soc.c     |   387 +
+ .../arm/plat-synaptics/chip/platypus/hal_soc.c     |   306 +
  .../chip/platypus/include/Galois_memmap.h          |  2284 ++
  .../chip/platypus/include/Galois_memmap_sm.h       |    39 +
  .../chip/platypus/include/Galois_memmap_soc.h      |    35 +
@@ -126,17 +126,17 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  core/arch/arm/plat-synaptics/driver/mzone/mz_szc.c |   152 +
  core/arch/arm/plat-synaptics/driver/mzone/mz_szc.h |    22 +
  core/arch/arm/plat-synaptics/driver/mzone/sub.mk   |     2 +
- .../arm/plat-synaptics/driver/mzone/szc_zone.c     |   264 +
- .../arm/plat-synaptics/driver/protor/prot_setup.c  |    50 +
+ .../arm/plat-synaptics/driver/mzone/szc_zone.c     |   286 +
+ .../arm/plat-synaptics/driver/protor/prot_setup.c  |    70 +
  .../arm/plat-synaptics/driver/protor/prot_setup.h  |    12 +
  .../arch/arm/plat-synaptics/driver/protor/protor.c |   101 +
  .../arch/arm/plat-synaptics/driver/protor/protor.h |    19 +
  core/arch/arm/plat-synaptics/driver/protor/sub.mk  |     3 +
  .../driver/regfirewall/regfirewall.c               |   135 +
  .../driver/regfirewall/regfirewall.h               |    33 +
- .../driver/regfirewall/rf_drv_dolphin.c            |   266 +
- .../driver/regfirewall/rf_drv_myna2.c              |   224 +
- .../driver/regfirewall/rf_drv_platypus.c           |   249 +
+ .../driver/regfirewall/rf_drv_dolphin.c            |   287 +
+ .../driver/regfirewall/rf_drv_myna2.c              |   245 +
+ .../driver/regfirewall/rf_drv_platypus.c           |   271 +
  .../plat-synaptics/driver/regfirewall/rf_setup.c   |    20 +
  .../plat-synaptics/driver/regfirewall/rf_setup.h   |    12 +
  .../arm/plat-synaptics/driver/regfirewall/sub.mk   |     2 +
@@ -194,7 +194,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../tz/tz_boot_param_value_platypus.c              |   608 +
  core/arch/arm/plat-synaptics/tz/tz_errcode.h       |    44 +
  core/arch/arm/plat-synaptics/tz/tz_perm.h          |    89 +
- 188 files changed, 313103 insertions(+)
+ 188 files changed, 312840 insertions(+)
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap.h
  create mode 100644 core/arch/arm/plat-synaptics/chip/dolphin/include/Galois_memmap_sm.h
@@ -386,10 +386,10 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 
 diff --git a/core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c b/core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
 new file mode 100644
-index 0000000..23e875d
+index 0000000..f6642ec
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/dolphin/hal_soc.c
-@@ -0,0 +1,390 @@
+@@ -0,0 +1,321 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -412,6 +412,7 @@ index 0000000..23e875d
 +#include "szc_mpt.h"
 +#include "apb_timer.h"
 +#include <mm/core_memprot.h>
++#include <kernel/pm.h>
 +
 +#define SUSPEND_WAKEUP_INTR		GIC_IID_SPI(IRQ_sm2socSwInt)
 +
@@ -603,56 +604,6 @@ index 0000000..23e875d
 +	free(tee_final_config);
 +}
 +
-+#if 0
-+unsigned long plat_mr_region_get_va(const struct mem_region *mr)
-+{
-+	if (strncmp(mr->name, "tz", 2) == 0)
-+#ifdef CONFIG_ENABLE_PIE
-+		return (unsigned long)(mmu_temp_data[0]);
-+#else
-+		return CONFIG_KERNEL_VBASE;
-+#endif
-+	/*-------------------------------------------------------------------
-+	 * A workaround here to remap the V4G register address to 0x8xxxxxxx
-+	 * in order to fix the bus error found in BG4CD/BG4CT when:
-+	 *
-+	 * 1) Linux apps keep doing mmap/munmap
-+	 * 2) CAs keep calling into TAs
-+	 *
-+	 * Per test, v4g register becomes inaccessible and gives bus error
-+	 * in user space using busybox devmem command. A reset to v4g can
-+	 * recover this error but won't fix. Issues can easily happen if we
-+	 * keep running 1) & 2) tests.
-+	 *
-+	 * This turns out to have something to do with MMU, below are some
-+	 * tests done in Trustzone:
-+	 * Case A) Don't map register space, issue not reproduced
-+	 * Case B) Map register to 0x8xxxxxxx, issue not reproduced
-+	 * Case C) Don't create map for V4G register space, issue not seen
-+	 *
-+	 * Root cause still not found, but the guess is this issue might
-+	 * have something to do with world switching between secure and
-+	 * non-secure, 64-bit and 32-bit environment.
-+	 *
-+	 * For this momemnt, case B) gives us the idea to provide this
-+	 * workaround
-+	 *-------------------------------------------------------------------
-+	 */
-+	if (strncmp(mr->name, "v4g", 3) == 0)
-+		return (((unsigned long)(mr->base) & 0x0fffffff) | 0x80000000);
-+
-+	/*-------------------------------------------------------------------
-+	 * Like the above, a similar workaround here to remap the H1 register
-+	 * address to 0x8xxxxxxx
-+	 *-------------------------------------------------------------------
-+	 */
-+	if (strncmp(mr->name, "h1", 2) == 0)
-+		return (((unsigned long)(mr->base) & 0x0fffffff) | 0x80000000);
-+
-+	return (unsigned long)mr->base;
-+}
-+#endif
-+
 +/*-------------------------------------------------------------------
 + * Unlike suspend in BG2Q or relevant chips, requirement is changed
 + * in BG4CT in suspend implementation:
@@ -679,7 +630,7 @@ index 0000000..23e875d
 +void plat_suspend(void)
 +{
 +	mpt_suspend();
-+	plat_save_tee_final_configuration();
++	//plat_save_tee_final_configuration();
 +	secure_timer_stop();
 +#if 0
 +	/* set SM as wakeup interrupt source*/
@@ -695,31 +646,8 @@ index 0000000..23e875d
 +#endif
 +}
 +
-+#if 0
-+static void dolphin_system_reset(void)
-+{
-+	//bypass it, let atf do it
-+#if 0
-+	sm_do_system_reset();
-+	while (1);
-+#endif
-+}
 +
-+static void dolphin_system_off(void)
-+{
-+	//sm_do_system_off();
-+	while (1);
-+}
-+
-+static int dolphin_suspend(unsigned long sec_entrypoint)
-+{
-+	//tz_sw_suspend();
-+	return PSCI_SUCCESS;
-+}
-+#endif
-+
-+
-+static void dolphin_resume(int cpu_id)
++static void plat_resume(int cpu_id)
 +{
 +#ifdef CONFIG_SZC_ICTL
 +	extern void szc_ictl_init(void);
@@ -733,38 +661,27 @@ index 0000000..23e875d
 +	secure_timer_setup();
 +}
 +
-+#if 0
-+static plat_pm_ops_t dolphin_pm_ops = {
-+	.cpu_suspend	= dolphin_suspend,
-+	.system_reset	= dolphin_system_reset,
-+	.system_off	= dolphin_system_off,
-+	.cpu_off	= NULL,
-+	.cpu_on		= NULL,
-+	.cpu_on_finish	= NULL,
-+	.suspend_finish = dolphin_resume,
-+	.cpu_standby	= NULL,
-+};
-+
-+int plat_setup_pm(plat_pm_ops_t **ops)
-+{
-+	sm_config_t config;
-+
-+	config.queue_base = (void *)SM_Send_MsgQ;
-+	sm_set_config(&config);
-+
-+	*ops = &dolphin_pm_ops;
-+
-+	return 0;
-+}
-+#endif
 +
 +unsigned long thread_cpu_suspend_handler(unsigned long a0 __unused,
 +					unsigned long a1 __unused)
 +{
++	TEE_Result retstatus = TEE_SUCCESS;
++
 +	if (get_core_pos() != 0)
-+		return;
++		return 1;
 +
 +	plat_suspend();
++
++	retstatus = pm_change_state(PM_OP_SUSPEND, 0);
++
++	/*
++	 * Returned value to the TF-A.
++	 * If it is not 0, the system will panic
++	 */
++	if (retstatus == TEE_SUCCESS)
++		return 0;
++	else
++		return 1;
 +
 +	return 0;
 +}
@@ -772,11 +689,25 @@ index 0000000..23e875d
 +unsigned long thread_cpu_resume_handler(unsigned long a0 __unused,
 +					unsigned long a1 __unused)
 +{
++	TEE_Result retstatus = TEE_SUCCESS;
 +	if (get_core_pos() == 0) {
++		DMSG("resume for primary cpu.\n");
 +		boot_primary_init_intc();
-+		dolphin_resume(0);
-+	} else
++		plat_resume(0);
++	} else {
++		DMSG("resume for secondary cpu.\n");
 +		boot_secondary_init_intc();
++	}
++	retstatus = pm_change_state(PM_OP_RESUME, 0);
++
++	/*
++	 * Returned value to the TF-A.
++	 * If it is not 0, the system will panic
++	 */
++	if (retstatus == TEE_SUCCESS)
++		return 0;
++	else
++		return 1;
 +
 +	return 0;
 +}
@@ -98227,10 +98158,10 @@ index 0000000..aa491b1
 +srcs-y += hal_soc.c
 diff --git a/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c b/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c
 new file mode 100644
-index 0000000..f04c5b0
+index 0000000..cdd9584
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/myna2/hal_soc.c
-@@ -0,0 +1,385 @@
+@@ -0,0 +1,166 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -98249,6 +98180,7 @@ index 0000000..f04c5b0
 +#include "tee_api_types.h"
 +#include "apb_timer.h"
 +#include <mm/core_memprot.h>
++#include <kernel/pm.h>
 +
 +#define MEMMAP_OTP_DUMP_OFFSET          0x0
 +#define MEMMAP_OTP_DUMP_SIZE            (0xC00)
@@ -98259,256 +98191,7 @@ index 0000000..f04c5b0
 +static unsigned char otp_data[SOC_OTP_ROWS * SOC_OTP_ROW_LEN / 2];
 +
 +#define SOC_RESET_CTRL_BASE		(vaddr_t)phys_to_virt_io((MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger), MEMMAP_CHIP_CTRL_REG_SIZE)
-+#if 0
-+#define SUSPEND_WAKEUP_INTR		GIC_IID_SPI(IRQ_sm2socSwInt)
 +
-+//using SM msg queue 1
-+#define SM_Send_MsgQ                    0xF7F97400
-+void sm_do_system_off(void);
-+void prot_set_by_stage(uint32_t stage);
-+void rf_set_by_stage(uint32_t stage);
-+
-+#ifdef CONFIG_ENABLE_PIE
-+extern unsigned long mmu_temp_data[3];
-+#endif
-+
-+extern struct mem_zone mzs[SZC_ZONE_NUM_ZONES_MAX];
-+extern uint32_t secure_memzone_num;
-+
-+void plat_save_tee_final_configuration(void)
-+{
-+	struct tee_final_configuration *tee_final_config;
-+	struct tee_final_rf_window * rf;
-+	struct tee_final_memory_zone *zone;
-+	uint16_t *mst_setting;
-+	uint16_t *rule;
-+	uint32_t rf_window_len, master_setting_len, mz_zone_len, rule_len;
-+	uint32_t i, attr, id, perm, stage, mst;
-+	uint32_t tee_final_config_len;
-+
-+	rf_window_len = rf_window_num * sizeof(*rf);
-+	master_setting_len = master_setting_num * sizeof(*mst_setting);
-+	mz_zone_len = secure_memzone_num * sizeof(*zone);
-+	rule_len = szc_rule_num *sizeof(*rule);
-+
-+	tee_final_config_len = rf_window_len + master_setting_len + mz_zone_len + rule_len;
-+
-+	trace("rf_window_num = %d, master_setting_len = %d, secure_memzone_num = %d, szc_rule_num = %d\n",
-+		rf_window_num, master_setting_num, secure_memzone_num, szc_rule_num);
-+
-+	tee_final_config = malloc(sizeof(*tee_final_config) + tee_final_config_len);
-+	assert(NULL != tee_final_config);
-+
-+	memset(tee_final_config, 0, sizeof(struct tee_final_configuration) + tee_final_config_len);
-+
-+	// copy rf windows
-+	tee_final_config->rf_window_num = rf_window_num;
-+	rf = (struct tee_final_rf_window *)tee_final_config->buff;
-+	for (i = 0; i < rf_window_num; i++) {
-+		attr = rf_window_param[i].attr;
-+		id = rf_window_param[i].id;
-+		stage = RF_GET_STAGE(rf_window_param[i].attr);
-+		perm = RF_GET_PERM(rf_window_param[i].attr);
-+		rf[i].base = rf_window_param[i].base;
-+		rf[i].size = rf_window_param[i].mask;
-+		rf[i].mst_group_ids = rf_window_param[i].mst_group_ids;
-+		rf[i].attr = TF_RF_ATTR(id, stage, perm);
-+	}
-+
-+	// copy secure master setting
-+	tee_final_config->master_setting_num = master_setting_num;
-+	mst_setting = (uint16_t *)((uintptr_t)rf + rf_window_len);
-+	for (i = 0; i < master_setting_num; i++) {
-+		attr = master_setting_param[i].attr;
-+		id = master_setting_param[i].id;
-+		perm = MST_GET_PERM(attr);
-+		stage = MST_GET_STAGE(attr);
-+		mst_setting[i] = TF_MST(id, stage, perm);
-+	}
-+
-+	// copy memory zone
-+	tee_final_config->mem_zone_num = secure_memzone_num;
-+	zone = (struct tee_final_memory_zone *)((uintptr_t)mst_setting + master_setting_len);
-+	for (i = 0; i < secure_memzone_num; i++) {
-+		zone[i].attr = TF_MZ_ATTR(mzs[i].id, mzs[i].ns);
-+		zone[i].ns_rd = mzs[i].ns_rd;
-+		zone[i].ns_wr = mzs[i].ns_wr;
-+		zone[i].s_rd = mzs[i].s_rd;
-+		zone[i].s_wr = mzs[i].s_wr;
-+		zone[i].start = mzs[i].start;
-+		zone[i].size =mzs[i].size;
-+	}
-+
-+	// copy rule definitions
-+	tee_final_config->szc_rule_num = szc_rule_num;
-+	rule = (uint16_t *)((uintptr_t)zone + mz_zone_len);
-+	for (i = 0; i < szc_rule_num; i++) {
-+		attr = szc_rule_param[i];
-+		id = RULE_GET_ID(attr);
-+		mst = RULE_GET_MST(attr);
-+		perm = RULE_GET_PERM(attr);
-+		rule[i] = TF_RULE(id, mst, perm);
-+	}
-+
-+	trace("%s(),line %d: tee_final_config_len = 0x%x, len = 0x%x.\n",
-+		__func__, __LINE__, tee_final_config_len, sizeof(*tee_final_config) + tee_final_config_len);
-+
-+	if (bcm_store_tee_data(tee_final_config, 0, sizeof(*tee_final_config) + tee_final_config_len)){
-+		error("fail to store suspend info.\n");
-+		assert(0);
-+	};
-+
-+	memset(tee_final_config, 0, sizeof(*tee_final_config) + tee_final_config_len);
-+
-+	free(tee_final_config);
-+}
-+
-+unsigned long plat_mr_region_get_va(const struct mem_region *mr)
-+{
-+	if (strncmp(mr->name, "tz", 2) == 0)
-+#ifdef CONFIG_ENABLE_PIE
-+		return (unsigned long)(mmu_temp_data[0]);
-+#else
-+		return CONFIG_KERNEL_VBASE;
-+#endif
-+	/*-------------------------------------------------------------------
-+	 * A workaround here to remap the V4G register address to 0x8xxxxxxx
-+	 * in order to fix the bus error found in BG4CD/BG4CT when:
-+	 *
-+	 * 1) Linux apps keep doing mmap/munmap
-+	 * 2) CAs keep calling into TAs
-+	 *
-+	 * Per test, v4g register becomes inaccessible and gives bus error
-+	 * in user space using busybox devmem command. A reset to v4g can
-+	 * recover this error but won't fix. Issues can easily happen if we
-+	 * keep running 1) & 2) tests.
-+	 *
-+	 * This turns out to have something to do with MMU, below are some
-+	 * tests done in Trustzone:
-+	 * Case A) Don't map register space, issue not reproduced
-+	 * Case B) Map register to 0x8xxxxxxx, issue not reproduced
-+	 * Case C) Don't create map for V4G register space, issue not seen
-+	 *
-+	 * Root cause still not found, but the guess is this issue might
-+	 * have something to do with world switching between secure and
-+	 * non-secure, 64-bit and 32-bit environment.
-+	 *
-+	 * For this momemnt, case B) gives us the idea to provide this
-+	 * workaround
-+	 *-------------------------------------------------------------------
-+	 */
-+	if (strncmp(mr->name, "v4g", 3) == 0)
-+		return (((unsigned long)(mr->base) & 0x0fffffff) | 0x80000000);
-+
-+	/*-------------------------------------------------------------------
-+	 * Like the above, a similar workaround here to remap the H1 register
-+	 * address to 0x8xxxxxxx
-+	 *-------------------------------------------------------------------
-+	 */
-+	if (strncmp(mr->name, "h1", 2) == 0)
-+		return (((unsigned long)(mr->base) & 0x0fffffff) | 0x80000000);
-+
-+	return (unsigned long)mr->base;
-+}
-+
-+/*-------------------------------------------------------------------
-+ * Unlike suspend in BG2Q or relevant chips, requirement is changed
-+ * in BG4CT in suspend implementation:
-+ *
-+ * a) Primary cpu in Linux kernel would power off secondaries and
-+ *    calls PSCI suspend command and enter secure monitor
-+ * b) secure monitor calls TOS's suspend handler
-+ * c) TOS's suspend handler takes platform specific action for
-+ *    suspend preparation and gives control back to secure monitor
-+ *    once done
-+ * d) secure monitor calls platform specific power management APIs
-+ *    to do suspend, this includes:
-+ *    1) Save TSP SRAM contents to DDR memory
-+ *    2) Copy suspend codes to TSP SRAM and jump to TSP SRAM to
-+ *       execute the suspend codes
-+ *    3) Put DDR into self refresh state and enter wfi state, waiting
-+ *       for interrupt events for wake up
-+ *
-+ * Below plat_suspend is the step c) as described above, mainly to
-+ * set up the interrupt sources which are used to wake up CPU from
-+ * wfi state
-+ *-------------------------------------------------------------------
-+ */
-+void plat_suspend(void)
-+{
-+	plat_save_tee_final_configuration();
-+#if 0
-+	/* set SM as wakeup interrupt source*/
-+	hal_intr_set_secure(SUSPEND_WAKEUP_INTR);
-+	hal_intr_unmask(SUSPEND_WAKEUP_INTR);
-+
-+	/* disable the I & D cache */
-+	disable_caches();
-+	/* flush dcache */
-+	flush_dcache_all();
-+	/* flush icache */
-+	invalidate_icache_all();
-+#endif
-+}
-+
-+static void myna2_system_reset(void)
-+{
-+	//bypass it, let atf do it
-+#if 0
-+	sm_do_system_reset();
-+	while (1);
-+#endif
-+}
-+
-+static void myna2_system_off(void)
-+{
-+	//sm_do_system_off();
-+	while (1);
-+}
-+
-+static int myna2_suspend(unsigned long sec_entrypoint)
-+{
-+	//tz_sw_suspend();
-+	return PSCI_SUCCESS;
-+}
-+
-+static void myna2_resume(int cpu_id)
-+{
-+	tz_sw_enter_boot_stage(TZ_BOOT_STAGE_WARMBOOT, TZ_BOOT_MODE_NORMAL);
-+
-+#ifdef CONFIG_SZC_ICTL
-+	extern void szc_ictl_init(void);
-+	extern void mc6ctrl_axi_error_monitor_init(void);
-+	szc_ictl_init();
-+	mc6ctrl_axi_error_monitor_init();
-+#endif
-+#ifdef CONFIG_SZC_MPT
-+	mpt_resume();
-+#endif
-+}
-+static plat_pm_ops_t myna2_pm_ops = {
-+	.cpu_suspend	= myna2_suspend,
-+	.system_reset	= myna2_system_reset,
-+	.system_off	= myna2_system_off,
-+	.cpu_off	= NULL,
-+	.cpu_on		= NULL,
-+	.cpu_on_finish	= NULL,
-+	.suspend_finish = myna2_resume,
-+	.cpu_standby	= NULL,
-+};
-+
-+int plat_setup_pm(plat_pm_ops_t **ops)
-+{
-+	sm_config_t config;
-+
-+	config.queue_base = (void *)SM_Send_MsgQ;
-+	sm_set_config(&config);
-+
-+	*ops = &myna2_pm_ops;
-+
-+	return 0;
-+}
-+#endif
 +void otp_init(void)
 +{
 +	int i = 0;
@@ -98597,10 +98280,24 @@ index 0000000..f04c5b0
 +unsigned long thread_cpu_suspend_handler(unsigned long a0 __unused,
 +					unsigned long a1 __unused)
 +{
++	TEE_Result retstatus = TEE_SUCCESS;
++
 +	if (get_core_pos() != 0)
-+		return;
++		return 1;
 +
 +	plat_suspend();
++
++
++	retstatus = pm_change_state(PM_OP_SUSPEND, 0);
++
++	/*
++	 * Returned value to the TF-A.
++	 * If it is not 0, the system will panic
++	 */
++	if (retstatus == TEE_SUCCESS)
++		return 0;
++	else
++		return 1;
 +
 +	return 0;
 +}
@@ -98608,10 +98305,25 @@ index 0000000..f04c5b0
 +unsigned long thread_cpu_resume_handler(unsigned long a0 __unused,
 +					unsigned long a1 __unused)
 +{
-+	if (get_core_pos() != 0)
-+		return;
++	TEE_Result retstatus = TEE_SUCCESS;
++	if (get_core_pos() == 0) {
++		boot_primary_init_intc();
++	} else
++		boot_secondary_init_intc();
++
 +
 +	plat_resume();
++
++	retstatus = pm_change_state(PM_OP_RESUME, 0);
++
++	/*
++	 * Returned value to the TF-A.
++	 * If it is not 0, the system will panic
++	 */
++	if (retstatus == TEE_SUCCESS)
++		return 0;
++	else
++		return 1;
 +
 +	return 0;
 +}
@@ -199681,10 +199393,10 @@ index 0000000..d4b6a37
 +#endif /* _SZC_MST_H_ */
 diff --git a/core/arch/arm/plat-synaptics/chip/platypus/hal_soc.c b/core/arch/arm/plat-synaptics/chip/platypus/hal_soc.c
 new file mode 100644
-index 0000000..a954456
+index 0000000..77ec3bd
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/chip/platypus/hal_soc.c
-@@ -0,0 +1,387 @@
+@@ -0,0 +1,306 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -199709,6 +199421,7 @@ index 0000000..a954456
 +#include "szc_mpt.h"
 +#include "apb_timer.h"
 +#include <mm/core_memprot.h>
++#include <kernel/pm.h>
 +
 +#define SOC_OTP_BASE_ADDR		(vaddr_t)phys_to_virt_io((MEMMAP_TSP_REG_BASE + 0x4000), MEMMAP_TSP_REG_SIZE)
 +#define SOC_OTP_ROWS			192
@@ -199716,19 +199429,6 @@ index 0000000..a954456
 +static unsigned char otp_data[SOC_OTP_ROWS * SOC_OTP_ROW_LEN / 2];
 +
 +#define SOC_RESET_CTRL_BASE		(vaddr_t)phys_to_virt_io((MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger), MEMMAP_CHIP_CTRL_REG_SIZE)
-+#if 0
-+#define SUSPEND_WAKEUP_INTR		GIC_IID_SPI(IRQ_sm2socSwInt)
-+
-+//using SM msg queue 1
-+#define SM_Send_MsgQ                    0xF7F97400
-+void sm_do_system_off(void);
-+void prot_set_by_stage(uint32_t stage);
-+void rf_set_by_stage(uint32_t stage);
-+
-+#ifdef CONFIG_ENABLE_PIE
-+extern unsigned long mmu_temp_data[3];
-+#endif
-+#endif
 +
 +extern struct mem_zone mzs[SZC_ZONE_NUM_ZONES_MAX];
 +extern int szc_zone_num;
@@ -199821,56 +199521,6 @@ index 0000000..a954456
 +	free(tee_final_config);
 +}
 +
-+#if 0
-+unsigned long plat_mr_region_get_va(const struct mem_region *mr)
-+{
-+	if (strncmp(mr->name, "tz", 2) == 0)
-+#ifdef CONFIG_ENABLE_PIE
-+		return (unsigned long)(mmu_temp_data[0]);
-+#else
-+		return CONFIG_KERNEL_VBASE;
-+#endif
-+	/*-------------------------------------------------------------------
-+	 * A workaround here to remap the V4G register address to 0x8xxxxxxx
-+	 * in order to fix the bus error found in BG4CD/BG4CT when:
-+	 *
-+	 * 1) Linux apps keep doing mmap/munmap
-+	 * 2) CAs keep calling into TAs
-+	 *
-+	 * Per test, v4g register becomes inaccessible and gives bus error
-+	 * in user space using busybox devmem command. A reset to v4g can
-+	 * recover this error but won't fix. Issues can easily happen if we
-+	 * keep running 1) & 2) tests.
-+	 *
-+	 * This turns out to have something to do with MMU, below are some
-+	 * tests done in Trustzone:
-+	 * Case A) Don't map register space, issue not reproduced
-+	 * Case B) Map register to 0x8xxxxxxx, issue not reproduced
-+	 * Case C) Don't create map for V4G register space, issue not seen
-+	 *
-+	 * Root cause still not found, but the guess is this issue might
-+	 * have something to do with world switching between secure and
-+	 * non-secure, 64-bit and 32-bit environment.
-+	 *
-+	 * For this momemnt, case B) gives us the idea to provide this
-+	 * workaround
-+	 *-------------------------------------------------------------------
-+	 */
-+	if (strncmp(mr->name, "v4g", 3) == 0)
-+		return (((unsigned long)(mr->base) & 0x0fffffff) | 0x80000000);
-+
-+	/*-------------------------------------------------------------------
-+	 * Like the above, a similar workaround here to remap the H1 register
-+	 * address to 0x8xxxxxxx
-+	 *-------------------------------------------------------------------
-+	 */
-+	if (strncmp(mr->name, "h1", 2) == 0)
-+		return (((unsigned long)(mr->base) & 0x0fffffff) | 0x80000000);
-+
-+	return (unsigned long)mr->base;
-+}
-+#endif
-+
 +
 +/*-------------------------------------------------------------------
 + * Unlike suspend in BG2Q or relevant chips, requirement is changed
@@ -199914,30 +199564,7 @@ index 0000000..a954456
 +#endif
 +}
 +
-+#if 0
-+static void platypus_system_reset(void)
-+{
-+	//bypass it, let atf do it
-+#if 0
-+	sm_do_system_reset();
-+	while (1);
-+#endif
-+}
-+
-+static void platypus_system_off(void)
-+{
-+	//sm_do_system_off();
-+	while (1);
-+}
-+
-+static int platypus_suspend(unsigned long sec_entrypoint)
-+{
-+	//tz_sw_suspend();
-+	return PSCI_SUCCESS;
-+}
-+#endif
-+
-+static void platypus_resume(int cpu_id)
++static void plat_resume(int cpu_id)
 +{
 +
 +#ifdef CONFIG_SZC_ICTL
@@ -199952,30 +199579,6 @@ index 0000000..a954456
 +	secure_timer_setup();
 +}
 +
-+#if 0
-+static plat_pm_ops_t platypus_pm_ops = {
-+	.cpu_suspend	= platypus_suspend,
-+	.system_reset	= platypus_system_reset,
-+	.system_off	= platypus_system_off,
-+	.cpu_off	= NULL,
-+	.cpu_on		= NULL,
-+	.cpu_on_finish	= NULL,
-+	.suspend_finish = platypus_resume,
-+	.cpu_standby	= NULL,
-+};
-+
-+int plat_setup_pm(plat_pm_ops_t **ops)
-+{
-+	sm_config_t config;
-+
-+	config.queue_base = (void *)SM_Send_MsgQ;
-+	sm_set_config(&config);
-+
-+	*ops = &platypus_pm_ops;
-+
-+	return 0;
-+}
-+#endif
 +void otp_init(void)
 +{
 +	int i = 0;
@@ -200053,10 +199656,23 @@ index 0000000..a954456
 +unsigned long thread_cpu_suspend_handler(unsigned long a0 __unused,
 +					unsigned long a1 __unused)
 +{
++	TEE_Result retstatus = TEE_SUCCESS;
++
 +	if (get_core_pos() != 0)
-+		return;
++		return 1;
 +
 +	plat_suspend();
++
++	retstatus = pm_change_state(PM_OP_SUSPEND, 0);
++
++	/*
++	 * Returned value to the TF-A.
++	 * If it is not 0, the system will panic
++	 */
++	if (retstatus == TEE_SUCCESS)
++		return 0;
++	else
++		return 1;
 +
 +	return 0;
 +}
@@ -200064,11 +199680,26 @@ index 0000000..a954456
 +unsigned long thread_cpu_resume_handler(unsigned long a0 __unused,
 +					unsigned long a1 __unused)
 +{
++	TEE_Result retstatus = TEE_SUCCESS;
++
 +	if (get_core_pos() == 0) {
 +		boot_primary_init_intc();
-+		platypus_resume(0);
++		plat_resume(0);
 +	} else
 +		boot_secondary_init_intc();
++
++	retstatus = pm_change_state(PM_OP_RESUME, 0);
++
++	/*
++	 * Returned value to the TF-A.
++	 * If it is not 0, the system will panic
++	 */
++	if (retstatus == TEE_SUCCESS)
++		return 0;
++	else
++		return 1;
++
++	return 0;
 +
 +	return 0;
 +}
@@ -305706,10 +305337,10 @@ index 0000000..494f0fb
 +srcs-$(CFG_SZC_ZONE) += szc_zone.c
 diff --git a/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c b/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c
 new file mode 100644
-index 0000000..b898e2b
+index 0000000..e4a70d6
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/mzone/szc_zone.c
-@@ -0,0 +1,264 @@
+@@ -0,0 +1,286 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -305729,6 +305360,7 @@ index 0000000..b898e2b
 +#include <trace.h>
 +#include <mm/core_memprot.h>
 +#include <initcall.h>
++#include <kernel/pm.h>
 +
 +#define SZC_ZONE_NUM_ZONES_MAX      16
 +#define SZC_ZONE_NUM_MASTERS_MAX    32
@@ -305918,7 +305550,7 @@ index 0000000..b898e2b
 +	return zone_num;
 +}
 +
-+static TEE_Result mz_setup(void)
++static TEE_Result szc_configure_setup(void)
 +{
 +	int i = 0;
 +
@@ -305951,6 +305583,27 @@ index 0000000..b898e2b
 +	return TEE_SUCCESS;
 +}
 +
++static TEE_Result
++pm_enter_resume(enum pm_op op, uint32_t pm_hint __unused,
++		const struct pm_callback_handle *pm_handle __unused)
++{
++	DMSG("op = 0x%x.\n", op);
++	if (op == PM_OP_RESUME)
++		return szc_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
++static TEE_Result mz_setup(void)
++{
++	register_pm_driver_cb(pm_enter_resume, NULL, "syna_mz");
++
++	szc_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
++
 +int szc_get_zones(void *mz, size_t *size)
 +{
 +	uint32_t zone_sizes;
@@ -305976,10 +305629,10 @@ index 0000000..b898e2b
 +
 diff --git a/core/arch/arm/plat-synaptics/driver/protor/prot_setup.c b/core/arch/arm/plat-synaptics/driver/protor/prot_setup.c
 new file mode 100644
-index 0000000..e4b1b97
+index 0000000..a2eb373
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/protor/prot_setup.c
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,70 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -305994,6 +305647,7 @@ index 0000000..e4b1b97
 +#include "tz_boot_cmd.h"
 +#include <trace.h>
 +#include <initcall.h>
++#include <kernel/pm.h>
 +
 +static const struct master_setting *master_value;
 +static int master_num;
@@ -306013,7 +305667,7 @@ index 0000000..e4b1b97
 +	}
 +}
 +
-+static TEE_Result prot_setup(void)
++static TEE_Result prot_configure_setup(void)
 +{
 +	int i;
 +
@@ -306028,8 +305682,27 @@ index 0000000..e4b1b97
 +	return TEE_SUCCESS;
 +}
 +
-+driver_init(prot_setup);
++static TEE_Result
++pm_enter_resume(enum pm_op op, uint32_t pm_hint __unused,
++		const struct pm_callback_handle *pm_handle __unused)
++{
++	DMSG("op = 0x%x.\n", op);
++	if (op == PM_OP_RESUME)
++		return prot_configure_setup();
 +
++	return TEE_SUCCESS;
++}
++
++static TEE_Result prot_setup(void)
++{
++	register_pm_driver_cb(pm_enter_resume, NULL, "syna_prot");
++
++	prot_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
++driver_init(prot_setup);
 diff --git a/core/arch/arm/plat-synaptics/driver/protor/prot_setup.h b/core/arch/arm/plat-synaptics/driver/protor/prot_setup.h
 new file mode 100644
 index 0000000..3af25ea
@@ -306371,10 +306044,10 @@ index 0000000..adbacfd
 +#endif /* _REG_FIREWALL_H_ */
 diff --git a/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_dolphin.c b/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_dolphin.c
 new file mode 100644
-index 0000000..4872826
+index 0000000..0c4f898
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_dolphin.c
-@@ -0,0 +1,266 @@
+@@ -0,0 +1,287 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -306395,6 +306068,7 @@ index 0000000..4872826
 +#include "szc_mst.h"
 +#include <mm/core_memprot.h>
 +#include <initcall.h>
++#include <kernel/pm.h>
 +
 +#define MEMMAP_SOC_REG_VA_BASE		(vaddr_t)phys_to_virt_io(MEMMAP_SOC_REG_BASE, MEMMAP_SOC_REG_SIZE)
 +#define CONFIG_RF_WINDOW_NUM 32
@@ -306613,7 +306287,7 @@ index 0000000..4872826
 +	return 0;
 +}
 +
-+static TEE_Result rf_setup(void)
++static TEE_Result rf_configure_setup(void)
 +{
 +	int i;
 +	const struct rf_window *rf_value;
@@ -306640,13 +306314,33 @@ index 0000000..4872826
 +	return TEE_SUCCESS;
 +}
 +
++static TEE_Result
++pm_enter_resume(enum pm_op op, uint32_t pm_hint __unused,
++		const struct pm_callback_handle *pm_handle __unused)
++{
++	DMSG("op = 0x%x.\n", op);
++	if (op == PM_OP_RESUME)
++		return rf_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
++static TEE_Result rf_setup(void)
++{
++	register_pm_driver_cb(pm_enter_resume, NULL, "syna_rf_dolphin");
++
++	rf_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
 +driver_init(rf_setup);
 diff --git a/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_myna2.c b/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_myna2.c
 new file mode 100644
-index 0000000..e0facce
+index 0000000..54b18d6
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_myna2.c
-@@ -0,0 +1,224 @@
+@@ -0,0 +1,245 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -306666,6 +306360,7 @@ index 0000000..e0facce
 +#include "tz_boot_cmd.h"
 +#include <mm/core_memprot.h>
 +#include <initcall.h>
++#include <kernel/pm.h>
 +
 +#define MEMMAP_SOC_REG_VA_BASE	(vaddr_t)phys_to_virt_io(MEMMAP_SOC_REG_BASE, MEMMAP_SOC_REG_SIZE)
 +#define CONFIG_RF_WINDOW_NUM 32
@@ -306848,7 +306543,7 @@ index 0000000..e0facce
 +	return 0;
 +}
 +
-+static TEE_Result rf_setup(void)
++static TEE_Result rf_configure_setup(void)
 +{
 +	int i;
 +	const struct rf_window *rf_value;
@@ -306870,13 +306565,33 @@ index 0000000..e0facce
 +	return TEE_SUCCESS;
 +}
 +
++static TEE_Result
++pm_enter_resume(enum pm_op op, uint32_t pm_hint __unused,
++		const struct pm_callback_handle *pm_handle __unused)
++{
++	DMSG("op = 0x%x.\n", op);
++	if (op == PM_OP_RESUME)
++		return rf_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
++static TEE_Result rf_setup(void)
++{
++	register_pm_driver_cb(pm_enter_resume, NULL, "syna_rf");
++
++	rf_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
 +driver_init(rf_setup);
 diff --git a/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_platypus.c b/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_platypus.c
 new file mode 100644
-index 0000000..f2801d6
+index 0000000..795b8db
 --- /dev/null
 +++ b/core/arch/arm/plat-synaptics/driver/regfirewall/rf_drv_platypus.c
-@@ -0,0 +1,249 @@
+@@ -0,0 +1,271 @@
 +// SPDX-License-Identifier: BSD-2-Clause
 +/*
 + * Copyright (c) 2024, Synaptics Incorporated.
@@ -306897,6 +306612,7 @@ index 0000000..f2801d6
 +#include "szc_mst.h"
 +#include <mm/core_memprot.h>
 +#include <initcall.h>
++#include <kernel/pm.h>
 +
 +#define MEMMAP_SOC_REG_VA_BASE		(vaddr_t)phys_to_virt_io(MEMMAP_SOC_REG_BASE, MEMMAP_SOC_REG_SIZE)
 +#define CONFIG_RF_WINDOW_NUM 48
@@ -307099,7 +306815,7 @@ index 0000000..f2801d6
 +	return 0;
 +}
 +
-+static TEE_Result rf_setup(void)
++static TEE_Result rf_configure_setup(void)
 +{
 +	int i;
 +	const struct rf_window *rf_value;
@@ -307125,6 +306841,27 @@ index 0000000..f2801d6
 +
 +	return TEE_SUCCESS;
 +}
++
++static TEE_Result
++pm_enter_resume(enum pm_op op, uint32_t pm_hint __unused,
++		const struct pm_callback_handle *pm_handle __unused)
++{
++	DMSG("op = 0x%x.\n", op);
++	if (op == PM_OP_RESUME)
++		return rf_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
++static TEE_Result rf_setup(void)
++{
++	register_pm_driver_cb(pm_enter_resume, NULL, "syna_rf_platypus");
++
++	rf_configure_setup();
++
++	return TEE_SUCCESS;
++}
++
 +driver_init(rf_setup);
 diff --git a/core/arch/arm/plat-synaptics/driver/regfirewall/rf_setup.c b/core/arch/arm/plat-synaptics/driver/regfirewall/rf_setup.c
 new file mode 100644
