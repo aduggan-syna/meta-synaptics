@@ -49,7 +49,7 @@ do_compile() {
 	unset CPPFLAGS
 
     oe_runmake -C ${S} BUILD_BASE=${B} DEBUG=0 CROSS_COMPILE=${TARGET_PREFIX} \
-        PLAT=${ATF_PLATFORM} TARGET_SOC=${ATF_SOC} SPD=opteed ${ATF_TARGET}
+        PLAT=${ATF_PLATFORM} TARGET_SOC=${ATF_SOC} SPD=opteed ${ATF_TARGET} SYNA_GENX=1
 }
 
 do_install:append() {
