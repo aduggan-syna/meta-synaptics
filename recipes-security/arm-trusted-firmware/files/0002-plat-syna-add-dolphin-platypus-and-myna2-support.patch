@@ -1,4 +1,4 @@
-From 7a49b5f37c4e23b63af8ecefb8ac87ef4039a7ca Mon Sep 17 00:00:00 2001
+From e5f90dc3f8ddee2cdabbb9f45031e4614d425a08 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 4 Sep 2024 13:18:24 +0800
 Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
@@ -8,7 +8,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 ---
  plat/syna/berlin/common/aarch64/berlin_helpers.S   |  186 +
  plat/syna/berlin/common/berlin_bl31_setup.c        |  402 +
- plat/syna/berlin/common/berlin_common.mk           |   43 +
+ plat/syna/berlin/common/berlin_common.mk           |   47 +
  plat/syna/berlin/common/berlin_pm.c                |  539 ++
  plat/syna/berlin/common/berlin_sip_svc.c           |   85 +
  plat/syna/berlin/common/berlin_stack_protector.c   |   25 +
@@ -43,7 +43,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../berlin/include/soc/dolphin/Galois_memmap.h     | 2186 +++++
  plat/syna/berlin/include/soc/dolphin/SysMgr.h      | 8534 ++++++++++++++++++++
  plat/syna/berlin/include/soc/dolphin/avpll_regs.h  |  100 +
- plat/syna/berlin/include/soc/dolphin/berlin_def.h  |  107 +
+ plat/syna/berlin/include/soc/dolphin/berlin_def.h  |  108 +
  plat/syna/berlin/include/soc/dolphin/clock_regs.h  |   32 +
  plat/syna/berlin/include/soc/dolphin/cpu_wrp.h     | 7559 +++++++++++++++++
  plat/syna/berlin/include/soc/dolphin/ctypes.h      |  126 +
@@ -59,7 +59,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  .../berlin/include/soc/platypus/Galois_memmap.h    | 2285 ++++++
  plat/syna/berlin/include/soc/platypus/SysMgr.h     | 8359 +++++++++++++++++++
  plat/syna/berlin/include/soc/platypus/avpll_regs.h |  100 +
- plat/syna/berlin/include/soc/platypus/berlin_def.h |  126 +
+ plat/syna/berlin/include/soc/platypus/berlin_def.h |  124 +
  plat/syna/berlin/include/soc/platypus/clock_regs.h |   27 +
  plat/syna/berlin/include/soc/platypus/cpu_wrp.h    | 7186 ++++++++++++++++
  plat/syna/berlin/include/soc/platypus/ctypes.h     |  126 +
@@ -100,7 +100,7 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/suspend/sha256_ce.S               |  156 +
  plat/syna/berlin/suspend/suspend.ld.S              |   83 +
  plat/syna/berlin/suspend/suspend_entrypoint.S      |   67 +
- 94 files changed, 53285 insertions(+)
+ 94 files changed, 53288 insertions(+)
  create mode 100644 plat/syna/berlin/common/aarch64/berlin_helpers.S
  create mode 100644 plat/syna/berlin/common/berlin_bl31_setup.c
  create mode 100644 plat/syna/berlin/common/berlin_common.mk
@@ -798,10 +798,10 @@ index 0000000..ae399bf
 +}
 diff --git a/plat/syna/berlin/common/berlin_common.mk b/plat/syna/berlin/common/berlin_common.mk
 new file mode 100644
-index 0000000..199c35e
+index 0000000..9ff7afb
 --- /dev/null
 +++ b/plat/syna/berlin/common/berlin_common.mk
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,47 @@
 +#
 +# Copyright (c) 2015-2020, ARM Limited and Contributors. All rights reserved.
 +# Copyright (c) 2024, Synaptics Corporation. All rights reserved.
@@ -819,6 +819,10 @@ index 0000000..199c35e
 +			${GICV2_SOURCES}				\
 +			plat/common/plat_gicv2.c		\
 +			plat/arm/common/arm_gicv2.c
++
++ifeq (${SYNA_GENX},1)
++$(eval $(call add_define,CONFIG_GENX))
++endif
 +
 +ifeq (${SYNA_MP},1)
 +$(eval $(call add_define,SYNA_MP))
@@ -14787,10 +14791,10 @@ index 0000000..a647cae
 +#endif
 diff --git a/plat/syna/berlin/include/soc/dolphin/berlin_def.h b/plat/syna/berlin/include/soc/dolphin/berlin_def.h
 new file mode 100644
-index 0000000..ec27625
+index 0000000..1345369
 --- /dev/null
 +++ b/plat/syna/berlin/include/soc/dolphin/berlin_def.h
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,108 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -14895,7 +14899,8 @@ index 0000000..ec27625
 +#define MAX_WAKEUP_IRQS			8
 +#define IRQ_TOTAL_IRQ			0x7A
 +#define IRQ_sm2socSwInt			0x13
-+#define CFG_SUSPEND_WAKEUP_INTR IRQ_sm2socSwInt
++//#define CFG_SUSPEND_WAKEUP_INTR IRQ_sm2socSwInt
++#define BCM_KERNEL_STORE_HASH		0x32
 +
 +#endif /* __BERLIN_DEF_H__ */
 diff --git a/plat/syna/berlin/include/soc/dolphin/clock_regs.h b/plat/syna/berlin/include/soc/dolphin/clock_regs.h
@@ -42003,10 +42008,10 @@ index 0000000..a647cae
 +#endif
 diff --git a/plat/syna/berlin/include/soc/platypus/berlin_def.h b/plat/syna/berlin/include/soc/platypus/berlin_def.h
 new file mode 100644
-index 0000000..1f2ec64
+index 0000000..ff5b990
 --- /dev/null
 +++ b/plat/syna/berlin/include/soc/platypus/berlin_def.h
-@@ -0,0 +1,126 @@
+@@ -0,0 +1,124 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -42125,8 +42130,6 @@ index 0000000..1f2ec64
 +#define CONFIG_GENX				1
 +#define MAX_WAKEUP_IRQS			8
 +#define IRQ_TOTAL_IRQ			0x7C
-+//IRQ_sm2socSwInt  0xD
-+#define CFG_SUSPEND_WAKEUP_INTR 0xD
 +
 +// Hash calculate
 +//#define BCM_CALCULATE_HASH		1
