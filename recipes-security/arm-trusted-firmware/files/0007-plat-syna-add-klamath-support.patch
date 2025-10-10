@@ -1,4 +1,4 @@
-From 1436f790b892d4b658adc1cf5de75d0203f8be4d Mon Sep 17 00:00:00 2001
+From 1a17b6e4a798841aecc5d137fdbea524e1635e7b Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Tue, 9 Sep 2025 09:58:49 +0800
 Subject: [PATCH] plat:syna: add klamath support
@@ -33,12 +33,12 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  plat/syna/berlin/soc/klamath/berlin_soc.mk         |    31 +
  plat/syna/berlin/soc/klamath/clock.c               |    94 +
  plat/syna/berlin/soc/klamath/mc.c                  |   202 +
- plat/syna/berlin/soc/klamath/plat_pm.c             |   299 +
+ plat/syna/berlin/soc/klamath/plat_pm.c             |   301 +
  plat/syna/berlin/soc/klamath/plat_setup.c          |    24 +
  plat/syna/berlin/soc/klamath/suspend.S             |    21 +
  plat/syna/berlin/soc/klamath/suspend.c             |   179 +
  plat/syna/berlin/suspend/berlin_suspend.mk         |     8 +
- 32 files changed, 68203 insertions(+), 3 deletions(-)
+ 32 files changed, 68205 insertions(+), 3 deletions(-)
  create mode 100644 plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
  create mode 100644 plat/syna/berlin/common/drivers/mailbox/sm_ipc.h
  create mode 100644 plat/syna/berlin/include/soc/klamath/berlin_def.h
@@ -69,10 +69,10 @@ Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
  create mode 100644 plat/syna/berlin/soc/klamath/suspend.c
 
 diff --git a/plat/syna/berlin/common/berlin_common.mk b/plat/syna/berlin/common/berlin_common.mk
-index 53458fa..2fb2dc0 100644
+index 9aeb30a..57f165a 100644
 --- a/plat/syna/berlin/common/berlin_common.mk
 +++ b/plat/syna/berlin/common/berlin_common.mk
-@@ -63,6 +63,8 @@ endif
+@@ -67,6 +67,8 @@ endif
  ifeq (${SYNA_IPC}, 1)
  BL31_SOURCES		+=	\
  				${COMMON_DIR}/drivers/mailbox/syna_ipc.c \
@@ -67923,10 +67923,10 @@ index 0000000..6f3cb94
 +}
 diff --git a/plat/syna/berlin/soc/klamath/plat_pm.c b/plat/syna/berlin/soc/klamath/plat_pm.c
 new file mode 100644
-index 0000000..a942bfd
+index 0000000..1333be3
 --- /dev/null
 +++ b/plat/syna/berlin/soc/klamath/plat_pm.c
-@@ -0,0 +1,299 @@
+@@ -0,0 +1,301 @@
 +/*
 + * Copyright (c) 2024, Synaptics Corporation. All rights reserved.
 + *
@@ -68129,6 +68129,8 @@ index 0000000..a942bfd
 +	mmio_write_32(START_PDMA_REG, 0xffffffff);
 +	mmio_write_32(START_CHIP_CTRL_REG + RA_Gbl_pdma_dst_req_mask, 0xffffffff);
 +	mmio_write_32(START_CHIP_CTRL_REG + RA_Gbl_pdma_src_req_mask, 0xffffffff);
++	// enable arm sse timer cntctrl
++	mmio_write_32(START_SYSCOUNT_CTRL_REG, 0x1);
 +}
 +
 +extern unsigned char *nagra_boot_p;
