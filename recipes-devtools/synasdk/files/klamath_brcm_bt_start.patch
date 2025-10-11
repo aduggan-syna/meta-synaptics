@@ -1,8 +1,23 @@
+From 505cc7913448a2da7e0a5a4b5ce0441bda6c99b4 Mon Sep 17 00:00:00 2001
+From: Rohit Tayal <Rohit.Tayal@synaptics.com>
+Date: Tue, 16 Sep 2025 05:12:36 -0700
+Subject: [PATCH] patch
+
+---
+ brcm_bt_start.service | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
 diff --git a/brcm_bt_start.service b/brcm_bt_start.service
-index 1379338..ead5553 100644
+index 1379338..b3e3465 100644
 --- a/brcm_bt_start.service
 +++ b/brcm_bt_start.service
-@@ -5,7 +5,7 @@ Before=bluetooth.service
+@@ -1,11 +1,13 @@
+ [Unit]
+ Description=brcm bt start
+ Before=bluetooth.service
++After=systemd-rfkill.service
++Requires=systemd-rfkill.service
+
  [Service]
  Type=oneshot
  ExecStartPre=/bin/sh -c 'rfkill unblock bluetooth'
