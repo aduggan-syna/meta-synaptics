@@ -68,11 +68,12 @@ do_compile:prepend() {
     spd_size="$(awk '/\<Secure\>/{print $3}' ${mr_file})"
 
     if [ -z "${spd_base}" ] || [ -z "${spd_size}" ]; then
-        EXTRA_OEMAKE="${EXTRA_OEMAKE} CFG_SECURE_DATA_PATH=n"
+        export CFG_SECURE_DATA_PATH="n"
     else
-        EXTRA_OEMAKE="${EXTRA_OEMAKE} CFG_SECURE_DATA_PATH=y CFG_TEE_SDP_MEM_BASE=${spd_base} CFG_TEE_SDP_MEM_SIZE=${spd_size}"
+        export CFG_SECURE_DATA_PATH="y"
+        export CFG_TEE_SDP_MEM_BASE="${spd_base}"
+        export CFG_TEE_SDP_MEM_SIZE="${spd_size}"
     fi
-    export EXTRA_OEMAKE
 }
 
 do_install:append() {
