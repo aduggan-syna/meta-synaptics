@@ -1,6 +1,7 @@
 require optee-syna.inc
 require recipes-devtools/synasdk/synasdk-config.inc
 
+SRC_URI:append: = "${SYNA_SRC_TEE}"
 SRC_URI:append:platypus = "${SYNA_SRC_TA_ENC}"
 SRC_URI:append:dolphin = "${SYNA_SRC_TA_ENC}"
 
@@ -25,6 +26,7 @@ DEPENDS:append:platypus = "synasdk-vpu-ta \
                            synasdk-gpu-ta"
 
 SYNA_TA_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/ta_enc"
+SYNA_TEE_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee"
 
 STAGING_NONARCH_BASELIBDIR = "${STAGING_DIR_HOST}/${nonarch_base_libdir}"
 
@@ -46,6 +48,32 @@ EARLY_TA_CFG:sl1680spi = ""
 EARLY_TA_CFG:sl1620spi = ""
 EARLY_TA_CFG:sl1640spi = ""
 EXTRA_OEMAKE += "${EARLY_TA_CFG}"
+
+do_compile:prepend() {
+    . ${CONFIG_FILE}
+    . ${CHIP_RC_FILE}
+
+    if [ "is${syna_chip_name}" == "isdolphin" ];then
+        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
+    else
+        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
+    fi
+    bbnote "MR file: ${mr_file}"
+
+    if [ ! -r "${mr_file}" ]; then
+        bbfatal "Missing or unreadable MR file: ${mr_file}"
+    fi
+
+    spd_base="$(awk '/\<Secure\>/{print $2}' ${mr_file})"
+    spd_size="$(awk '/\<Secure\>/{print $3}' ${mr_file})"
+
+    if [ -z "${spd_base}" ] || [ -z "${spd_size}" ]; then
+        EXTRA_OEMAKE="${EXTRA_OEMAKE} CFG_SECURE_DATA_PATH=n"
+    else
+        EXTRA_OEMAKE="${EXTRA_OEMAKE} CFG_SECURE_DATA_PATH=y CFG_TEE_SDP_MEM_BASE=${spd_base} CFG_TEE_SDP_MEM_SIZE=${spd_size}"
+    fi
+    export EXTRA_OEMAKE
+}
 
 do_install:append() {
     # Launch script to generate required configurations (ex. ${syna_chip_rev})

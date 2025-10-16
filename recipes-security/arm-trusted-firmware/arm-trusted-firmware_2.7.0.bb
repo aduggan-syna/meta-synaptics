@@ -29,6 +29,8 @@ DEPENDS:append = " \
     synasdk-tools-native \
     synasdk-security-native \
 "
+SRC_URI:append: = "${SYNA_SRC_TEE}"
+SYNA_TEE_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee"
 
 S = "${WORKDIR}/git"
 B = "${WORKDIR}/build"
@@ -42,6 +44,29 @@ ATF_SOC:myna2 = "myna2"
 ATF_SOC:platypus = "platypus"
 ATF_SOC:dolphin = "dolphin"
 ATF_SOC:klamath = "klamath"
+
+do_compile:prepend() {
+    . ${CONFIG_FILE}
+    . ${CHIP_RC_FILE}
+    def_file="${S}/plat/syna/${ATF_PLATFORM}/include/platform_def.h"
+    if [ "is${syna_chip_name}" == "isdolphin" ]; then
+        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
+    else
+        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
+    fi
+    bbnote "MR file: ${mr_file}"
+
+    if [ ! -r "${mr_file}" ]; then
+        bbfatal "Missing or unreadable MR file: ${mr_file}"
+    fi
+
+    bl33_base="$(awk '/bootloader/{print $2}' ${mr_file})"
+    sed "s/BL33_BASE[[:space:]]*0x[0-9a-fA-F]\+/BL33_BASE\t\t\t$bl33_base/g" -i ${def_file}
+
+    if [ "is${CONFIG_TEE_OS}" = "isn" ]; then
+        sed "s/BL32_BASE.*/BL32_BASE\t\t\t0/g" -i ${def_file}
+    fi
+}
 
 do_compile() {
 	unset LDFLAGS
