@@ -3,17 +3,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
 PATCHTOOL = "git"
 
 SRC_URI += " \
-    file://0001-allow-setting-sysroot-for-libgcc-lookup.patch \
-    file://0002-core-Define-section-attributes-for-clang.patch \
-    file://0003-optee-enable-clang-support.patch \
-    file://0004-core-link-add-no-warn-rwx-segments.patch \
-    file://0005-ta-pkcs11-disable-TA_FLAG_INSTANCE_KEEP_ALIVE.patch \
-    file://0006-lib-extend-newlib-apis.patch \
-    file://0007-plat-syna-add-dolphin-platypus-and-myna2-support.patch \
-    file://0008-libutee-add-syna-syscalls.patch \
-    file://0009-core-support-berlin-secure-and-non-secure-heap.patch \
-    file://0010-plat-syna-add-vpp-zone.patch \
-    file://0011-optee-klamath-bringup.patch \
+    file://astra-optee-os.patch \
 "
 OPTEEMACHINE = "synaptics"
 SYNA_CHIP:myna2 = "myna2"

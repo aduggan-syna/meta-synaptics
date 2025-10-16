@@ -14,14 +14,7 @@ SRCREV = "35f4c7295bafeb32c8bcbdfb6a3f2e74a57e732b"
 LIC_FILES_CHKSUM += "file://docs/license.rst;md5=b2c740efedc159745b9b31f88ff03dde"
 
 SRC_URI:append= " \
-            file://0001-genx-warm-boot-support.patch \
-            file://0002-plat-syna-add-dolphin-platypus-and-myna2-support.patch \
-            file://0003-berlin-pm-just-return-if-cpu-idle.patch \
-            file://0004-myna2-add-pvd-support-and-adjust-voltage-in-suspend-.patch \
-            file://0005-plat-syna-fix-build-error-with-gcc13.patch \
-            file://0005-syna-store-and-restore-all-SRAM-during-suspend-resum.patch \
-            file://0006-plat-syna-refine-code-structure.patch \
-            file://0007-plat-syna-add-klamath-support.patch \
+            file://astra-atf.patch \
         "
 
 require recipes-devtools/synasdk/synasdk-config.inc
