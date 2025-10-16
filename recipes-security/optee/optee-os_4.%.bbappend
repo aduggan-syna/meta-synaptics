@@ -1,7 +1,7 @@
 require optee-syna.inc
 require recipes-devtools/synasdk/synasdk-config.inc
 
-SRC_URI:append: = "${SYNA_SRC_TEE}"
+SRC_URI:append: = "${SYNA_SRC_TEE} "
 SRC_URI:append:platypus = "${SYNA_SRC_TA_ENC}"
 SRC_URI:append:dolphin = "${SYNA_SRC_TA_ENC}"
 
