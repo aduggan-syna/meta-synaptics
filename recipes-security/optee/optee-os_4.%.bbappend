@@ -5,8 +5,10 @@ SRC_URI:append: = "${SYNA_SRC_TEE} "
 SRC_URI:append:platypus = "${SYNA_SRC_TA_ENC}"
 SRC_URI:append:dolphin = "${SYNA_SRC_TA_ENC}"
 
+SRCREV_tee = "${SYNA_SRCREV_TEE}"
 SRCREV_taenc = "${SYNA_SRCREV_TA_ENC}"
 
+SRCREV_FORMAT = "tee"
 SRCREV_FORMAT = "taenc"
 
 DEPENDS:append = " \

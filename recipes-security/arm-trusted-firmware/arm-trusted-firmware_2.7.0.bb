@@ -23,6 +23,8 @@ DEPENDS:append = " \
     synasdk-security-native \
 "
 SRC_URI:append: = "${SYNA_SRC_TEE}"
+SRCREV_tee = "${SYNA_SRCREV_TEE}"
+SRCREV_FORMAT = "tee"
 SYNA_TEE_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee"
 
 S = "${WORKDIR}/git"
