@@ -151,6 +151,8 @@ IMAGE_INSTALL:append:klamath = " \
     ${TEE_OPTEE} \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
+    synasdk-v4l2isp-test \
+    synasdk-v4l2isp-qtapp \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
@@ -169,6 +171,8 @@ PLATYPUS_DOLPHIN_INSTALL = " \
 IMAGE_INSTALL:append:dolphin = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-v4l2isp-daemon \
+    synasdk-v4l2isp-test \
+    synasdk-v4l2isp-qtapp \
     synasdk-vpu-plugin \
 "
 

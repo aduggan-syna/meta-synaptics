@@ -10,7 +10,7 @@ SRCREV = "${SYNA_SRCREV_V4L2ISP}"
 
 PV = "git${SRCPV}"
 
-COMPATIBLE_MACHINE = "dolphin"
+COMPATIBLE_MACHINE = "klamath|dolphin"
 
 DEPENDS += "qtbase qtdeclarative qtmultimedia qtxmlpatterns libpng jpeg udev python3"
 RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
@@ -18,6 +18,12 @@ RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/v4l2isp/qt_camera_app"
 
 inherit qmake5
+
+EXTRA_QMAKEVARS_PRE += "${QMAKE_EXTRA_ARGS}"
+
+QMAKE_EXTRA_ARGS = ""
+QMAKE_EXTRA_ARGS:dolphin = "CONFIG+=DOLPHIN"
+QMAKE_EXTRA_ARGS:klamath = "CONFIG+=KLAMATH"
 
 FILES:${PN} = " \
     ${libdir}/*.so \
