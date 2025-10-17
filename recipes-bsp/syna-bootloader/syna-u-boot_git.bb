@@ -36,7 +36,6 @@ SRC_URI = " \
     ${SYNA_SRC_UBOOT} \
     ${SYNA_SRC_EXTERNAL} \
     ${SYNA_SRC_TEE} \
-    file://0001-Force-gcc-as-HOSTCC.patch \
 "
 
 SRCREV_uboot = "${SYNA_SRCREV_UBOOT}"
