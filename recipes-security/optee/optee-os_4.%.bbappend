@@ -55,10 +55,10 @@ do_compile:prepend() {
     . ${CONFIG_FILE}
     . ${CHIP_RC_FILE}
 
-    if [ "is${syna_chip_name}" == "isdolphin" ];then
-        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
-    else
+    if [ "is${syna_chip_name}" != "isdolphin" ];then
         mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
+    else
+        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
     fi
     bbnote "MR file: ${mr_file}"
 
