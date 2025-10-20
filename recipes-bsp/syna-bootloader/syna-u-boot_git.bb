@@ -56,6 +56,7 @@ do_compile () {
     if [ "null${SYNA_SDK_REVISION}" != "null" ]; then
         export LOCALVERSION=".${SYNA_SDK_REVISION}"
     fi
+    CONFIG_TOOLCHAIN_BSP=${HOST_PREFIX}
     clean=0 . build/module/uboot/build.sh "${CONFIG_FILE}"
 
     if [ $? -ne 0 ]; then
