@@ -1,4 +1,4 @@
-FILESEXTRAPATHS:prepend := "${THISDIR}/${BPN}:"
+FILESEXTRAPATHS:prepend := "${THISDIR}/optee-os:"
 require recipes-devtools/synasdk/synasdk-config.inc
 
 PATCHTOOL = "git"
