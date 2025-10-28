@@ -27,6 +27,7 @@ IMAGE_INSTALL:append:klamath = " \
     python3 \
     python3-numpy \
     python3-ensurepip \
+    python3-nanobind \
 "
 
 IMAGE_INSTALL:append = " \
