@@ -9,6 +9,7 @@ DEPENDS:append:myna2 = " mesa"
 DEPENDS:append:platypus = " mesa"
 DEPENDS:append:dolphin = " mesa"
 DEPENDS:append:klamath = " synasdk-gpu-mali"
+CXXFLAGS:append:klamath = " -DUSE_MALI_GPU"
 
 SRC_URI = "${SYNA_SRC_APPLICATION}"
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/syna-compositor"
