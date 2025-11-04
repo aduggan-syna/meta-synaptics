@@ -50,8 +50,16 @@ gen_preboot_subimg() {
     exit 1
   fi
 
-  fill_length=$(expr "${spi_boot_part_size}" - "${spi_vt_size}" - "${spi_header_size}" - "${f_len}")
-  dd if=/dev/zero bs="$fill_length" count=1 >> "${f_input}"
+  ### Check if PMIC config is included ###
+  expected_size_with_pmic=$(expr "${spi_boot_part_size}" - "${spi_vt_size}" - "${spi_header_size}")
+  if [ $f_len -lt $expected_size_with_pmic ]; then
+    echo "Warning: preboot_esmt.bin may be missing PMIC config (size: $f_len, expected: $expected_size_with_pmic)"
+  fi
+
+  fill_length=$(expr "${spi_boot_part_size}" - "${spi_vt_size}" - "${spi_header_size}" - "${f_len}") || true
+  if [ $fill_length -gt 0 ]; then
+    dd if=/dev/zero bs="$fill_length" count=1 >> "${f_input}"
+  fi
 
   ### Append version table ###
   cat "${DEPLOY_DIR_IMAGE}/version_table" >> "${f_input}"
@@ -63,7 +71,9 @@ gen_preboot_subimg() {
   fi
 
   fill_length=$(expr "${spi_boot_part_size}" - "${spi_header_size}" - "${f_len}")
-  dd if=/dev/zero bs="$fill_length" count=1 >> "${f_input}"
+  if [ $fill_length -gt 0 ]; then
+    dd if=/dev/zero bs="$fill_length" count=1 >> "${f_input}"
+  fi
 }
 
 genx_spi_suboot_combo() {
