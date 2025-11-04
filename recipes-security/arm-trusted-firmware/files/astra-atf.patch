@@ -125052,3 +125052,158 @@ index f6d4cb5..c7ac7a2 100644
 -- 
 2.7.4
 
+
+From 39dd2d6e4699ef6f3665556fd9b0bfddb3c1a558 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Sat, 4 Oct 2025 21:10:24 +0800
+Subject: [PATCH] klamath: add warm boot flag
+
+Change-Id: Ied2b1be27500e5a7068b2f9cc479d32e70f140c2
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ bl31/aarch64/bl31_entrypoint.S                    |  6 ++++
+ plat/syna/berlin/common/berlin_bl31_setup.c       |  2 +-
+ plat/syna/berlin/include/berlin_private.h         |  2 ++
+ plat/syna/berlin/include/soc/klamath/berlin_def.h |  4 ---
+ plat/syna/berlin/soc/klamath/plat_pm.c            | 43 +++++++----------------
+ 5 files changed, 21 insertions(+), 36 deletions(-)
+
+diff --git a/bl31/aarch64/bl31_entrypoint.S b/bl31/aarch64/bl31_entrypoint.S
+index 8e2c35f..c7eb9fc 100644
+--- a/bl31/aarch64/bl31_entrypoint.S
++++ b/bl31/aarch64/bl31_entrypoint.S
+@@ -29,6 +29,12 @@ func bl31_entrypoint
+ 	and w22, w22, #0x1
+ 	cmp w22, #1
+ 	beq bl31_warm_entrypoint
++#else
++	ldr x0, =boot_mode
++	ldr w22, [x0]
++	cmp w22, #1
++	beq bl31_warm_entrypoint
++1:
+ #endif
+ 	/* ---------------------------------------------------------------
+ 	 * Stash the previous bootloader arguments x0 - x3 for later use.
+diff --git a/plat/syna/berlin/common/berlin_bl31_setup.c b/plat/syna/berlin/common/berlin_bl31_setup.c
+index 95c7b9c..abde8e1 100644
+--- a/plat/syna/berlin/common/berlin_bl31_setup.c
++++ b/plat/syna/berlin/common/berlin_bl31_setup.c
+@@ -131,7 +131,7 @@ static entry_point_info_t bl33_image_ep_info;
+ 
+ static unsigned char nagra_boot_params[MAX_SECURE_BOOT_PARA_SIZE];
+ unsigned char *nagra_boot_p = NULL;
+-static unsigned int boot_mode = NORMAL_BOOT;
++unsigned int boot_mode = NORMAL_BOOT;
+ static uint64_t nw_entry_addr;
+ 
+ /*******************************************************************************
+diff --git a/plat/syna/berlin/include/berlin_private.h b/plat/syna/berlin/include/berlin_private.h
+index 8cfa61b..e3b25e8 100644
+--- a/plat/syna/berlin/include/berlin_private.h
++++ b/plat/syna/berlin/include/berlin_private.h
+@@ -26,6 +26,8 @@ enum {
+ 	GENX = 0x100
+ };
+ 
++extern unsigned int boot_mode;
++
+ void berlin_context_resume(void);
+ void berlin_init(void);
+ void berlin_cpu_standby(plat_local_state_t cpu_state);
+diff --git a/plat/syna/berlin/include/soc/klamath/berlin_def.h b/plat/syna/berlin/include/soc/klamath/berlin_def.h
+index f90ebb4..22d7f3c 100644
+--- a/plat/syna/berlin/include/soc/klamath/berlin_def.h
++++ b/plat/syna/berlin/include/soc/klamath/berlin_def.h
+@@ -108,10 +108,6 @@
+ #define CONFIG_GENX				1
+ #define MAX_WAKEUP_IRQS 8
+ #define IRQ_TOTAL_IRQ 0x6D
+-// IRQ_gethIntr: 0x6B
+-#define CFG_SUSPEND_WAKEUP_INTR 0x6B
+-#define CFG_UART_WAKEUP_INTR 19
+-
+ // Hash calculate
+ //#define BCM_CALCULATE_HASH		1
+ #define BCM_KERNEL_STORE_HASH		0x32
+diff --git a/plat/syna/berlin/soc/klamath/plat_pm.c b/plat/syna/berlin/soc/klamath/plat_pm.c
+index 1333be3..37a1323 100644
+--- a/plat/syna/berlin/soc/klamath/plat_pm.c
++++ b/plat/syna/berlin/soc/klamath/plat_pm.c
+@@ -39,7 +39,6 @@ int berlin_set_wakeup_sources(u_register_t x1, u_register_t x2, u_register_t x3,
+ #define nCPU_ISO_MODE_EN       6
+ 
+ #define MEMMAP_CA7_REG_BASE START_ACPU_REG
+-
+ #define CPU_PCH(n)      (*(volatile unsigned int*)((uintptr_t)(MEMMAP_CA7_REG_BASE + RA_CPU_REG_CPU0 + (n)*(RA_CPU_REG_CPU1-RA_CPU_REG_CPU0))))
+ /*
+  void arm_set_PWRCTLR(unsigned int value);
+@@ -204,31 +203,9 @@ void berlin_soc_init(void)
+ 	mmio_write_32(START_SYSCOUNT_CTRL_REG, 0x1);
+ }
+ 
+-extern unsigned char *nagra_boot_p;
+-extern unsigned int suspend_entry[];
+-extern unsigned int suspend_size;
+-static unsigned char sram_backup[SRAM_BACKUP_SIZE];
+-
+-typedef void (*suspend_handler_t)(unsigned long, unsigned int, void *);
+-
+-
+ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ 				unsigned int power_state)
+ {
+-	suspend_handler_t suspend_func;
+-
+-	assert(suspend_size <= SRAM_BACKUP_SIZE);
+-	/* Save the MPT sram to ddr */
+-	memcpy(sram_backup, (void *)SUSPEND_SRAM_BASE, SRAM_BACKUP_SIZE);
+-
+-	/*
+-	 * Copy code to SRAM, and jump to it later
+-	 */
+-	memcpy((void *)SUSPEND_SRAM_BASE,
+-		(const void *)suspend_entry, suspend_size);
+-
+-	flush_dcache_range(SUSPEND_SRAM_BASE, suspend_size);
+-
+ 	/*
+ 	 * disable the mmu before jump to sram entry, or, it will lead
+ 	 * to a permission fault when execute in SRAM, because of WXN and XN
+@@ -236,21 +213,25 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ 	 */
+ 	disable_mmu_el3();
+ 	arm_set_PWRCTLR(0);
+-
++	/*
++	 * Mark warm boot for BL31: store a flag in retention memory so that
++	 * bl31_entrypoint can detect warm resume and jump to bl31_warm_entrypoint.
++	 * Do this before disabling MMU and perform cache maintenance afterwards
++	 * to ensure visibility.
++	 */
++	boot_mode = WARM_BOOT;
++	INFO("boot mode: 0x%x.\n", boot_mode);
+ 	/* Flush all caches. */
+ 	dcsw_op_all(DCCISW);
++	sm_system_warmdown(power_state);
++	// should not return here
++	while(1);
+ 
+-	/* Jump to SRAM base */
+-	suspend_func = (suspend_handler_t)SUSPEND_SRAM_BASE;
+-	suspend_func(sec_entrypoint, power_state, nagra_boot_p);
+ }
+ 
+ void berlin_resume_from_sram(void)
+ {
+-	/* Restore the sram from ddr */
+-
+-	memcpy((void *)SUSPEND_SRAM_BASE, sram_backup, SRAM_BACKUP_SIZE);
+-
++	boot_mode = NORMAL_BOOT;
+ }
+ 
+ void berlin_get_sys_suspend_power_state(psci_power_state_t *req_state)
+-- 
+2.7.4
+
