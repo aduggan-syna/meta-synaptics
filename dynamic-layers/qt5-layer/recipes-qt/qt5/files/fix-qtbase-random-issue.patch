@@ -1,0 +1,17 @@
+diff --git a/examples/dbus/pingpong/pingpong.pro b/examples/dbus/pingpong/pingpong.pro
+index 654574c76d4..a0a2b99bb24 100644
+--- a/examples/dbus/pingpong/pingpong.pro
++++ b/examples/dbus/pingpong/pingpong.pro
+@@ -1,3 +1,4 @@
+ TEMPLATE = subdirs
+ win32:CONFIG += console
+ SUBDIRS = ping.pro pong.pro
++pong.depends = ping
+diff --git a/tests/auto/corelib/io/qresourceengine/qresourceengine.pro b/tests/auto/corelib/io/qresourceengine/qresourceengine.pro
+index 1e12a41dead..ed3b50c18b3 100644
+--- a/tests/auto/corelib/io/qresourceengine/qresourceengine.pro
++++ b/tests/auto/corelib/io/qresourceengine/qresourceengine.pro
+@@ -1,2 +1,3 @@
+ TEMPLATE = subdirs
+ SUBDIRS = staticplugin qresourceengine_test.pro
++qresourceengine_test.depends = staticplugin
