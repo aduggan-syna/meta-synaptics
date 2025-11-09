@@ -176,6 +176,11 @@ IMAGE_INSTALL:append:platypus = " \
     synasdk-vpu-plugin \
 "
 
+IMAGE_INSTALL:append:klamath = " \
+    torq-kernel-module \
+    torq-runtime \
+"
+
 TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-framework-staticdev kernel-devsrc"
 
 mount_usb () {
