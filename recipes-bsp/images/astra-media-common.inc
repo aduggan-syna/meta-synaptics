@@ -119,6 +119,7 @@ IMAGE_INSTALL:append:klamath = " \
 "
 
 IMAGE_INSTALL:append:sl2619 = " \
+    ${TORQ_PACKAGES} \
     ${GPU_RELATED_PACKAGES} \
     ${NPU_RELATED_PACKAGES} \
 "
@@ -148,7 +149,7 @@ IMAGE_INSTALL:append:platypus = " \
     synasdk-vpu-plugin \
 "
 
-TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-framework-staticdev kernel-devsrc"
+TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-runtime-staticdev kernel-devsrc"
 
 mount_usb () {
     cat >> ${IMAGE_ROOTFS}/etc/fstab <<EOF

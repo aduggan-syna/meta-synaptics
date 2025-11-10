@@ -11,7 +11,7 @@ S = "${WORKDIR}/git"
 
 inherit cmake
 
-DEPENDS = "synasdk-synap-prebuilts synasdk-synap-framework"
+DEPENDS = "synasdk-synap-prebuilts synasdk-synap-runtime"
 
 EXTRA_OECMAKE = "\
   -DCMAKE_BUILD_TYPE=Release \

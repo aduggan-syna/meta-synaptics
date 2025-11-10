@@ -46,7 +46,12 @@ GPU_RELATED_PACKAGES = " \
 NPU_RELATED_PACKAGES = " \
     tensorflow-lite \
     synasdk-synap-models \
-    synasdk-synap-framework \
+    synasdk-synap-runtime \
+"
+
+TORQ_PACKAGES = " \
+    torq-kernel-module \
+    torq-runtime \
 "
 
 IMAGE_INSTALL:append:sl2615 = " \
@@ -54,6 +59,7 @@ IMAGE_INSTALL:append:sl2615 = " \
 "
 
 IMAGE_INSTALL:append:sl2615 = " \
+    ${@bb.utils.contains('SYNA_NPU_ENABLE', '1', '${TORQ_PACKAGES}', '', d)} \
     ${@bb.utils.contains('SYNA_NPU_ENABLE', '1', '${NPU_RELATED_PACKAGES}', '', d)} \
 "
 
@@ -64,7 +70,7 @@ IMAGE_INSTALL:remove:sl2611 = " \
     synasdk-v4l2isp-qtapp \
 "
 
-TOOLCHAIN_TARGET_TASK:sl2611:remove = "synasdk-synap-framework-staticdev"
+TOOLCHAIN_TARGET_TASK:sl2611:remove = "synasdk-synap-runtime-staticdev"
 TOOLCHAIN_TARGET_TASK:sl2615:remove = " \
-    ${@bb.utils.contains('SYNA_NPU_ENABLE', '0', 'synasdk-synap-framework-staticdev', '', d)} \
+    ${@bb.utils.contains('SYNA_NPU_ENABLE', '0', 'synasdk-synap-runtime-staticdev', '', d)} \
 "

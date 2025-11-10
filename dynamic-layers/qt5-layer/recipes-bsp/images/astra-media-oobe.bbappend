@@ -16,7 +16,7 @@ IMAGE_INSTALL:append:platypus = " \
     nnstreamer \
 "
 
-IMAGE_INSTALL:append:klamath = " \
+IMAGE_INSTALL:append:sl2619 = " \
     synasdk-torq-demo \
 "
 
