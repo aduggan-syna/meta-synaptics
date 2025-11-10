@@ -6,11 +6,18 @@ LICENSE_FLAGS = "Synaptics-EULA"
 
 require recipes-multimedia/gstreamer/gstreamer1.0-plugins-common.inc
 
-DEPENDS += "gstreamer1.0-plugins-base synasdk-synap-framework synasdk-syna-compositor json-glib opencv"
+inherit meson pkgconfig
+COMMON_DEPS = "gstreamer1.0-plugins-base synasdk-syna-compositor json-glib opencv"
+
+DEPENDS:append:platypus = " ${COMMON_DEPS} synasdk-synap-framework"
+DEPENDS:append:dolphin  = " ${COMMON_DEPS} synasdk-synap-framework"
+DEPENDS:append:myna2    = " ${COMMON_DEPS} synasdk-synap-framework"
+DEPENDS:append:klamath  = " ${COMMON_DEPS} synasdk-synap-runtime"
 
 EXTRA_OEMESON += " \
    -Dexamples=enabled \
 "
+EXTRA_OEMESON:klamath += " -Dsynap_dep=synap-runtime"
 
 SRC_URI = "${SYNA_SRC_GSTREAMER} \
            file://ic.json \
