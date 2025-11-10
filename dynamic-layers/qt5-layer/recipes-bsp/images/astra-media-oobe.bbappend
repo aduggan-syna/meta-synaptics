@@ -15,3 +15,11 @@ IMAGE_INSTALL:append:dolphin = " \
 IMAGE_INSTALL:append:platypus = " \
     nnstreamer \
 "
+
+IMAGE_INSTALL:append:klamath = " \
+    synasdk-torq-demo \
+"
+
+IMAGE_INSTALL:append:sl2615 = " \
+    ${@bb.utils.contains('SYNA_NPU_ENABLE', '1', ' synasdk-torq-demo', '', d)} \
+"
