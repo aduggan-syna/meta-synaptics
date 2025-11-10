@@ -68,8 +68,6 @@ IMAGE_INSTALL:append = " \
     synasdk-syna-settings-framework \
     synasdk-syna-compositor \
     tensorflow-lite \
-    synasdk-synap-models \
-    synasdk-synap-framework \
     "
 
 IMAGE_INSTALL:append = " \
@@ -159,6 +157,8 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
     synasdk-synap-module \
+    synasdk-synap-models \
+    synasdk-synap-framework \
     tim-vx \
     tflite-vx-delegate \
     libdrm-tests \
@@ -176,12 +176,20 @@ IMAGE_INSTALL:append:platypus = " \
     synasdk-vpu-plugin \
 "
 
+IMAGE_INSTALL:append:myna2 = " \
+    synasdk-synap-models \
+    synasdk-synap-framework \
+"
+
 IMAGE_INSTALL:append:klamath = " \
     torq-kernel-module \
     torq-runtime \
+    synasdk-synap-runtime \
 "
 
-TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-framework-staticdev kernel-devsrc"
+SYNAP_SDK_PKG ?= "synasdk-synap-framework-staticdev"
+SYNAP_SDK_PKG:klamath = "synasdk-synap-runtime-staticdev"
+TOOLCHAIN_TARGET_TASK:append = " ${SYNAP_SDK_PKG} kernel-devsrc"
 
 mount_usb () {
     cat >> ${IMAGE_ROOTFS}/etc/fstab <<EOF
