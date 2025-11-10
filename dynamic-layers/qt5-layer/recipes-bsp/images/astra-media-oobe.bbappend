@@ -15,3 +15,7 @@ IMAGE_INSTALL:append:dolphin = " \
 IMAGE_INSTALL:append:platypus = " \
     nnstreamer \
 "
+
+IMAGE_INSTALL:append:klamath = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' synasdk-torq-demo', '', d)} \
+"
