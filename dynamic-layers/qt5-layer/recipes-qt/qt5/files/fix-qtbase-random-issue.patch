@@ -1,12 +1,41 @@
+diff --git a/examples/dbus/pingpong/ping.pro b/examples/dbus/pingpong/ping.pro
+index 1c75c8a47f6..cb79e19c4b1 100644
+--- a/examples/dbus/pingpong/ping.pro
++++ b/examples/dbus/pingpong/ping.pro
+@@ -1,7 +1,6 @@
+ QT -= gui
+ QT += dbus
+
+-HEADERS += ping-common.h
+ SOURCES += ping.cpp
+
+ target.path = $$[QT_INSTALL_EXAMPLES]/dbus/pingpong
 diff --git a/examples/dbus/pingpong/pingpong.pro b/examples/dbus/pingpong/pingpong.pro
-index 654574c76d4..a0a2b99bb24 100644
+index 654574c76d4..7da1a985aad 100644
 --- a/examples/dbus/pingpong/pingpong.pro
 +++ b/examples/dbus/pingpong/pingpong.pro
-@@ -1,3 +1,4 @@
+@@ -1,3 +1,8 @@
  TEMPLATE = subdirs
  win32:CONFIG += console
  SUBDIRS = ping.pro pong.pro
++headers.files = ping-common.h
++headers.path = $$[QT_INSTALL_EXAMPLES]/dbus/pingpong
++INSTALLS += headers
++ping.depends = headers
 +pong.depends = ping
+diff --git a/examples/dbus/pingpong/pong.pro b/examples/dbus/pingpong/pong.pro
+index bc787305344..fc8c7ad911a 100644
+--- a/examples/dbus/pingpong/pong.pro
++++ b/examples/dbus/pingpong/pong.pro
+@@ -1,7 +1,7 @@
+ QT -= gui
+ QT += dbus
+
+-HEADERS += ping-common.h pong.h
++HEADERS += pong.h
+ SOURCES += pong.cpp
+
+ target.path = $$[QT_INSTALL_EXAMPLES]/dbus/pingpong
 diff --git a/tests/auto/corelib/io/qresourceengine/qresourceengine.pro b/tests/auto/corelib/io/qresourceengine/qresourceengine.pro
 index 1e12a41dead..ed3b50c18b3 100644
 --- a/tests/auto/corelib/io/qresourceengine/qresourceengine.pro
