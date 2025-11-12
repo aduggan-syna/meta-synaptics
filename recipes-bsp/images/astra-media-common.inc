@@ -85,6 +85,10 @@ IMAGE_INSTALL:append = " \
 
 IMAGE_INSTALL:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'selinux', ' packagegroup-core-selinux', '', d)}"
 
+IMAGE_INSTALL:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'aws-misdk', 'packagegroup-aws-misdk', '', d)}"
+TOOLCHAIN_TARGET_TASK:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'aws-misdk', 'packagegroup-aws-misdk-dev', '', d)}"
+SDKIMAGE_FEATURES:append = "${@bb.utils.contains('DISTRO_FEATURES', 'aws-misdk', ' dev-pkgs staticdev-pkgs', '', d)}"
+
 # install xfce desktop for X backend in 1680
 IMAGE_INSTALL:append:dolphin = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'x11', '${XORG_XFCE}', '${WAYLAND_PACKAGES}', d)} \
