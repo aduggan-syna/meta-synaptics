@@ -5,7 +5,6 @@ IMAGE_INSTALL:append = " \
     synasdk-qtrenderingserver \
     qtbase-examples qtdeclarative-examples \
     synasdk-syna-settings \
-    gstreamer1.0-plugins-syna \
 "
 
 IMAGE_INSTALL:append = " \

@@ -1,3 +1,5 @@
+require astra-media-common-ips.inc
+
 IMAGE_FEATURES:append = " debug-tweaks package-management ssh-server-dropbear"
 
 IMAGE_FEATURES:append = " \
@@ -67,10 +69,6 @@ IMAGE_INSTALL:append = " \
     synasdk-macaddr \
     syna-mount-generator \
     synasdk-syna-settings-framework \
-    synasdk-syna-compositor \
-    tensorflow-lite \
-    synasdk-synap-models \
-    synasdk-synap-framework \
     "
 
 IMAGE_INSTALL:append = " \
@@ -103,7 +101,6 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-bad-mpegtsdemux \
     gstreamer1.0-plugins-bad-videoparsersbad \
     gstreamer1.0-plugins-bad-kms \
-    gstreamer1.0-plugins-syna \
     gstreamer1.0-meta-debug \
     gstreamer1.0-libav \
     gstreamer1.0-rtsp-server \
@@ -144,6 +141,8 @@ IMAGE_INSTALL:append:klamath = " \
 
 IMAGE_INSTALL:append:myna2 = " \
     ${TEE_OPTEE} \
+    ${GPU_RELATED_PACKAGES} \
+    ${NPU_RELATED_PACKAGES} \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
 "
@@ -156,6 +155,8 @@ IMAGE_INSTALL:append:klamath = " \
 
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
+    ${GPU_RELATED_PACKAGES} \
+    ${NPU_RELATED_PACKAGES} \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
     synasdk-synap-module \
