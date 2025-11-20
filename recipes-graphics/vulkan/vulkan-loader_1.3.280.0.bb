@@ -35,6 +35,9 @@ PACKAGECONFIG ??= "${@bb.utils.filter('DISTRO_FEATURES', 'wayland x11', d)}"
 PACKAGECONFIG[x11] = "-DBUILD_WSI_XLIB_SUPPORT=ON -DBUILD_WSI_XCB_SUPPORT=ON, -DBUILD_WSI_XLIB_SUPPORT=OFF -DBUILD_WSI_XCB_SUPPORT=OFF, libxcb libx11 libxrandr"
 PACKAGECONFIG[wayland] = "-DBUILD_WSI_WAYLAND_SUPPORT=ON, -DBUILD_WSI_WAYLAND_SUPPORT=OFF, wayland"
 
-RRECOMMENDS:${PN} = "mesa-vulkan-drivers"
+RRECOMMENDS:${PN}:myna2 = "mesa-vulkan-drivers"
+RRECOMMENDS:${PN}:platypus = "mesa-vulkan-drivers"
+RRECOMMENDS:${PN}:dolphin = "mesa-vulkan-drivers"
+RRECOMMENDS:${PN}:klamath = "synasdk-gpu-mali"
 
 UPSTREAM_CHECK_GITTAGREGEX = "sdk-(?P<pver>\d+(\.\d+)+)"

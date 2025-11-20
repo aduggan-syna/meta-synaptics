@@ -60,6 +60,7 @@ IMAGE_INSTALL:append = " \
     i2c-tools \
     v4l-utils \
     alsa-utils \
+    vulkan-loader \
     synasdk-demos \
     synasdk-bootctrl \
     synasdk-sysctl-conf \
