@@ -97,25 +97,6 @@ done
 # BUILDIR is either set from command line, or needs to be set to build-$MACHINE
 if [ -z "$_BUILDDIR" ]; then
     _BUILDDIR=build-$MACHINE
-    if [ $MACHINE = "sl2615" ] || [ $MACHINE = "sl2611" ]; then
-        _RESPONSE=
-        while [ -z "$_RESPONSE" ]; do
-            echo -e "\nsl2611, sl2615 are coming soon!\n"
-            echo -n "Do you want to build sl2619 instead? (y/n) "
-            read _RESPONSE
-                case "$_RESPONSE" in
-                    y|Y)
-                        MACHINE="sl2619"
-                        _BUILDDIR=build-$MACHINE
-                    ;;
-                    *)
-                        unset _BUILDDIR MACHINE
-                        return 0
-                    ;;
-                esac
-        done
-        unset _RESPONSE
-    fi
     # check if this build-$MACHINE folder was already configured
     if [ -f ${_BUILDDIR}/conf/local.conf ] && \
         [ -f ${_BUILDDIR}/conf/bblayers.conf ]
