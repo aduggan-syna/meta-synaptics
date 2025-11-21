@@ -152,6 +152,7 @@ KERNEL_MODULE_AUTOLOAD:append = " \
     amp_bm \
     vpu \
     rpi-panel-attiny-regulator \
+    edt-ft5x06 \
     panel-waveshare-dsi \
     syna_drm \
     pvrsrvkm \
@@ -172,6 +173,7 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
 
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
 KERNEL_MODULE_PROBECONF:append = "rpi-panel-attiny-regulator "
+KERNEL_MODULE_PROBECONF:append = "edt-ft5x06 "
 KERNEL_MODULE_PROBECONF:append = "panel-waveshare-dsi "
 KERNEL_MODULE_PROBECONF:append = "amp_bm "
 KERNEL_MODULE_PROBECONF:append = "pvrsrvkm "
