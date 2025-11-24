@@ -1,0 +1,16 @@
+
+Upstream-Status: Inappropriate [ astra specific ]
+
+diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
+index faf3bdf..22dd07e 100644
+--- a/libweston/renderer-gl/gl-renderer.c
++++ b/libweston/renderer-gl/gl-renderer.c
+@@ -2847,6 +2847,8 @@ choose_texture_target(struct gl_renderer *gr,
+ 	case DRM_FORMAT_VYUY:
+ 	case DRM_FORMAT_AYUV:
+ 	case DRM_FORMAT_XYUV8888:
++        case DRM_FORMAT_NV12:
++        case DRM_FORMAT_NV21:
+ 		return GL_TEXTURE_EXTERNAL_OES;
+ 	default:
+ 		return GL_TEXTURE_2D;

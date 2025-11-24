@@ -8,6 +8,7 @@ SRC_URI += "file://0007-enable-triple-buffer.patch"
 #SRC_URI += "file://0008-xdgwindow-select-display.patch"
 SRC_URI += "file://0009-update-drm-planes-on-disconnect.patch"
 #SRC_URI += "file://0010-enable-leaseout-drm-resources.patch"
+SRC_URI += "file://0011-set-nv12-import-ext-texture.patch"
 
 PACKAGECONFIG:append:class-target = " wl_shell"
 #PACKAGECONFIG[wl_shell] = "-Ddeprecated-wl-shell=true,-Ddeprecated-wl-shell=false"
