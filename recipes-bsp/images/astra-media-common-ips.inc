@@ -1,4 +1,4 @@
-GPU_GST_PACAKGES = " \
+GPU_GST_PACKAGES = " \
     gstreamer1.0-meta-base \
     gstreamer1.0-meta-video \
     gstreamer1.0-plugins-base-app \
@@ -32,21 +32,33 @@ GPU_GST_PACAKGES = " \
     gstreamer1.0-libav \
     gstreamer1.0-rtsp-server \
 "
+SYNA_GST_PLUGINS = "\
+    gstreamer1.0-plugins-syna-videoconvertscale \
+    gstreamer1.0-plugins-syna-compositor \
+    gstreamer1.0-plugins-syna-synap \
+"
+PACKAGES =+ "${SYNA_GST_PLUGINS} ${PN}-dev ${PN}-dbg"
+
+FILES:gstreamer1.0-plugins-syna-videoconvertscale = "${libdir}/gstreamer-1.0/libgstsynavideoconvertscale.so"
+FILES:gstreamer1.0-plugins-syna-compositor        = "${libdir}/gstreamer-1.0/libgstsynacompositor.so"
+FILES:gstreamer1.0-plugins-syna-synap             = "${libdir}/gstreamer-1.0/libgstsynap.so"
 
 GPU_RELATED_PACKAGES = " \
     synasdk-syna-compositor \
-    gstreamer1.0-plugins-syna \
     vulkan-loader \
     synasdk-demos \
     opencv \
     glmark2 \
-    ${GPU_GST_PACAKGES} \
+    ${GPU_GST_PACKAGES} \
+    gstreamer1.0-plugins-syna-videoconvertscale \
+    gstreamer1.0-plugins-syna-compositor \
 "
 
 NPU_RELATED_PACKAGES = " \
     tensorflow-lite \
     synasdk-synap-models \
     synasdk-synap-runtime \
+    gstreamer1.0-plugins-syna-synap \
 "
 
 TORQ_PACKAGES = " \
@@ -56,11 +68,7 @@ TORQ_PACKAGES = " \
 
 IMAGE_INSTALL:append:sl2615 = " \
     ${GPU_RELATED_PACKAGES} \
-"
-
-IMAGE_INSTALL:append:sl2615 = " \
-    ${@bb.utils.contains('SYNA_NPU_ENABLE', '1', '${TORQ_PACKAGES}', '', d)} \
-    ${@bb.utils.contains('SYNA_NPU_ENABLE', '1', '${NPU_RELATED_PACKAGES}', '', d)} \
+    ${@bb.utils.contains('SYNA_NPU_ENABLE', '1', '${TORQ_PACKAGES} ${NPU_RELATED_PACKAGES}', '', d)} \
 "
 
 IMAGE_INSTALL:remove:sl2611 = " \

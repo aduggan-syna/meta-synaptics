@@ -26,6 +26,16 @@ PV = "1.22.12+git${SRCPV}"
 
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/gstreamer-plugins-syna"
 
+PACKAGES =+ "\
+    gstreamer1.0-plugins-syna-videoconvertscale \
+    gstreamer1.0-plugins-syna-compositor \
+    gstreamer1.0-plugins-syna-synap \
+"
+
+FILES:gstreamer1.0-plugins-syna-videoconvertscale = "${libdir}/gstreamer-1.0/libgstsynavideoconvertscale.so"
+FILES:gstreamer1.0-plugins-syna-compositor        = "${libdir}/gstreamer-1.0/libgstsynacompositor.so"
+FILES:gstreamer1.0-plugins-syna-synap             = "${libdir}/gstreamer-1.0/libgstsynap.so"
+
 FILES:${PN} = "${datadir}/gst-ai"
 do_install:append() {
         install -m 0755 -D ${WORKDIR}/ic.json ${D}${datadir}/gst-ai/ic.json
