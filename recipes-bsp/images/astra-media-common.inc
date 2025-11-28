@@ -116,6 +116,7 @@ IMAGE_INSTALL:append = " \
     iptables \
     protobuf \
     opencv \
+    libdrm-tests \
     "
 
 IMAGE_INSTALL:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'selinux', ' packagegroup-core-selinux', '', d)}"
@@ -164,7 +165,6 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     synasdk-synap-module \
     tim-vx \
     tflite-vx-delegate \
-    libdrm-tests \
     pciutils \
 "
 
