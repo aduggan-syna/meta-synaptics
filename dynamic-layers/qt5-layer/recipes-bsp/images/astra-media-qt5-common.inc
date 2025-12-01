@@ -1,5 +1,5 @@
 # Adding QT packages
-IMAGE_INSTALL:append = " \
+QT_PACKAGES = " \
     qtbase qtdeclarative qtquickcontrols2 qtquickcontrols \
     qt3d qtquick3d qtmultimedia \
     synasdk-qtrenderingserver \
@@ -7,8 +7,13 @@ IMAGE_INSTALL:append = " \
     synasdk-syna-settings \
 "
 
-IMAGE_INSTALL:append = " \
+SYNA_PLAYER_PACKAGES = " \
     synasdk-syna-player-framework synasdk-syna-video-player synasdk-syna-capability-demo synasdk-syna-ai-player \
+"
+
+IMAGE_INSTALL:append = " \
+    ${QT_PACKAGES} \
+    ${SYNA_PLAYER_PACKAGES} \
 "
 
 IMAGE_INSTALL:append = " \
@@ -17,4 +22,10 @@ IMAGE_INSTALL:append = " \
 
 IMAGE_INSTALL:append:dolphin = " \
     synasdk-v4l2isp-qtapp \
+"
+
+IMAGE_INSTALL:remove:sl2611 = " \
+    ${QT_PACKAGES} \
+    ${SYNA_PLAYER_PACKAGES} \
+    qtwayland \
 "

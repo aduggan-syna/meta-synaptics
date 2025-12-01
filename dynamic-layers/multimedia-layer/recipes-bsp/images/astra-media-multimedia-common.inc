@@ -1,5 +1,4 @@
-IMAGE_INSTALL:append = " \
-    bluealsa \
+MULTIMEDIA_GPU_RELATED_PACKAGES = " \
     gstreamer1.0-plugins-bad-fdkaac \
     gstreamer1.0-plugins-base-audiomixer \
     gstreamer1.0-plugins-base-apps \
@@ -12,5 +11,12 @@ IMAGE_INSTALL:append = " \
     gstreamer1.0-plugins-bad-dash \
     gstreamer1.0-plugins-ugly-x264 \
     gstreamer1.0-plugins-bad-aom \
+"
+
+IMAGE_INSTALL:append = " \
+    ${MULTIMEDIA_GPU_RELATED_PACKAGES} \
+    bluealsa \
     v4l-utils \
 "
+
+IMAGE_INSTALL:remove:sl2611 = "${MULTIMEDIA_GPU_RELATED_PACKAGES}"

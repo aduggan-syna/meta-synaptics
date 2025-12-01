@@ -62,48 +62,11 @@ IMAGE_INSTALL:append = " \
     i2c-tools \
     v4l-utils \
     alsa-utils \
-    vulkan-loader \
-    synasdk-demos \
     synasdk-bootctrl \
     synasdk-sysctl-conf \
     synasdk-macaddr \
     syna-mount-generator \
     synasdk-syna-settings-framework \
-    "
-
-IMAGE_INSTALL:append = " \
-    gstreamer1.0-meta-base \
-    gstreamer1.0-meta-video \
-    gstreamer1.0-plugins-base-app \
-    gstreamer1.0-plugins-base-compositor \
-    gstreamer1.0-plugins-base-opengl \
-    gstreamer1.0-plugins-base-pango \
-    gstreamer1.0-plugins-base-rawparse \
-    gstreamer1.0-plugins-base-videorate \
-    gstreamer1.0-plugins-good-audioparsers \
-    gstreamer1.0-plugins-good-cairo \
-    gstreamer1.0-plugins-good-flv \
-    gstreamer1.0-plugins-good-id3demux \
-    gstreamer1.0-plugins-good-imagefreeze \
-    gstreamer1.0-plugins-good-isomp4 \
-    gstreamer1.0-plugins-good-mpg123 \
-    gstreamer1.0-plugins-good-multifile \
-    gstreamer1.0-plugins-good-png \
-    gstreamer1.0-plugins-good-jpeg \
-    gstreamer1.0-plugins-good-video4linux2 \
-    gstreamer1.0-plugins-good-udp \
-    gstreamer1.0-plugins-good-rtp\
-    gstreamer1.0-plugins-good-rtsp \
-    gstreamer1.0-plugins-good-rtpmanager \
-    gstreamer1.0-plugins-bad-autoconvert \
-    gstreamer1.0-plugins-bad-camerabin \
-    gstreamer1.0-plugins-bad-jpegformat \
-    gstreamer1.0-plugins-bad-mpegtsdemux \
-    gstreamer1.0-plugins-bad-videoparsersbad \
-    gstreamer1.0-plugins-bad-kms \
-    gstreamer1.0-meta-debug \
-    gstreamer1.0-libav \
-    gstreamer1.0-rtsp-server \
     "
 
 IMAGE_INSTALL:append = " \
@@ -115,7 +78,6 @@ IMAGE_INSTALL:append = " \
     hostapd \
     iptables \
     protobuf \
-    opencv \
     libdrm-tests \
     "
 
@@ -154,6 +116,11 @@ IMAGE_INSTALL:append:klamath = " \
     synasdk-brcm-bt-start \
     synasdk-v4l2isp-test \
     synasdk-v4l2isp-qtapp \
+"
+
+IMAGE_INSTALL:append:sl2619 = " \
+    ${GPU_RELATED_PACKAGES} \
+    ${NPU_RELATED_PACKAGES} \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \

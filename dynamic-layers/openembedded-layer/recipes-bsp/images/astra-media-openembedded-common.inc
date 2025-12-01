@@ -1,7 +1,6 @@
 IMAGE_INSTALL:append = " \
     android-tools \
     android-tools-adbd \
-    glmark2 \
     iperf2 \
     iperf3 \
     ethtool \
