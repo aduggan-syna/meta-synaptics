@@ -20,6 +20,7 @@ RDEPENDS:${PN} = " \
     imgtec-pvr-firmware \
     libglapi libgles1-mesa libegl-mesa libgbm mesa-vulkan-drivers \
     libgles2-mesa \
+    vulkan-loader \
 "
 
 COMPATIBLE_MACHINE = "syna"
@@ -36,6 +37,7 @@ PREBUILT_BINS = "sysroot/linux-baseline/data/gfx_prebuilt/imagination/${DISPLAY_
 
 SRC_URI = " \
    ${SYNA_SRC_LINUX_SYSROOT} \
+   file://powervr_icd.json \
 "
 
 SRCREV = "${SYNA_SRCREV_LINUX_SYSROOT}"
@@ -62,6 +64,12 @@ do_install:append:aarch64 () {
 
     for i in ${S}/${PREBUILT_LIBS}/*\.so*; do
         file_name=`basename "${i}"`
+
+        if [ "${file_name}" = "libvulkan.so" ] || [ "${file_name}" = "libvulkan.so.1" ]; then
+            echo "Skipping ${file_name}"
+            continue
+        fi
+
         install -Dm0644 ${i} ${D}${libdir}/${file_name}
     done
 
@@ -76,6 +84,11 @@ do_install:append:aarch64 () {
         ln -sf "libVK_IMG.so" "libVK_IMG.so.1"; \
         cd -
     fi
+
+    # Install Vulkan ICD config
+    install -d ${D}${datadir}/vulkan/icd.d
+    install -m0644 ${WORKDIR}/powervr_icd.json ${D}${datadir}/vulkan/icd.d/powervr_icd.json
+
 }
 
 do_install:append:arm () {
@@ -126,6 +139,10 @@ FILES:pvrscope = " \
 # The firmware is MIPS, not ARM!
 FILES:imgtec-pvr-firmware = " \
     ${nonarch_base_libdir}/firmware/* \
+"
+
+FILES:${PN} += " \
+    ${datadir}/vulkan/icd.d/powervr_icd.json \
 "
 
 do_configure[noexec] = "1"
