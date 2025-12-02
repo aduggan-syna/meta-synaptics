@@ -1,0 +1,72 @@
+From 07d13b003187a6bd04180ec834f1c8a8573985d1 Mon Sep 17 00:00:00 2001
+From: Dan Huo <Dan.Huo@synaptics.com>
+Date: Wed, 30 Jul 2025 19:54:17 +0800
+Subject: [PATCH 6/7] fix dma_buf_release crash bug
+
+Jira: VSSDK-35425
+
+Change-Id: I68cff3f40c090a0060d635a9e7affcf74d51295c
+---
+ kernel/src/kernel_compatibility.h | 18 ++++--------------
+ kernel/src/synap_mem.c            |  6 +++++-
+ 2 files changed, 9 insertions(+), 15 deletions(-)
+
+diff --git a/kernel/src/kernel_compatibility.h b/kernel/src/kernel_compatibility.h
+index 2250ab2..9accb79 100644
+--- a/kernel/src/kernel_compatibility.h
++++ b/kernel/src/kernel_compatibility.h
+@@ -23,14 +23,8 @@ struct dma_buf_map {
+ 		(map)->vaddr = NULL; \
+ 	})
+ #else
+-#define compatible_dma_buf_vmap(dmabuf, map) \
+-        ({ \
+-                dma_buf_vmap(dmabuf, map); \
+-        })
+-#define compatible_dma_buf_vunmap(dmabuf, map) \
+-        ({ \
+-                dma_buf_vunmap(dmabuf, map); \
+-        })
++#define compatible_dma_buf_vmap(dmabuf, map) dma_buf_vmap(dmabuf, map)
++#define compatible_dma_buf_vunmap(dmabuf, map) dma_buf_vunmap(dmabuf, map)
+ #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0) */
+ 
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0)
+@@ -39,14 +33,10 @@ struct dma_buf_map {
+ 
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(6, 11, 0)
+ #define compatible_get_user_pages(start, nr_pages, gup_flags, pages) \
+-	({ \
+-		get_user_pages(start, nr_pages, gup_flags, pages, NULL); \
+-	})
++	get_user_pages(start, nr_pages, gup_flags, pages, NULL)
+ #else
+ #define compatible_get_user_pages(start, nr_pages, gup_flags, pages) \
+-        ({ \
+-                get_user_pages(start, nr_pages, gup_flags, pages); \
+-        })
++	get_user_pages(start, nr_pages, gup_flags, pages)
+ #endif /* LINUX_VERSION_CODE < KERNEL_VERSION(6, 11, 0) */
+ 
+ #endif
+diff --git a/kernel/src/synap_mem.c b/kernel/src/synap_mem.c
+index 5568298..98e4d02 100644
+--- a/kernel/src/synap_mem.c
++++ b/kernel/src/synap_mem.c
+@@ -409,8 +409,12 @@ void* synap_mem_map_dmabuf_vaddr(struct synap_mem* mem)
+     }
+ 
+     mem->dmabuf_vaddr = NULL;
+-    if (compatible_dma_buf_vmap(mem->dmabuf, &mem->dmabuf_map) < 0 )
++    if (compatible_dma_buf_vmap(mem->dmabuf, &mem->dmabuf_map) >= 0 ) {
++	    mem->dmabuf_vaddr = mem->dmabuf_map.vaddr;
++    }
++    if (mem->dmabuf_vaddr == NULL) {
+         KLOGE("dmabuf kmap failed.");
++    }
+ 
+     return mem->dmabuf_map.vaddr;
+ }
+-- 
+2.25.1
+

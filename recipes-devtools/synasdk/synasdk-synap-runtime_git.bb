@@ -12,7 +12,7 @@ SRC_URI:append:dolphin = " ${SYNA_SRC_SYNAP_DRIVER}"
 
 SRCREV_synapruntime = "5f7961cfb27a1e09ae77922753793840155264bb"
 
-SRCREV_FORMAT = "synapruntime synapframework_synapdriver"
+SRCREV_FORMAT = "synapruntime"
 
 PV = "${SYNAP_VERSION}+git+${@d.getVar('SRCREV_synapruntime')[:8]}"
 S = "${WORKDIR}/git"

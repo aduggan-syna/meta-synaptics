@@ -1,0 +1,38 @@
+From 58291a5a50f4760df8c4f5464a31ef289542fe28 Mon Sep 17 00:00:00 2001
+From: xshang-synaptics <147597737+xshang-synaptics@users.noreply.github.com>
+Date: Thu, 8 Aug 2024 17:07:35 +0800
+Subject: [PATCH 1/7] add include path for linux_5_15 (#13)
+
+patch from Kaicheng Xie <Kaicheng.Xie@synaptics.com>
+---
+ kernel/Kbuild | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/kernel/Kbuild b/kernel/Kbuild
+index b06119d..c5be53b 100644
+--- a/kernel/Kbuild
++++ b/kernel/Kbuild
+@@ -12,12 +12,20 @@ EXTRA_CFLAGS += -I$(src)/src \
+ 
+ EXTRA_CFLAGS += -I$(src)/../lib/ta_interface -I$(src)/../lib/ebg_file
+ 
++#For linux_5_4, we may drop it in the feature
+ TEE_INC_PATH += -I$(srctree)/drivers/soc/berlin/modules/tzd/tee/client_api \
+                 -I$(srctree)/drivers/soc/berlin/modules/tzd/tee/common \
+                 -I$(srctree)/drivers/soc/berlin/modules/tzd/tz/common \
+                 -I$(srctree)/drivers/soc/berlin/modules/tzd/include \
+                 -I$(srctree)/drivers/soc/berlin/modules/tzd
+ 
++#For linux_5_15
++TEE_INC_PATH += -I$(srctree)/drivers/synaptics/soc/berlin/modules/tzd/tee/client_api \
++                -I$(srctree)/drivers/synaptics/soc/berlin/modules/tzd/tee/common \
++                -I$(srctree)/drivers/synaptics/soc/berlin/modules/tzd/tz/common \
++                -I$(srctree)/drivers/synaptics/soc/berlin/modules/tzd/include \
++                -I$(srctree)/drivers/synaptics/soc/berlin/modules/tzd
++
+ ION_INC_PATH += -I$(srctree)/drivers/staging/android/ion
+ 
+ EXTRA_CFLAGS += $(TEE_INC_PATH) $(ION_INC_PATH)
+-- 
+2.25.1
+

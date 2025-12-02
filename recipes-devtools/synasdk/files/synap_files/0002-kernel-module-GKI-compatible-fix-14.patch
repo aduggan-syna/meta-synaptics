@@ -1,0 +1,110 @@
+From e02c88e2847520a2c0758e4941b67c86bb3b4a8a Mon Sep 17 00:00:00 2001
+From: xshang-synaptics <147597737+xshang-synaptics@users.noreply.github.com>
+Date: Fri, 8 Nov 2024 15:27:40 +0800
+Subject: [PATCH 2/7] kernel module GKI compatible fix (#14)
+
+request_firmware() works for kernel 5.4 and 5.15
+
+this api request relative path, firmware path specify by android
+https://android.googlesource.com/platform/system/core/+/master/init/README.ueventd.md#firmware-loading
+
+in target, we can check firmware path in /system/etc/ueventd.rc
+---
+ kernel/src/synap_kernel.c | 49 +++++++++------------------------------
+ 1 file changed, 11 insertions(+), 38 deletions(-)
+
+diff --git a/kernel/src/synap_kernel.c b/kernel/src/synap_kernel.c
+index 30dddd7..eeefea0 100644
+--- a/kernel/src/synap_kernel.c
++++ b/kernel/src/synap_kernel.c
+@@ -31,20 +31,17 @@
+ #include <linux/stat.h>
+ #include <linux/fs.h>
+ #include <linux/errno.h>
+-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0))
+-#include <linux/kernel_read_file.h>
+-#endif
+ 
+ #include <linux/mod_devicetable.h>
++#include <linux/firmware.h>
+ 
+-#define SYNAPTA_NAME "libsynap.ta"
++// TODO: remove ta_path module parameter from cmdline
+ static char *ta_path;
+ module_param(ta_path, charp, 0000);
+ MODULE_PARM_DESC(ta_path, "ta path");
++// end TODO
+ 
+-//ta_path string len refer to string param max len
+-//param_set_charp() in kernel/params.c
+-#define TA_PATH_LEN_MAX 1024
++#define SYNAPTA_NAME "ta/libsynap.ta"
+ 
+ #define SYNAP_HARDWARE_IRQ_TIMEOUT 40000
+ 
+@@ -272,47 +269,23 @@ static struct synap_network* synap_alloc_network(struct synap_file *inst,
+ }
+ 
+ #ifndef CONFIG_OPTEE
+-static bool synap_load_ta(struct synap_ta *ta)
++static bool synap_load_ta(struct synap_ta *ta, struct device *dev)
+ {
+     bool ret;
+-
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,10,0)
+-    loff_t size = 0;
+-#else
+-    size_t size = 0;
+-#endif
+-    char synap_ta_path[TA_PATH_LEN_MAX] = {0};
+-    void *ta_data = NULL;
++    const struct firmware *fw = NULL;
+ 
+     LOG_ENTER();
+-
+     if (!ta) return false;
+ 
+-    if (!ta_path || !strlen(ta_path) ||
+-        (strlen(ta_path) >= (TA_PATH_LEN_MAX - strlen(SYNAPTA_NAME) - 1))) {
+-        KLOGE("failed to load ta from %s", ta_path);
+-        return false;
+-    }
+-
+-    strcat(synap_ta_path, ta_path);
+-    strcat(synap_ta_path, "/");
+-    strcat(synap_ta_path, SYNAPTA_NAME);
+-
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,10,0)
+-    if (kernel_read_file_from_path(synap_ta_path, &ta_data, &size, 0, READING_FIRMWARE) < 0) {
+-#else
+-    if (kernel_read_file_from_path(synap_ta_path, 0, &ta_data, INT_MAX, &size, READING_FIRMWARE) < 0) {
+-#endif
+-        KLOGE("failed to open ta from %s", synap_ta_path);
++    if (request_firmware(&fw, SYNAPTA_NAME, dev) != 0) {
++        KLOGE("failed to open ta from %s", SYNAPTA_NAME);
+         return false;
+     }
+ 
+-    KLOGI("libsyapta size=%d", size);
++    ret = synap_ca_load_ta(ta->ca, (void *)fw->data, fw->size);
+ 
+-    ret = synap_ca_load_ta(ta->ca, ta_data, size);
++    release_firmware(fw);
+ 
+-    vfree(ta_data);
+-    
+     return ret;
+ }
+ #endif
+@@ -391,7 +364,7 @@ static struct synap_ta * synap_init_ta(struct synap_device *dev)
+     }
+ 
+ #ifndef CONFIG_OPTEE
+-    if (!synap_load_ta(ta)) {
++    if (!synap_load_ta(ta, &dev->pdev->dev)) {
+         synap_finalize_ta(ta);
+         return NULL;
+     }
+-- 
+2.25.1
+

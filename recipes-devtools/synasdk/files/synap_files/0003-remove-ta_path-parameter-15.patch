@@ -1,0 +1,30 @@
+From 40de850b6b668d81ccaaefd34602863013af2bbf Mon Sep 17 00:00:00 2001
+From: xshang-synaptics <147597737+xshang-synaptics@users.noreply.github.com>
+Date: Fri, 8 Nov 2024 15:34:40 +0800
+Subject: [PATCH 3/7] remove ta_path parameter (#15)
+
+ta is under firmware default search path, kernel find it automatically
+---
+ kernel/src/synap_kernel.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/kernel/src/synap_kernel.c b/kernel/src/synap_kernel.c
+index eeefea0..d6c14af 100644
+--- a/kernel/src/synap_kernel.c
++++ b/kernel/src/synap_kernel.c
+@@ -35,12 +35,6 @@
+ #include <linux/mod_devicetable.h>
+ #include <linux/firmware.h>
+ 
+-// TODO: remove ta_path module parameter from cmdline
+-static char *ta_path;
+-module_param(ta_path, charp, 0000);
+-MODULE_PARM_DESC(ta_path, "ta path");
+-// end TODO
+-
+ #define SYNAPTA_NAME "ta/libsynap.ta"
+ 
+ #define SYNAP_HARDWARE_IRQ_TIMEOUT 40000
+-- 
+2.25.1
+

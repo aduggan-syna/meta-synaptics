@@ -1,0 +1,348 @@
+From aef86caf0251d7ac03419f480401380464ec821e Mon Sep 17 00:00:00 2001
+From: dhuo-synaptics <dhuo@synaptics.com>
+Date: Mon, 28 Jul 2025 16:11:55 +0800
+Subject: [PATCH 5/7] vsi_npu_drivers: change to support linux-6.12 (#18)
+
+Change-Id: I01446b09992dc5ba585cedae578d88c77fed47e2
+---
+ kernel/src/kernel_compatibility.h | 53 +++++++++++++++++++++++++++++++
+ kernel/src/synap_kernel.c         | 17 ++++++----
+ kernel/src/synap_kernel.h         |  2 ++
+ kernel/src/synap_kernel_log.h     |  6 +++-
+ kernel/src/synap_mem.c            | 24 ++++----------
+ kernel/src/synap_mem.h            |  7 ++--
+ kernel/src/synap_profile.c        | 31 ++++++------------
+ lib/ebg_file/ebg_file.h           |  4 +++
+ 8 files changed, 93 insertions(+), 51 deletions(-)
+ create mode 100644 kernel/src/kernel_compatibility.h
+
+diff --git a/kernel/src/kernel_compatibility.h b/kernel/src/kernel_compatibility.h
+new file mode 100644
+index 0000000..2250ab2
+--- /dev/null
++++ b/kernel/src/kernel_compatibility.h
+@@ -0,0 +1,53 @@
++// SPDX-License-Identifier: GPL-2.0
++/* Copyright (C) 2025 Synaptics Incorporated */
++
++#pragma once
++
++#ifndef __KERNEL_COMPATIBILITY_H__
++#define __KERNEL_COMPATIBILITY_H__
++
++#include <linux/version.h>
++
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0)
++struct dma_buf_map {
++	void *vaddr;
++};
++#define compatible_dma_buf_vmap(dmabuf, map) \
++	({ \
++		(map)->vaddr = dma_buf_vmap(dmabuf); \
++		(map)->vaddr ? 0 : ((dmabuf) && (dmabuf)->ops->vmap) ? -ENOMEM : -EINVAL; \
++	})
++#define compatible_dma_buf_vunmap(dmabuf, map) \
++	({ \
++		dma_buf_vunmap(dmabuf, (map)->vaddr); \
++		(map)->vaddr = NULL; \
++	})
++#else
++#define compatible_dma_buf_vmap(dmabuf, map) \
++        ({ \
++                dma_buf_vmap(dmabuf, map); \
++        })
++#define compatible_dma_buf_vunmap(dmabuf, map) \
++        ({ \
++                dma_buf_vunmap(dmabuf, map); \
++        })
++#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0) */
++
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0)
++#define dma_buf_map iosys_map
++#endif /* LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0) */
++
++#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 11, 0)
++#define compatible_get_user_pages(start, nr_pages, gup_flags, pages) \
++	({ \
++		get_user_pages(start, nr_pages, gup_flags, pages, NULL); \
++	})
++#else
++#define compatible_get_user_pages(start, nr_pages, gup_flags, pages) \
++        ({ \
++                get_user_pages(start, nr_pages, gup_flags, pages); \
++        })
++#endif /* LINUX_VERSION_CODE < KERNEL_VERSION(6, 11, 0) */
++
++#endif
++
+diff --git a/kernel/src/synap_kernel.c b/kernel/src/synap_kernel.c
+index d6c14af..4167159 100644
+--- a/kernel/src/synap_kernel.c
++++ b/kernel/src/synap_kernel.c
+@@ -24,7 +24,6 @@
+ #include <linux/time.h>
+ #include <linux/list.h>
+ #include <linux/vmalloc.h>
+-#include <linux/version.h>
+ #include <linux/moduleparam.h>
+ 
+ #include <asm/uaccess.h>
+@@ -39,6 +38,14 @@
+ 
+ #define SYNAP_HARDWARE_IRQ_TIMEOUT 40000
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 0)
++#define RET void
++#define RETURN
++#else
++#define RET int32_t
++#define RETURN return 0
++#endif
++
+ union synap_ioctl_arg {
+     struct synap_set_network_io_data set_data;
+     struct synap_attach_io_buffer_data attach_io_buffer_data;
+@@ -1472,7 +1479,7 @@ static int32_t synap_power_off(struct platform_device *pdev)
+     return 0;
+ }
+ 
+-static int32_t synap_platform_remove(struct platform_device *pdev) {
++static RET synap_platform_remove(struct platform_device *pdev) {
+ 
+     struct synap_device *synap_device;
+ 
+@@ -1480,10 +1487,6 @@ static int32_t synap_platform_remove(struct platform_device *pdev) {
+ 
+     synap_device = platform_get_drvdata(pdev);
+ 
+-    if (!synap_device) {
+-        return -EFAULT;
+-    }
+-
+     if (synap_device->misc_registered) {
+         misc_deregister(&synap_device->misc_dev);
+     }
+@@ -1497,7 +1500,7 @@ static int32_t synap_platform_remove(struct platform_device *pdev) {
+     mutex_destroy(&synap_device->hw_mutex);
+     mutex_destroy(&synap_device->files_mutex);
+ 
+-    return 0;
++    RETURN;
+ }
+ 
+ static int32_t synap_platform_probe(struct platform_device *pdev)
+diff --git a/kernel/src/synap_kernel.h b/kernel/src/synap_kernel.h
+index a6c167e..a589f92 100644
+--- a/kernel/src/synap_kernel.h
++++ b/kernel/src/synap_kernel.h
+@@ -190,4 +190,6 @@ int32_t synap_kernel_module_init(void);
+ 
+ void synap_kernel_module_exit(void);
+ 
++ssize_t synap_drv_read(struct file *file, char *buffer, size_t length, loff_t *offset);
++
+ extern const struct attribute_group *synap_device_groups[];
+diff --git a/kernel/src/synap_kernel_log.h b/kernel/src/synap_kernel_log.h
+index 4b7d3c7..c4715dc 100644
+--- a/kernel/src/synap_kernel_log.h
++++ b/kernel/src/synap_kernel_log.h
+@@ -4,8 +4,12 @@
+ #pragma once
+ 
+ #include <linux/kernel.h>
+-
++#include <linux/version.h>
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 0)
++#include <linux/stdarg.h>
++#else
+ #include <stdarg.h>
++#endif
+ 
+ static inline void synap_print(const char* level, const char* function, int line, const char *msg, ...)
+ {
+diff --git a/kernel/src/synap_mem.c b/kernel/src/synap_mem.c
+index 4b63c4b..5568298 100644
+--- a/kernel/src/synap_mem.c
++++ b/kernel/src/synap_mem.c
+@@ -7,6 +7,7 @@
+ #include <linux/slab.h>
+ #include <linux/fs.h>
+ #include <linux/swap.h>
++#include <linux/vmalloc.h>
+ 
+ #include "synap_kernel_log.h"
+ #include "synap_mem.h"
+@@ -213,9 +214,9 @@ struct synap_mem *synap_mem_wrap_userbuffer(u64 addr, size_t size) {
+     }
+ 
+     do {
+-        r = get_user_pages(start_addr + pinned * PAGE_SIZE,
++        r = compatible_get_user_pages(start_addr + pinned * PAGE_SIZE,
+                            num_pages - pinned,
+-                           0, pages + pinned, NULL);
++                           0, pages + pinned);
+         if (r < 0) {
+             release_pages(pages, pinned);
+             vfree(pages);
+@@ -408,19 +409,10 @@ void* synap_mem_map_dmabuf_vaddr(struct synap_mem* mem)
+     }
+ 
+     mem->dmabuf_vaddr = NULL;
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15,0)
+-    mem->dmabuf_vaddr = dma_buf_vmap(mem->dmabuf);
+-#else
+-    if (dma_buf_vmap(mem->dmabuf, &mem->dmabuf_map) >= 0) {
+-        mem->dmabuf_vaddr = mem->dmabuf_map.vaddr;
+-    }
+-#endif
+-
+-    if (mem->dmabuf_vaddr == NULL) {
++    if (compatible_dma_buf_vmap(mem->dmabuf, &mem->dmabuf_map) < 0 )
+         KLOGE("dmabuf kmap failed.");
+-    }
+ 
+-    return mem->dmabuf_vaddr;
++    return mem->dmabuf_map.vaddr;
+ }
+ 
+ void synap_mem_unmap_dmabuf_vaddr(struct synap_mem* mem)
+@@ -428,11 +420,7 @@ void synap_mem_unmap_dmabuf_vaddr(struct synap_mem* mem)
+     if (!mem || !mem->dmabuf_vaddr) {
+         return;
+     }
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15,0)
+-    dma_buf_vunmap(mem->dmabuf, mem->dmabuf_vaddr);
+-#else
+-    dma_buf_vunmap(mem->dmabuf, &mem->dmabuf_map);
+-#endif
++    compatible_dma_buf_vunmap(mem->dmabuf, &mem->dmabuf_map);
+ 
+     dma_buf_end_cpu_access(mem->dmabuf, DMA_BIDIRECTIONAL);
+ }
+diff --git a/kernel/src/synap_mem.h b/kernel/src/synap_mem.h
+index 4716ad9..7a6ea72 100644
+--- a/kernel/src/synap_mem.h
++++ b/kernel/src/synap_mem.h
+@@ -1,12 +1,15 @@
+ #pragma once
+ 
+ #include "synap_kernel.h"
++#include "kernel_compatibility.h"
+ #include <linux/types.h>
+ #include <linux/device.h>
+ #include "ca/synap_ta_cmd.h"
+ #include <linux/scatterlist.h>
+-#include <linux/version.h>
+ #include <linux/dma-buf.h>
++#include <linux/module.h>
++
++MODULE_IMPORT_NS(DMA_BUF);
+ 
+ struct synap_mem {
+     struct synap_device *owner;
+@@ -17,9 +20,7 @@ struct synap_mem {
+     u64 offset;
+ 
+     void* dmabuf_vaddr;
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,15,0)
+     struct dma_buf_map dmabuf_map;
+-#endif
+ };
+ 
+ typedef enum {
+diff --git a/kernel/src/synap_profile.c b/kernel/src/synap_profile.c
+index 79b0368..c329fb1 100644
+--- a/kernel/src/synap_profile.c
++++ b/kernel/src/synap_profile.c
+@@ -3,8 +3,7 @@
+ #include "synap_kernel_ca.h"
+ #include "synap_mem.h"
+ #include <linux/slab.h>
+-#include <linux/version.h>
+-
++#include <linux/vmalloc.h>
+ 
+ bool synap_profile_parse_layers(void* model_buffer, size_t model_size,
+                                 struct ebg_file_public_data *pd,
+@@ -58,9 +57,7 @@ bool synap_profile_get_layers_data(struct synap_network *network)
+ {
+     u32 i, j;
+     void *op_va;
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,15,0)
+     struct dma_buf_map map;
+-#endif
+     struct synap_profile_layer *layers = network->layer_profile;
+     struct dma_buf *dmabuf = network->profile_operation->dmabuf;
+ 
+@@ -69,22 +66,14 @@ bool synap_profile_get_layers_data(struct synap_network *network)
+     if (dma_buf_begin_cpu_access(dmabuf, DMA_BIDIRECTIONAL) != 0) {
+         return false;
+     }
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15,0)
+-    op_va = dma_buf_vmap(dmabuf);
+-    if (op_va == NULL) {
+-        KLOGE("op buffer kmap failed.");
+-        dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
+-        return false;
+-    }
+-#else
+-    if (dma_buf_vmap(dmabuf, &map) < 0) {
++
++    if (compatible_dma_buf_vmap(dmabuf, &map) < 0) {
+         KLOGE("op buffer kmap failed.");
+         dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
+         return false;
+     }
+ 
+     op_va = map.vaddr;
+-#endif
+ 
+     for (j = 0; j < network->layer_count; j++) {
+         layers[j].cycle = 0;
+@@ -115,11 +104,7 @@ bool synap_profile_get_layers_data(struct synap_network *network)
+               layers[j].execution_time, layers[j].byte_read, layers[j].byte_write);
+     }
+ 
+-#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15,0)
+-    dma_buf_vunmap(dmabuf, op_va);
+-#else
+-    dma_buf_vunmap(dmabuf, &map);
+-#endif
++    compatible_dma_buf_vunmap(dmabuf, &map);
+ 
+     dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
+ 
+@@ -156,6 +141,7 @@ void synap_profile_operation_dump(struct synap_network *network)
+     u32 i;
+     void *op_va;
+     struct dma_buf *dmabuf = network->profile_operation->dmabuf;
++    struct dma_buf_map map;
+ 
+     if (!dmabuf) return;
+ 
+@@ -163,13 +149,14 @@ void synap_profile_operation_dump(struct synap_network *network)
+         return;
+     }
+ 
+-    op_va = dma_buf_vmap(dmabuf);
+-    if (op_va == NULL) {
++    if (compatible_dma_buf_vmap(dmabuf, &map) < 0) {
+         KLOGE("op buffer kmap failed.");
+         dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
+         return;
+     }
+ 
++    op_va = map.vaddr;
++
+     KLOGD("|------------------------------------------------------------|");
+     KLOGD("| op_type | op_layer_idx | op_cycle | byte_read | byte_write |");
+     for (i = 0; i < network->operation_count; i++) {
+@@ -183,7 +170,7 @@ void synap_profile_operation_dump(struct synap_network *network)
+     }
+     KLOGD("|------------------------------------------------------------|");
+ 
+-    dma_buf_vunmap(dmabuf, op_va);
++    compatible_dma_buf_vunmap(dmabuf, &map);
+     dma_buf_end_cpu_access(dmabuf, DMA_BIDIRECTIONAL);
+ }
+ 

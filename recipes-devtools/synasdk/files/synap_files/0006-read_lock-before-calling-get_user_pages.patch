@@ -1,0 +1,63 @@
+From 9b5cbc627f99fa26e09df03f20a99c21c333f29d Mon Sep 17 00:00:00 2001
+From: Dan Huo <Dan.Huo@synaptics.com>
+Date: Thu, 25 Sep 2025 17:15:56 +0800
+Subject: [PATCH 7/7] read_lock before calling get_user_pages
+
+Jira: VSSDK-35470
+---
+ kernel/src/synap_mem.c | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
+
+diff --git a/kernel/src/synap_mem.c b/kernel/src/synap_mem.c
+index 98e4d02..c94d762 100644
+--- a/kernel/src/synap_mem.c
++++ b/kernel/src/synap_mem.c
+@@ -204,7 +204,7 @@ struct synap_mem *synap_mem_wrap_userbuffer(u64 addr, size_t size) {
+     u64 start_addr;
+ 
+     struct page **pages;
+-    struct synap_mem *mem;
++    struct synap_mem *mem=NULL;
+ 
+     pages = synap_mem_alloc_pages(addr, size, &start_addr, &num_pages);
+ 
+@@ -214,13 +214,18 @@ struct synap_mem *synap_mem_wrap_userbuffer(u64 addr, size_t size) {
+     }
+ 
+     do {
++        if (mmap_read_lock_killable(current->mm)) {
++            KLOGE("unable to lock mm");
++            release_pages(pages, pinned);
++            goto free_pages;
++        }
+         r = compatible_get_user_pages(start_addr + pinned * PAGE_SIZE,
+                            num_pages - pinned,
+                            0, pages + pinned);
++        mmap_read_unlock(current->mm);
+         if (r < 0) {
+             release_pages(pages, pinned);
+-            vfree(pages);
+-            return NULL;
++            goto free_pages;
+         }
+ 
+         pinned += r;
+@@ -230,12 +235,12 @@ struct synap_mem *synap_mem_wrap_userbuffer(u64 addr, size_t size) {
+     mem = synap_mem_wrap_pages(pages, num_pages, addr - start_addr, size);
+ 
+     if (!mem) {
+-        release_pages(pages, pinned);
+-        vfree(pages);
+         KLOGE("unable to allocate mem struct");
+-        return NULL;
++        release_pages(pages, pinned);
++        goto free_pages;
+     }
+ 
++free_pages:
+     vfree(pages);
+ 
+     return mem;
+-- 
+2.25.1
+
