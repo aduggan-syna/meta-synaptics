@@ -108,6 +108,8 @@ IMAGE_INSTALL:append:myna2 = " \
     ${NPU_RELATED_PACKAGES} \
     brcm-patchram-plus \
     synasdk-brcm-bt-start \
+    synasdk-factory-ta \
+    synasdk-drm-factory-ca-program \
 "
 
 IMAGE_INSTALL:append:klamath = " \
@@ -134,6 +136,8 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     tim-vx \
     tflite-vx-delegate \
     pciutils \
+    synasdk-factory-ta \
+    synasdk-drm-factory-ca-program \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
