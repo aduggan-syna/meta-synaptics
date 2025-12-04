@@ -126128,3 +126128,50 @@ index 9522f07..92c9d80 100644
 -- 
 2.7.4
 
+
+From fe3c213a9d362f739cd20164131f433e67155dfa Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Thu, 4 Dec 2025 13:12:56 +0800
+Subject: [PATCH] klamath: set boot mode before disable mmu
+
+Change-Id: Idea56a1a4984b577ea10b57c28f486e3d34aa37d
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/soc/klamath/plat_pm.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/plat/syna/berlin/soc/klamath/plat_pm.c b/plat/syna/berlin/soc/klamath/plat_pm.c
+index 62f639e..b833149 100644
+--- a/plat/syna/berlin/soc/klamath/plat_pm.c
++++ b/plat/syna/berlin/soc/klamath/plat_pm.c
+@@ -209,13 +209,6 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ 				unsigned int power_state)
+ {
+ 	/*
+-	 * disable the mmu before jump to sram entry, or, it will lead
+-	 * to a permission fault when execute in SRAM, because of WXN and XN
+-	 * bit effect.
+-	 */
+-	disable_mmu_el3();
+-	arm_set_PWRCTLR(0);
+-	/*
+ 	 * Mark warm boot for BL31: store a flag in retention memory so that
+ 	 * bl31_entrypoint can detect warm resume and jump to bl31_warm_entrypoint.
+ 	 * Do this before disabling MMU and perform cache maintenance afterwards
+@@ -223,6 +216,13 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+ 	 */
+ 	boot_mode = WARM_BOOT;
+ 	INFO("boot mode: 0x%x.\n", boot_mode);
++	/*
++	 * disable the mmu before jump to sram entry, or, it will lead
++	 * to a permission fault when execute in SRAM, because of WXN and XN
++	 * bit effect.
++	 */
++	disable_mmu_el3();
++	arm_set_PWRCTLR(0);
+ 	/* Flush all caches. */
+ 	dcsw_op_all(DCCISW);
+ 	sm_system_warmdown(power_state);
+-- 
+2.7.4
+
