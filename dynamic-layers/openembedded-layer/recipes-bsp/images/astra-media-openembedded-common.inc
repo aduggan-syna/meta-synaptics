@@ -30,6 +30,10 @@ IMAGE_INSTALL:append:myna2 = " \
     evtest \
 "
 
+IMAGE_INSTALL:append:klamath = " \
+    evtest \
+"
+
 IMAGE_INSTALL:remove = " \
     ofono \
     connman \
