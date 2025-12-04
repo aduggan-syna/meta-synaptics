@@ -126175,3 +126175,30 @@ index 62f639e..b833149 100644
 -- 
 2.7.4
 
+
+From 7147a88f927dcbcccc12d3e042451f8dd7cc4564 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Thu, 4 Dec 2025 14:25:45 +0800
+Subject: [PATCH] plat: syna: set NS_TIMER_SWITCH=0
+
+Change-Id: Ia11439ff6e0f90389d9370c83bafde306cea87a5
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/platform.mk | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/plat/syna/berlin/platform.mk b/plat/syna/berlin/platform.mk
+index a67c463..6404458 100644
+--- a/plat/syna/berlin/platform.mk
++++ b/plat/syna/berlin/platform.mk
+@@ -10,6 +10,7 @@ PROGRAMMABLE_RESET_ADDRESS	:=	1
+ COLD_BOOT_SINGLE_CPU		:=	1
+ MULTI_CONSOLE_API		:=	1
+ ENABLE_ASSERTIONS    := 0
++NS_TIMER_SWITCH	:= 0
+ 
+ WORKAROUND_CVE_2017_5715 := 1
+ SPMD_SPM_AT_SEL2 :=0
+-- 
+2.7.4
+
