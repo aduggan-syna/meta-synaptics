@@ -7,9 +7,6 @@ COMPATIBLE_MACHINE = "syna"
 SRC_URI = "git://github.com/synaptics-synap/runtime.git;branch=main;protocol=https;submodules=1;name=synapruntime \
            file://synap-runtime.pc.in \
            "
-SRC_URI:append:platypus = " ${SYNA_SRC_SYNAP_DRIVER}"
-SRC_URI:append:dolphin = " ${SYNA_SRC_SYNAP_DRIVER}"
-
 SRCREV_synapruntime = "5f7961cfb27a1e09ae77922753793840155264bb"
 
 SRCREV_FORMAT = "synapruntime"

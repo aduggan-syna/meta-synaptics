@@ -18,8 +18,9 @@ SRC_URI = "git://github.com/synaptics-synap/runtime.git;branch=main;protocol=htt
         "
 
 SRCREV_synapkernel = "5f7961cfb27a1e09ae77922753793840155264bb"
+SRCREV_synapdriver = "${SYNA_SRCREV_SYNAP_DRIVER}"
 
-SRCREV_FORMAT = "synapkernel"
+SRCREV_FORMAT = "synapkernel_synapdriver"
 
 PV = "${SYNAP_VERSION}+git+${@d.getVar('SRCREV_synapkernel')[:8]}"
 S = "${WORKDIR}/git/kernel"
