@@ -42,7 +42,7 @@ do_patch(){
         patch -p1 < myna2_brcm_bt_start.patch
     fi
 
-    if [ "${MACHINE}" = "sl2619" ] | [ "${MACHINE}" = "klamath" ]; then
+    if [ "${MACHINE}" = "sl2619" ] || [ "${MACHINE}" = "klamath" ]; then
         cd ${WORKDIR}
         patch -p1 < klamath_brcm_bt_start.patch
     fi
