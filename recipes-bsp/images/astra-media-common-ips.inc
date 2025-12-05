@@ -36,12 +36,9 @@ SYNA_GST_PLUGINS = "\
     gstreamer1.0-plugins-syna-videoconvertscale \
     gstreamer1.0-plugins-syna-compositor \
     gstreamer1.0-plugins-syna-synap \
+    gstreamer1.0-plugins-syna-ai \
 "
 PACKAGES =+ "${SYNA_GST_PLUGINS} ${PN}-dev ${PN}-dbg"
-
-FILES:gstreamer1.0-plugins-syna-videoconvertscale = "${libdir}/gstreamer-1.0/libgstsynavideoconvertscale.so"
-FILES:gstreamer1.0-plugins-syna-compositor        = "${libdir}/gstreamer-1.0/libgstsynacompositor.so"
-FILES:gstreamer1.0-plugins-syna-synap             = "${libdir}/gstreamer-1.0/libgstsynap.so"
 
 GPU_RELATED_PACKAGES = " \
     synasdk-syna-compositor \
@@ -52,6 +49,7 @@ GPU_RELATED_PACKAGES = " \
     ${GPU_GST_PACKAGES} \
     gstreamer1.0-plugins-syna-videoconvertscale \
     gstreamer1.0-plugins-syna-compositor \
+    gstreamer1.0-plugins-syna-ai \
 "
 
 NPU_RELATED_PACKAGES = " \

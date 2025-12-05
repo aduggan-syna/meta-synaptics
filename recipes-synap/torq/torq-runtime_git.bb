@@ -143,4 +143,3 @@ FILES:${PN}-dev += " \
     ${libdir}/pkgconfig/torq-runtime.pc \
 "
 COMPATIBLE_MACHINE = "syna"
-SYNAMACH:klamath = "sl2619"

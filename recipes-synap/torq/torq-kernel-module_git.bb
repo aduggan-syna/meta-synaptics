@@ -37,4 +37,3 @@ KERNEL_MODULE_AUTOLOAD:append = " syna_npu"
 KERNEL_MODULE_PROBECONF:append = " syna_npu"
 
 COMPATIBLE_MACHINE = "syna"
-SYNAMACH:klamath = "sl2619"

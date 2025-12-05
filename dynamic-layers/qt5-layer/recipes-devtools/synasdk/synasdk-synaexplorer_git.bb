@@ -29,6 +29,9 @@ inherit qmake5
 EXTRA_QMAKEVARS_PRE += "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'CONFIG+=x11', '', d)}"
 EXTRA_QMAKEVARS_PRE += "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'CONFIG+=wayland', '', d)}"
 
+# Add custom QMake configuration based on SYNA_NPU_ENABLE
+EXTRA_QMAKEVARS_PRE += "${@bb.utils.contains('SYNA_NPU_ENABLE', '1', 'CONFIG+=npu', '', d)}"
+
 do_install () {
     install -d ${D}${bindir}
     install -m 0755 ${WORKDIR}/build/synaexplorer ${D}${bindir}/
