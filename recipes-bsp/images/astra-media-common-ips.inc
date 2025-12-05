@@ -76,7 +76,7 @@ IMAGE_INSTALL:remove:sl2611 = " \
     synasdk-v4l2isp-qtapp \
 "
 
-TOOLCHAIN_TARGET_TASK:sl2611:remove = "synasdk-synap-runtime-staticdev"
-TOOLCHAIN_TARGET_TASK:sl2615:remove = " \
+TOOLCHAIN_TARGET_TASK:remove:sl2611 = "synasdk-synap-runtime-staticdev"
+TOOLCHAIN_TARGET_TASK:remove:sl2615 = " \
     ${@bb.utils.contains('SYNA_NPU_ENABLE', '0', 'synasdk-synap-runtime-staticdev', '', d)} \
 "
