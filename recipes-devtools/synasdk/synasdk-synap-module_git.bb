@@ -27,9 +27,9 @@ S = "${WORKDIR}/git/kernel"
 
 do_configure:prepend() {
     install -d ${S}/../lib/ebg_file
-    install -m 0644 ${SYNA_SDK_PATH}/synap/vsi_npu_driver/lib/ebg_file/* ${S}/../lib/ebg_file/
+    install -m 0644 ${WORKDIR}/${SYNA_SOURCE_PREFIX}/synap/vsi_npu_driver/lib/ebg_file/* ${S}/../lib/ebg_file/
     install -d ${S}/../lib/ta_interface
-    cp -r ${SYNA_SDK_PATH}/synap/vsi_npu_driver/lib/ta_interface/* ${S}/../lib/ta_interface/
+    cp -r ${WORKDIR}/${SYNA_SOURCE_PREFIX}/synap/vsi_npu_driver/lib/ta_interface/* ${S}/../lib/ta_interface/
 }
 
 EXTRA_OEMAKE = "-C ${STAGING_KERNEL_DIR} M=${S}"
