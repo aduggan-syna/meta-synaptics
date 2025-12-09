@@ -18,6 +18,9 @@ S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/v4l2isp/isp_video_test"
 
 inherit pkgconfig cmake
 
+EXTRA_OECMAKE:append:dolphin = " -DDOLPHIN=1"
+EXTRA_OECMAKE:append:klamath = " -DKLAMATH=1"
+
 FILES:${PN} = " \
     ${libdir}/*.so \
     ${bindir}/* \
