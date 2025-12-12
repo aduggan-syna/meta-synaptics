@@ -29,6 +29,10 @@ IMAGE_INSTALL:append:klamath = " \
     python3-ensurepip \
 "
 
+IMAGE_INSTALL:append:sl2619 = " \
+    torq-runtime-python \
+"
+
 IMAGE_INSTALL:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'syna-weston-desktop', '', d)} \
 "

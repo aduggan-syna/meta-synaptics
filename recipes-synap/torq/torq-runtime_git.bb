@@ -9,7 +9,7 @@ SRC_URI = " \
     git://github.com/google/googletest.git;branch=main;protocol=https;name=googletest;submodules=1;destsuffix=git/third_party/iree/third_party/googletest \
     git://github.com/dvidelabs/flatcc.git;branch=master;protocol=https;name=flatcc;submodules=1;destsuffix=git/third_party/iree/third_party/flatcc \
 "
-SRCREV_torq = "8c4477000abc0ac19d5c9b123bd43c6ec8deef8d"
+SRCREV_torq = "4db4811e4ea89ca94981769758f86f511b029db6"
 SRCREV_iree = "0802453ba39cc43bae75f05610e34cd35a4892e9"
 SRCREV_benchmark = "1e96bb0ab5e758861f5bbbd4edbd0a8d9a2a7cae"
 SRCREV_googletest = "c8393f8554419dc27b688c535b8fa4afb82146a4"
@@ -19,10 +19,18 @@ SRCREV_FORMAT = "torq"
 PV = "git+${@d.getVar('SRCREV_torq')[:8]}"
 S = "${WORKDIR}/git"
 
-inherit cmake pkgconfig
+inherit cmake pkgconfig python3native
 OECMAKE_GENERATOR = "Unix Makefiles"
 
-DEPENDS += "torq-hosttools-native"
+DEPENDS += "\
+  torq-hosttools-native \
+  python3-native \
+  python3-numpy-native \
+  python3 \
+  python3-numpy \
+  python3-nanobind \
+"
+
 EXTRA_OECMAKE += "\
   -DCMAKE_BUILD_TYPE=Release \
   -DIREE_BUILD_COMPILER=OFF \
@@ -39,7 +47,15 @@ EXTRA_OECMAKE += "\
   -DBENCHMARK_ENABLE_GTEST_TESTS=OFF \
   -DIREE_HOST_BIN_DIR=${STAGING_BINDIR_NATIVE}/iree \
 "
-OECMAKE_TARGET_COMPILE = "iree-run-module iree_runtime_unified"
+EXTRA_OECMAKE:append = " \
+  -DIREE_BUILD_PYTHON_BINDINGS=ON \
+  -Dnanobind_DIR=${RECIPE_SYSROOT}/usr/nanobind/cmake \
+  -DPython3_EXECUTABLE:FILEPATH=${RECIPE_SYSROOT_NATIVE}/usr/bin/python3-native/python3 \
+"
+do_compile:prepend() {
+    mkdir -p ${B}/third_party/iree/runtime/bindings/python/iree/_runtime_libs
+}
+OECMAKE_TARGET_COMPILE = "iree-run-module iree_runtime_unified iree_runtime_bindings_python_PyExtRt"
 
 IREE_BUILD_DIR ?= "${B}"
 DEP_LIBS = " \
@@ -132,14 +148,51 @@ Version: ${PV}
 Libs: -L${libdir} -ldriver_torq_full -liree_runtime_unified.a
 Cflags: -I${includedir}/iree
 EOF
-}    
+}
 
+do_install:append() {
+    pybind_src="${S}/third_party/iree/runtime/bindings/python/iree"
+    for d in _runtime runtime; do
+        if [ ! -d "${pybind_src}/${d}" ]; then
+            bbfatal "Directory ${pybind_src}/${d} not found!"
+        fi
+    done
 
-FILES:${PN} += "${bindir}/iree-run-module"
+    install -d ${D}${PYTHON_SITEPACKAGES_DIR}/iree
+    cp -r "${pybind_src}/_runtime" "${D}${PYTHON_SITEPACKAGES_DIR}/iree/"
+    cp -r "${pybind_src}/runtime"  "${D}${PYTHON_SITEPACKAGES_DIR}/iree/"
+
+    runtimelib="${B}/third_party/iree/runtime/bindings/python/iree/_runtime_libs"
+    pybase="${@d.getVar('PYTHON_BASEVERSION').replace('.', '')}"
+
+    built_so="${runtimelib}/_runtime.cpython-${pybase}-x86_64-linux-gnu.so"
+    if [ ! -f "${built_so}" ]; then
+        bbfatal "Expected built extension not found: ${built_so}"
+    fi
+    new_name="_runtime.cpython-${pybase}-${TARGET_ARCH}-linux-gnu.so"
+
+    install -d ${D}${PYTHON_SITEPACKAGES_DIR}/iree/_runtime_libs
+    install -m 0644 "${built_so}" \
+        "${D}${PYTHON_SITEPACKAGES_DIR}/iree/_runtime_libs/${new_name}"
+}
+
+PACKAGES += "${PN}-python"
+FILES:${PN} += " \
+    ${bindir}/iree-run-module \
+"
+
 FILES:${PN}-staticdev += "${libdir}/libiree_runtime_unified.a"
 FILES:${PN}-staticdev += "${libdir}/$(basename ${COMBINED_OUTPUT})"
+
 FILES:${PN}-dev += " \
     ${includedir}/iree \
     ${libdir}/pkgconfig/torq-runtime.pc \
 "
+
+FILES:${PN}-python += " \
+    ${PYTHON_SITEPACKAGES_DIR}/iree \
+"
+
+INSANE_SKIP:${PN} += "already-stripped"
+INSANE_SKIP:${PN}-python += "already-stripped"
 COMPATIBLE_MACHINE = "syna"
