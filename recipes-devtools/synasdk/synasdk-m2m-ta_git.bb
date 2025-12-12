@@ -11,7 +11,7 @@ SRC_URI = "${SYNA_SRC_OPTEE_DEV}"
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 SRCREV = "${SYNA_SRCREV_OPTEE_DEV}"
 
-S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee/optee_dev/ta/m2m/m2m"
+S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee/optee_dev/ta/tsp/m2m"
 B = "${WORKDIR}/build"
 
 SOC_VER:platypus = "platypus_rdk"
