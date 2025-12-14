@@ -1,6 +1,11 @@
 PACKAGECONFIG:append = "fdkaac"
 EXTRA_OEMESON:remove = "-Dfdkaac=disabled"
 PACKAGECONFIG:remove:klamath = "vulkan"
+#Remove GPU acceleration from GStreamer
+PACKAGECONFIG:remove:sl2611 = "opengl"
+PACKAGECONFIG:remove:sl2611 = "egl"
+PACKAGECONFIG:remove:sl2611 = "gl"
+PACKAGECONFIG:remove:sl2611 = "gles2"
 
 PACKAGECONFIG[fdkaac] = "-Dfdkaac=enabled,-Dfdkaac=disabled,fdk-aac"
 PACKAGECONFIG:append = " kms"

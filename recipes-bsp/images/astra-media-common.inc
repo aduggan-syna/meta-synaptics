@@ -106,6 +106,7 @@ IMAGE_INSTALL:append:klamath = " \
 
 IMAGE_INSTALL:append:myna2 = " \
     ${TEE_OPTEE} \
+    ${GST_PACKAGES} \
     ${GPU_RELATED_PACKAGES} \
     ${NPU_RELATED_PACKAGES} \
     brcm-patchram-plus \
@@ -124,12 +125,14 @@ IMAGE_INSTALL:append:klamath = " \
 
 IMAGE_INSTALL:append:sl2619 = " \
     ${TORQ_PACKAGES} \
+    ${GST_PACKAGES} \
     ${GPU_RELATED_PACKAGES} \
     ${NPU_RELATED_PACKAGES} \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \
     ${TEE_OPTEE} \
+    ${GST_PACKAGES} \
     ${GPU_RELATED_PACKAGES} \
     ${NPU_RELATED_PACKAGES} \
     synasdk-brcm-bt-start \
