@@ -11,3 +11,6 @@ Before=tpm2.target sysinit.target shutdown.target
 Type=notify
 EnvironmentFile=-/etc/default/tee-supplicant
 ExecStart=/usr/sbin/tee-supplicant $OPTARGS
+
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=60
