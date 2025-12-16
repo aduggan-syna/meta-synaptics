@@ -21,16 +21,17 @@ SRC_URI:append: = "${SYNA_SRC_TEE} "
 SRCREV_tee = "${SYNA_SRCREV_TEE}"
 SRCREV_FORMAT = "tee"
 
+DEPENDS:append = " \
+    synasdk-tee-bootparam-native \
+"
+
 SYNA_TEE_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee"
 do_compile:prepend() {
     . ${CONFIG_FILE}
     . ${CHIP_RC_FILE}
 
-    if [ "is${syna_chip_name}" != "isdolphin" ];then
-        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
-    else
-        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
-    fi
+
+    mr_file="${STAGING_DIR_NATIVE}${datadir}/syna/tee/bootparam/mr_config"
     bbnote "MR file: ${mr_file}"
 
     if [ ! -r "${mr_file}" ]; then

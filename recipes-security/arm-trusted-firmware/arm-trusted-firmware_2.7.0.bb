@@ -21,6 +21,7 @@ require recipes-devtools/synasdk/synasdk-config.inc
 DEPENDS:append = " \
     synasdk-tools-native \
     synasdk-security-native \
+    synasdk-tee-bootparam-native \
 "
 SRC_URI:append: = "${SYNA_SRC_TEE}"
 SRCREV_tee = "${SYNA_SRCREV_TEE}"
@@ -43,12 +44,10 @@ ATF_SOC:klamath = "klamath"
 do_compile:prepend() {
     . ${CONFIG_FILE}
     . ${CHIP_RC_FILE}
+
     def_file="${S}/plat/syna/${ATF_PLATFORM}/include/platform_def.h"
-    if [ "is${syna_chip_name}" != "isdolphin" ]; then
-        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
-    else
-        mr_file="${SYNA_TEE_PATH}/tee/products/${syna_chip_name}/genx/${CONFIG_TZK_MEM_LAYOUT}/mr_config"
-    fi
+
+    mr_file="${STAGING_DIR_NATIVE}${datadir}/syna/tee/bootparam/mr_config"
     bbnote "MR file: ${mr_file}"
 
     if [ ! -r "${mr_file}" ]; then

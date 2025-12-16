@@ -126,6 +126,7 @@ do_install:append () {
     # bootparam
     install -d ${D}/${datadir}/syna/tee/bootparam/
     cp -av ${B}/tee/* ${D}/${datadir}/syna/tee/bootparam
+    cp -av ${S}/bootparam.bin.mr ${D}/${datadir}/syna/tee/bootparam/mr_config
 }
 
 FILES:${PN} = "\
