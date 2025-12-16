@@ -23,6 +23,7 @@ IMAGE_INSTALL:append = " \
     syna-mount-generator \
     syna-wifi-tools \
     synasdk-bootctrl \
+    synasdk-power \
     libubootenv \
     libubootenv-bin \
     android-tools \

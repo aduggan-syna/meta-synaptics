@@ -63,6 +63,7 @@ IMAGE_INSTALL:append = " \
     v4l-utils \
     alsa-utils \
     synasdk-bootctrl \
+    synasdk-power \
     synasdk-sysctl-conf \
     synasdk-macaddr \
     syna-mount-generator \
