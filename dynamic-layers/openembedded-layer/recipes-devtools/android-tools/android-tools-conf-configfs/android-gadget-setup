@@ -13,7 +13,10 @@ if [ "null$serial" == "null" ]; then
     serial=`awk -F'chipid=' '{print $2}'|awk '{print $1}'`
   fi
   if [ "null$serial" == "null" ]; then
-    serial="SL16x0"
+    serial=`cat /etc/hostname`
+  fi
+  if [ "null$serial" == "null" ]; then
+    serial="SLx6x0"
   fi
 fi
 
