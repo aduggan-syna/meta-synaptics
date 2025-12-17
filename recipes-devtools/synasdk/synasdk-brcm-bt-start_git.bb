@@ -32,20 +32,20 @@ SRC_URI:append:klamath = " \
 "
 
 do_patch(){
-    if [ "${MACHINE}" = "sl1680" ]; then
-        cd ${WORKDIR}
-        patch -p1 < dolphin_brcm_bt_start.patch
-    fi
-
-    if [ "${MACHINE}" = "sl1620" ]; then
-        cd ${WORKDIR}
-        patch -p1 < myna2_brcm_bt_start.patch
-    fi
-
-    if [ "${MACHINE}" = "sl2619" ] || [ "${MACHINE}" = "klamath" ]; then
-        cd ${WORKDIR}
-        patch -p1 < klamath_brcm_bt_start.patch
-    fi
+    case "${MACHINE}" in
+        sl1680)
+            cd ${WORKDIR}
+            patch -p1 < dolphin_brcm_bt_start.patch
+            ;;
+        sl1620)
+            cd ${WORKDIR}
+            patch -p1 < myna2_brcm_bt_start.patch
+            ;;
+        sl2619|sl2615|sl2611|klamath)
+            cd ${WORKDIR}
+            patch -p1 < klamath_brcm_bt_start.patch
+            ;;
+    esac
 }
 
 do_install() {
