@@ -1,4 +1,4 @@
-LINUX_VERSION ?= "6.12.11"
+LINUX_VERSION ?= "6.12.62"
 PR = "r1"
 
 require linux-syna.inc
@@ -18,7 +18,7 @@ SRC_URI += "${SYNA_SRC_LINUX_6_12_MODULES}"
 
 KMETA = "kernel-meta"
 
-SRCREV_meta = "9c34085a1b39aaba74176c64be0ef5081f81e1ed"
+SRCREV_meta = "0bc72383691f29eb7fc4661afa9d67e106635929"
 SRCREV_linux_main = "${SYNA_SRCREV_LINUX_6_12}"
 SRCREV_linux_drivers_synaptics = "${SYNA_SRCREV_LINUX_6_12_MODULES}"
 
