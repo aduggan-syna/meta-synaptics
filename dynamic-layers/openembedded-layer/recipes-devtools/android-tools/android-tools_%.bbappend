@@ -1,10 +1,11 @@
-FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-SRC_URI += " \
-    file://core/0015-adb-getenv-adbd-port.patch;patchdir=system/core \
-    file://android-tools-adbd.service \
-"
+# Add simg2simg needed by image_synaimg
+TOOLS_TO_BUILD:append:class-native = " simg2simg"
 
-#Need not use mkbootimg here
-TOOLS:class-native:remove = "mkbootimg"
+do_install:append:class-native() {
+    install -D -p -m0755 ${S}/debian/out/system/core/simg2simg ${D}${bindir}/simg2simg
+}
 
+RDEPENDS:${BPN} = "p7zip"
 RDEPENDS:${PN}-adbd = "${PN}-conf-configfs"
+
+SYSTEMD_PACKAGES = "${PN}-adbd"
