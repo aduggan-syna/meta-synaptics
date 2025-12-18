@@ -34,6 +34,10 @@ EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
 
 EXTRA_OEMAKE += "CFLAGS='${TARGET_CFLAGS}' LDFLAGS='${TARGET_LDFLAGS}'"
 
+do_configure() {
+    oe_runmake -f Makefile.op clean
+}
+
 do_compile() {
     oe_runmake -f Makefile.op -C ${S} O=${B}/out
 }

@@ -28,6 +28,13 @@ EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  TA_CROSS_COMPILE=${HOST_PREFIX} \
                  TEE_CATEGORY=OPTEE"
 
+do_configure() {
+    oe_runmake -f Makefile.op -C ${S}/otp_program clean
+    oe_runmake -f Makefile.op -C ${S}/write_rkekid clean
+    oe_runmake -f Makefile.op -C ${S}/read_rkekid clean
+    oe_runmake -f Makefile.op -C ${S}/factory_util clean
+}
+
 do_compile() {
     oe_runmake -f Makefile.op -C ${S}/otp_program O=${B}/out
     oe_runmake -f Makefile.op -C ${S}/write_rkekid O=${B}/out

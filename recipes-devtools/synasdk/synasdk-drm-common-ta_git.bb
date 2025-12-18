@@ -28,6 +28,10 @@ EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  CROSS_COMPILE=${HOST_PREFIX} \
                  O=${OUT}"
 
+do_configure() {
+    oe_runmake -f Makefile.op clean
+}
+
 do_compile() {
     oe_runmake -f Makefile.op -C ${S}
 }
