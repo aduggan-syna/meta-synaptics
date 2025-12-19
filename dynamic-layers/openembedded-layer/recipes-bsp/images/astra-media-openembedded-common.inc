@@ -17,20 +17,17 @@ IMAGE_INSTALL:append = " \
 
 IMAGE_INSTALL:append:platypus = " \
     pulseaudio \
-    evtest \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
     pulseaudio \
-    evtest \
 "
 
 IMAGE_INSTALL:append:myna2 = " \
     pulseaudio \
-    evtest \
 "
 
-IMAGE_INSTALL:append:klamath = " \
+IMAGE_INSTALL:append = " \
     evtest \
 "
 
