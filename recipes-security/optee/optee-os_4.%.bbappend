@@ -18,7 +18,8 @@ DEPENDS:append:dolphin = "synasdk-vpu-ta \
                           synasdk-dhub-ta \
                           synasdk-gpu-ta \
                           synasdk-tsp-ta \
-                          synasdk-m2m-ta"
+                          synasdk-m2m-ta \
+                          synasdk-ovp-ta"
 
 
 DEPENDS:append:platypus = "synasdk-vpu-ta \
@@ -26,7 +27,8 @@ DEPENDS:append:platypus = "synasdk-vpu-ta \
                            synasdk-ptm-ta \
                            synasdk-gpu-ta \
                            synasdk-tsp-ta \
-                           synasdk-m2m-ta"
+                           synasdk-m2m-ta \
+                           synasdk-ovp-ta"
 
 SYNA_TA_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/ta_enc"
 
@@ -39,6 +41,7 @@ EARLY_SYNA_TA:platypus=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d
                          ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f0.stripped.elf \
                          ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e8.stripped.elf \
                          ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e9.stripped.elf \
+                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f4.stripped.elf \
 "
 EARLY_SYNA_TA:dolphin=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f5.stripped.elf \
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae10436.stripped.elf \
@@ -48,6 +51,7 @@ EARLY_SYNA_TA:dolphin=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f3.stripped.elf \
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e8.stripped.elf \
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e9.stripped.elf \
+                        ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f4.stripped.elf \
 "
 EARLY_TA_CFG = " CFG_EARLY_TA=y EARLY_TA_PATHS="${EARLY_SYNA_TA}""
 EARLY_TA_CFG:sl1680spi = ""
