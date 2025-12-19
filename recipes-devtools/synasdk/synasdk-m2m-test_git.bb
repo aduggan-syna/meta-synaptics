@@ -35,4 +35,4 @@ do_install() {
     install -m 0755 ${OUT}/${UNIT_TEST_BIN} ${D}${bindir}
 }
 
-FILES:${PN}-dev = "${bindir}/m2m_test"
+FILES:${PN} = "${bindir}/m2m_test"

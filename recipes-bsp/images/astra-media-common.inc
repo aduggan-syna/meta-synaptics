@@ -140,6 +140,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     pciutils \
     synasdk-factory-ta \
     synasdk-drm-factory-ca-program \
+    synasdk-m2m-test \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
