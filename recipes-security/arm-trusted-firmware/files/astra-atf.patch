@@ -126202,3 +126202,47 @@ index a67c463..6404458 100644
 -- 
 2.7.4
 
+
+From 07c61eb7c0a2e10f8d6e080b1b7dfa4f8946d5bb Mon Sep 17 00:00:00 2001
+From: Shaojun Feng <Shaojun.Feng@synaptics.com>
+Date: Thu, 25 Dec 2025 10:43:20 +0800
+Subject: [PATCH] klamath: add secure separation PI call
+
+Change-Id: I07dc21eec3d4898b1825b681e775be798554e79f
+Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
+index 2ffbeb0..9941df0 100644
+--- a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
++++ b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
+@@ -254,6 +254,15 @@ static int mailbox_get_spk_version(unsigned int *version)
+ 	return 0;
+ }
+ 
++int seclib_security_separation_done(void)
++{
++	mailbox_command_t cmd = {0};
++	mailbox_rsp_t rsp = {0};
++
++	cmd.command.cmd_val = SP_CMD_SECURE_SEPARATION_DONE;
++
++	return mbox_send_command(&cmd, &rsp);
++}
+ 
+ void mailbox_init(void)
+ {
+@@ -264,5 +273,8 @@ void mailbox_init(void)
+ 
+ 	mailbox_get_spk_version(&version);
+ 
++	if (seclib_security_separation_done())
++		 ERROR("fail to open JTAG\n");
++
+ 	INFO("mailbox init done.\n");
+ }
+-- 
+2.7.4
+
