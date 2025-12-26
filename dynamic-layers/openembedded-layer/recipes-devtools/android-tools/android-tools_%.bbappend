@@ -1,3 +1,7 @@
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+SRC_URI += " file://android-tools-adbd.service"
+
 # Add simg2simg needed by image_synaimg
 TOOLS_TO_BUILD:append:class-native = " simg2simg"
 
