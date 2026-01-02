@@ -4,6 +4,7 @@ stty erase ^H
 
 AUTO_CONNECT_FILE="/etc/wifi_autoconnect"
 USAGE_FILE="/etc/wifi_usage"
+GUI_MARKER_FILE="/etc/wifi_gui_connected"
 SERVICE_MODE=false
 SCAN_BLOCK=$(fw_printenv -n SCAN_BLOCK 2>/dev/null)
 
@@ -34,7 +35,12 @@ systemctl stop wpa_supplicant@wlan0.service 2>/dev/null
 systemctl stop systemd-networkd 2>/dev/null
 systemctl stop NetworkManager 2>/dev/null
 systemctl stop wpa_supplicant 2>/dev/null
-
+#if created by GUI, remove it
+if [ -f "$GUI_MARKER_FILE" ]; then
+    echo "Wi-Fi last connected via GUI"
+    rm -rf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf 2>/dev/null
+    rm -rf "$GUI_MARKER_FILE" 2>/dev/null
+fi
 
 rfkill list | awk -F: '/^[0-9]+:.*Wireless LAN/ {print $1}' | while read -r rfkill_id; do
 
@@ -154,6 +160,7 @@ EOF
         check_command "systemctl restart wpa_supplicant@<interface>.service" "$out"
         udhcpc -i "$INTERFACE"
         echo "Auto-connect successful to $AUTO_CONNECT_SSID."
+        echo "gui:true" > "$GUI_MARKER_FILE"
         exit 0
     else
         echo "Service mode: No auto-connect SSID configured. Exiting."

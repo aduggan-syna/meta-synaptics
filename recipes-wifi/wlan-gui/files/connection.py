@@ -98,6 +98,9 @@ def wifi_connection(ssid, psk, auth, password):
         print("Waiting for authentication...")
         time.sleep(4)
         retries += 1
+
+    with open("/etc/wifi_gui_connected", "w") as f:
+        f.write("gui:true\n")
     run_command("udhcpc -i wlan0")
     return True
 
