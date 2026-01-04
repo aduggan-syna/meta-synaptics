@@ -24,5 +24,5 @@ MACHINE_EXTRA_RRECOMMENDS += " \
 "
 
 # Synaptics BSP default providers
-PREFERRED_PROVIDER_virtual/bootloader ?= "syna-bootloader"
+PREFERRED_PROVIDER_virtual/bootloader ?= "syna-u-boot"
 PREFERRED_PROVIDER_virtual/kernel ?= "linux-syna"
