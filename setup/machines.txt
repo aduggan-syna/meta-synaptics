@@ -10,3 +10,4 @@ conf/machine/sl1640spi.conf
 conf/machine/sl2611.conf
 conf/machine/sl2615.conf
 conf/machine/sl2619.conf
+conf/machine/sl2619nand.conf

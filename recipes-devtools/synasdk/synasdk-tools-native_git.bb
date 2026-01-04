@@ -36,6 +36,8 @@ do_install () {
 
     install -m 0755 ${S}/build/tools/bin/gen_secure_image ${D}${bindir}/gen_secure_image
     install -m 0755 ${S}/build/tools/bin/gen_x_secure_image ${D}${bindir}/gen_x_secure_image
+    install -m 0755 ${S}/build/tools/bin/mk_nandblock0_image ${D}${bindir}/mk_nandblock0_image
+    install -m 0755 ${S}/build/tools/bin/klamath/mk_nandblock0_image ${D}${bindir}/klamath-mk_nandblock0_image
 
     install -d ${D}${prefix}/libexec
     install -d ${D}${prefix}/libexec/syna
