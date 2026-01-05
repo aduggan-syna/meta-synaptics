@@ -23,12 +23,10 @@ RDEPENDS:${PN} = " \
     vulkan-loader \
 "
 
-COMPATIBLE_MACHINE = "syna"
+COMPATIBLE_MACHINE = "platypus|dolphin|myna2"
 SYNAMACH:platypus = "sl1640"
 SYNAMACH:dolphin = "sl1680"
 SYNAMACH:myna2 = "sl1620"
-# Fix me: use sl1620 gpu binary for klamath to pass build
-SYNAMACH:klamath = "sl1620"
 
 PREBUILT_PATH = "sysroot/linux-baseline/data/gfx_prebuilt/imagination/${SYNAMACH}"
 DISPLAY_SERVER = "${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'Xorg', 'wayland', d)}"
