@@ -126428,3 +126428,74 @@ index 6404458..2b87277 100644
 -- 
 2.7.4
 
+
+From e2c59f1b7985f35309b131f58f03f83e2e114601 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Tue, 13 Jan 2026 11:32:38 +0800
+Subject: [PATCH] klamath: set secondary CPU off when warmboot
+
+Change-Id: I0660c60a6ba98a6f646aee18d955756eb4252cfc
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ bl31/aarch64/bl31_entrypoint.S                 |  2 +-
+ plat/syna/berlin/common/aarch64/berlin_setup.S | 22 ++++++++++++++++++++++
+ plat/syna/berlin/common/berlin_common.mk       |  1 +
+ 3 files changed, 24 insertions(+), 1 deletion(-)
+ create mode 100644 plat/syna/berlin/common/aarch64/berlin_setup.S
+
+diff --git a/bl31/aarch64/bl31_entrypoint.S b/bl31/aarch64/bl31_entrypoint.S
+index c7eb9fc..56d80fb 100644
+--- a/bl31/aarch64/bl31_entrypoint.S
++++ b/bl31/aarch64/bl31_entrypoint.S
+@@ -33,7 +33,7 @@ func bl31_entrypoint
+ 	ldr x0, =boot_mode
+ 	ldr w22, [x0]
+ 	cmp w22, #1
+-	beq bl31_warm_entrypoint
++	beq plat_warm_boot_setup
+ 1:
+ #endif
+ 	/* ---------------------------------------------------------------
+diff --git a/plat/syna/berlin/common/aarch64/berlin_setup.S b/plat/syna/berlin/common/aarch64/berlin_setup.S
+new file mode 100644
+index 0000000..74937de
+--- /dev/null
++++ b/plat/syna/berlin/common/aarch64/berlin_setup.S
+@@ -0,0 +1,22 @@
++
++/*
++ * Copyright (c) 2026, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#include <arch.h>
++#include <asm_macros.S>
++#include <platform_def.h>
++
++	.globl	plat_secondary_cold_boot_setup
++	.globl	plat_is_my_cpu_primary
++	.globl	bl31_warm_entrypoint
++	.globl	plat_warm_boot_setup
++
++func plat_warm_boot_setup
++	bl	plat_is_my_cpu_primary
++	cbnz	w0, bl31_warm_entrypoint
++	/* This is a cold boot on a secondary CPU */
++	bl	plat_secondary_cold_boot_setup
++endfunc plat_warm_boot_setup
+diff --git a/plat/syna/berlin/common/berlin_common.mk b/plat/syna/berlin/common/berlin_common.mk
+index 7e08255..fffa4a3 100644
+--- a/plat/syna/berlin/common/berlin_common.mk
++++ b/plat/syna/berlin/common/berlin_common.mk
+@@ -40,6 +40,7 @@ BL31_SOURCES		+=	${BERLIN_GICv2_SOURCES}		\
+ 				drivers/delay_timer/generic_delay_timer.c	\
+ 				plat/common/plat_psci_common.c			\
+ 				${COMMON_DIR}/aarch64/berlin_helpers.S		\
++				${COMMON_DIR}/aarch64/berlin_setup.S		\
+ 				${COMMON_DIR}/drivers/tos/tz_boot_param.c	\
+ 				${COMMON_DIR}/drivers/tos/tz.c			\
+ 				${COMMON_DIR}/drivers/secure_register/secure_register.c	\
+-- 
+2.7.4
+
