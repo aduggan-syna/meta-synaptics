@@ -126246,3 +126246,185 @@ index 2ffbeb0..9941df0 100644
 -- 
 2.7.4
 
+
+From 1effd0d85f1ce81e04befeae3bbab72957ed12b1 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Wed, 24 Dec 2025 15:01:01 +0800
+Subject: [PATCH] syna: enable TRNG_SUPPORT
+
+Change-Id: I24e61243d579e6cff099ac22707f9c35565b8895
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/berlin_common.mk           |  3 ++
+ plat/syna/berlin/common/berlin_trng.c              | 54 ++++++++++++++++++++++
+ .../common/drivers/appcrypto/appcrypto_lock.h      | 14 ++++++
+ .../common/drivers/appcrypto/appcrypto_rng.c       |  8 ++++
+ plat/syna/berlin/common/drivers/bcm/bcm.c          | 11 ++++-
+ plat/syna/berlin/platform.mk                       |  1 +
+ 6 files changed, 90 insertions(+), 1 deletion(-)
+ create mode 100644 plat/syna/berlin/common/berlin_trng.c
+ create mode 100644 plat/syna/berlin/common/drivers/appcrypto/appcrypto_lock.h
+
+diff --git a/plat/syna/berlin/common/berlin_common.mk b/plat/syna/berlin/common/berlin_common.mk
+index 57f165a..7e08255 100644
+--- a/plat/syna/berlin/common/berlin_common.mk
++++ b/plat/syna/berlin/common/berlin_common.mk
+@@ -28,6 +28,9 @@ ifneq (${ENABLE_STACK_PROTECTOR},0)
+ PLAT_BL_COMMON_SOURCES	+=	plat/syna/berlin/common/berlin_stack_protector.c
+ endif
+ 
++ifeq (${TRNG_SUPPORT}, 1)
++PLAT_BL_COMMON_SOURCES	+=	plat/syna/berlin/common/berlin_trng.c
++endif
+ SYNA_BCM ?= 1
+ SYNA_SM ?= 1
+ 
+diff --git a/plat/syna/berlin/common/berlin_trng.c b/plat/syna/berlin/common/berlin_trng.c
+new file mode 100644
+index 0000000..9d098d2
+--- /dev/null
++++ b/plat/syna/berlin/common/berlin_trng.c
+@@ -0,0 +1,54 @@
++/*
++ * Copyright (c) 2025, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#include <arm_acle.h>
++#include <assert.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <string.h>
++
++#include <lib/mmio.h>
++#include <lib/utils_def.h>
++#include <platform_def.h>
++
++#include <lib/smccc.h>
++#include <services/trng_svc.h>
++#include <smccc_helpers.h>
++
++#include <plat/common/platform.h>
++
++extern void hw_get_random_bytes(uint8_t *data, uint32_t size);
++
++DEFINE_SVC_UUID2(_plat_trng_uuid,
++	0x1316a183, 0x894d, 0x43fe, 0x98, 0x93,
++	0xbb, 0x94, 0x6a, 0xe1, 0x04, 0x43
++);
++uuid_t plat_trng_uuid;
++
++static uint8_t trng_buf[64]
++    __attribute__((aligned(CACHE_WRITEBACK_GRANULE)));
++
++bool plat_get_entropy(uint64_t *out)
++{
++	memset(trng_buf, 0, sizeof(trng_buf));
++	hw_get_random_bytes(trng_buf, sizeof(*out));
++
++	if (out)
++		memcpy(out, trng_buf, sizeof(*out));
++
++	return true;
++}
++
++void plat_entropy_setup(void)
++{
++	uint64_t dummy;
++
++	plat_trng_uuid = _plat_trng_uuid;
++
++	/* Initialise the entropy source and trigger RNG generation */
++	plat_get_entropy(&dummy);
++	INFO("random dummy value = 0x%lx", dummy);
++}
+diff --git a/plat/syna/berlin/common/drivers/appcrypto/appcrypto_lock.h b/plat/syna/berlin/common/drivers/appcrypto/appcrypto_lock.h
+new file mode 100644
+index 0000000..c0db1d5
+--- /dev/null
++++ b/plat/syna/berlin/common/drivers/appcrypto/appcrypto_lock.h
+@@ -0,0 +1,14 @@
++
++/*
++ * Copyright (c) 2025, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#ifndef _APPCRYPTO_LOCK_H
++#define _APPCRYPTO_LOCK_H
++
++int32_t appcrypto_lock(void);
++int32_t appcrypto_try_lock(void);
++int32_t appcrypto_unlock(void);
++#endif // _APPCRYPTO_LOCK_H
+diff --git a/plat/syna/berlin/common/drivers/appcrypto/appcrypto_rng.c b/plat/syna/berlin/common/drivers/appcrypto/appcrypto_rng.c
+index 86c2399..1182f03 100644
+--- a/plat/syna/berlin/common/drivers/appcrypto/appcrypto_rng.c
++++ b/plat/syna/berlin/common/drivers/appcrypto/appcrypto_rng.c
+@@ -8,6 +8,7 @@
+ #include "nexus_fw_include/nexus_klamath_memmap.h"
+ #include <lib/mmio.h>
+ #include <platform_def.h>
++#include "appcrypto_lock.h"
+ 
+ #define BASE_ADDR_TRNG     MCU_DMA_CRYPT_REGION(START_MCU_TRNG_S)
+ 
+@@ -79,3 +80,10 @@ void appcrypto_get_random(uint8_t *data, uint32_t size)
+ 
+     return;
+ }
++
++void hw_get_random_bytes(uint8_t *data, uint32_t size)
++{
++	appcrypto_lock();
++	appcrypto_get_random(data, size);
++	appcrypto_unlock();
++}
+diff --git a/plat/syna/berlin/common/drivers/bcm/bcm.c b/plat/syna/berlin/common/drivers/bcm/bcm.c
+index f3e4cbe..a214ddd 100644
+--- a/plat/syna/berlin/common/drivers/bcm/bcm.c
++++ b/plat/syna/berlin/common/drivers/bcm/bcm.c
+@@ -247,16 +247,25 @@ int bcm_hwrand(void *    rand_addr, unsigned int rand_len)
+ 	unsigned int status;
+ 	BCM_MAILBOX_COMMAND cmd;
+ 
++	flush_dcache_range((uintptr_t)rand_addr, rand_len);
+ 	bcm_clear_command(&cmd);
+ 	cmd.arg0 = (unsigned int)(unsigned long)rand_addr;
+ 	cmd.arg1 = rand_len;
+ 	cmd.command = BCM_GET_RANDOM;
+ 
+ 	status = bcm_exec_func(&cmd);
+-
++	if (!status) {
++		inv_dcache_range((uintptr_t)rand_addr, rand_len);
++	}
+ 	return status;
+ }
+ 
++void hw_get_random_bytes(uint8_t *data, uint32_t size)
++{
++	if (bcm_hwrand(data, size))
++		panic();
++}
++
+ int bcm_erom_load_usb_image(uint64_t image_type, uint64_t dest_addr,
+ 				uint64_t file_name_addr, uint64_t file_name_len)
+ {
+diff --git a/plat/syna/berlin/platform.mk b/plat/syna/berlin/platform.mk
+index 6404458..2b87277 100644
+--- a/plat/syna/berlin/platform.mk
++++ b/plat/syna/berlin/platform.mk
+@@ -14,6 +14,7 @@ NS_TIMER_SWITCH	:= 0
+ 
+ WORKAROUND_CVE_2017_5715 := 1
+ SPMD_SPM_AT_SEL2 :=0
++TRNG_SUPPORT         :=      1
+ 
+ CRASH_REPORTING		:=	1
+ $(eval $(call add_define,CRASH_REPORTING))
+-- 
+2.7.4
+
