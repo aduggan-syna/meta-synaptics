@@ -12,6 +12,11 @@ do_install[depends] += " \
     virtual/kernel:do_shared_workdir \
 "
 
+keep_sdio_fws() {
+    rm -f ${D}${nonarch_base_libdir}/firmware/fw_bcm*.bin
+    rm -rf ${D}${nonarch_base_libdir}/firmware/mrvl
+}
+
 do_install() {
     install -d ${D}${nonarch_base_libdir}/firmware/bcm
     install -m 0644 ${STAGING_KERNEL_DIR}/firmware/bcm/* ${D}${nonarch_base_libdir}/firmware/bcm
@@ -29,6 +34,10 @@ do_install() {
 
     install -d ${D}${nonarch_base_libdir}/firmware/mrvl
     install -m 0644 ${STAGING_KERNEL_DIR}/firmware/mrvl/* ${D}${nonarch_base_libdir}/firmware/mrvl
+}
+
+do_install:append:sl2611nand() {
+    keep_sdio_fws
 }
 
 FILES:${PN} = " \

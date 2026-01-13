@@ -234,8 +234,16 @@ IMAGE_CMD:synanandimg () {
     mkdir ${IMAGE_ROOTFS}/boot
     cp ${DEPLOY_DIR_IMAGE}/linux_bootimgs.subimg ${IMAGE_ROOTFS}/boot
 
+    #zip large linux drivers
+    large_drivers="synaptics/net/wireless"
+    for driver in ${large_drivers}; do
+        find ${IMAGE_ROOTFS}/${nonarch_base_libdir}/modules/${PREFERRED_VERSION_linux-syna}/kernel/drivers/${driver} -name "*.ko" | \
+        xargs xz
+    done
+
     mtbd_size2vol_size=`expr 1024 \* 1024 / ${CONFIG_NAND_BLOCK_SIZE}`
     vol_size=`expr ${max_erase_blks} / ${mtbd_size2vol_size}`
+
     #make ubifs rootfs
     mkfs_ubifs " -e ${leb} -c ${max_erase_blks} -m ${CONFIG_NAND_PAGE_SIZE} -x none" " -vv -m ${CONFIG_NAND_PAGE_SIZE} -p ${CONFIG_NAND_BLOCK_SIZE} -s ${CONFIG_NAND_PAGE_SIZE}" "${vol_size}" "${IMAGE_ROOTFS}" "rootfs"
 
@@ -267,5 +275,5 @@ IMAGE_CMD:synanandimg () {
         fi
     done
     unand_gen_images "uNAND_full" "${subimg_list}"
-    unand_shrink_part "uNAND_full" "${subimg_list}" "rootfs_b"
+    #unand_shrink_part "uNAND_full" "${subimg_list}" "rootfs_b"
 }
