@@ -14,9 +14,10 @@ SRC_URI = "${SYNA_SRC_OPTEE_DEV}"
 SRCREV = "${SYNA_SRCREV_OPTEE_DEV}"
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee/optee_dev/ta/drm/drm_common_ta"
-B = "${S}"
-OUT = "${WORKDIR}/OUT"
+S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/tee/optee_dev"
+SUBDIR  = "ta/drm/drm_common_ta"
+B       = "${WORKDIR}/build/${BPN}"
+OUT     = "${B}/out"
 
 CHIP_FULL_NAME:platypus = "platypus"
 CHIP_FULL_NAME:dolphin = "dolphin_a0"
@@ -33,7 +34,7 @@ do_configure() {
 }
 
 do_compile() {
-    oe_runmake -f Makefile.op -C ${S}
+    oe_runmake -f Makefile.op -C ${S}/${SUBDIR}
 }
 
 do_install() {
