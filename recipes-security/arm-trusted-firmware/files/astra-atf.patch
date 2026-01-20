@@ -126500,7 +126500,35 @@ index 7e08255..fffa4a3 100644
 2.7.4
 
 
-From 7bef84b96e60ba0c48ffef81f2b40668c5d6fdd4 Mon Sep 17 00:00:00 2001
+From 8fc45f7dbf4c73ba3e7cdc9cb34bd57de79835a2 Mon Sep 17 00:00:00 2001
+From: Shaojun Feng <Shaojun.Feng@synaptics.com>
+Date: Tue, 20 Jan 2026 11:02:18 +0800
+Subject: [PATCH] syna: disable TRNG_SUPPORT
+
+Change-Id: Ie10c17265339629f8f3e009723c7e343f376acb8
+Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
+---
+ plat/syna/berlin/platform.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/syna/berlin/platform.mk b/plat/syna/berlin/platform.mk
+index 2b87277..27ef920 100644
+--- a/plat/syna/berlin/platform.mk
++++ b/plat/syna/berlin/platform.mk
+@@ -14,7 +14,7 @@ NS_TIMER_SWITCH	:= 0
+ 
+ WORKAROUND_CVE_2017_5715 := 1
+ SPMD_SPM_AT_SEL2 :=0
+-TRNG_SUPPORT         :=      1
++TRNG_SUPPORT         :=      0
+ 
+ CRASH_REPORTING		:=	1
+ $(eval $(call add_define,CRASH_REPORTING))
+-- 
+2.7.4
+
+
+From 60089a02231a818e135db8959b5f5ba4e34a49ef Mon Sep 17 00:00:00 2001
 From: Darren Huang <darren.huang@synaptics.com>
 Date: Wed, 14 Jan 2026 09:03:36 +0800
 Subject: [PATCH] syna: sip: add SYNA_SIP_SMC[32/64]_WARMBOOT_COUNT
