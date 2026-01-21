@@ -126625,3 +126625,31 @@ index 92c9d80..1b30e87 100644
 -- 
 2.7.4
 
+
+From ff5d976dd6f17a640810290965a4b68754a75ed6 Mon Sep 17 00:00:00 2001
+From: Shaojun Feng <Shaojun.Feng@synaptics.com>
+Date: Tue, 20 Jan 2026 15:36:44 +0800
+Subject: [PATCH] syna: fix a typo
+
+Change-Id: I6ec7a1975a8c26eecfb02a6e225d500c5cfa07ac
+Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/bcm/bcm_reg.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/syna/berlin/common/drivers/bcm/bcm_reg.h b/plat/syna/berlin/common/drivers/bcm/bcm_reg.h
+index cb6781d..c3b0a51 100644
+--- a/plat/syna/berlin/common/drivers/bcm/bcm_reg.h
++++ b/plat/syna/berlin/common/drivers/bcm/bcm_reg.h
+@@ -4,7 +4,7 @@
+  * SPDX-License-Identifier: BSD-3-Clause
+  */
+ 
+-#ifndef __BCM_REG_H_
++#ifndef __BCM_REG_H__
+ #define __BCM_REG_H__
+ 
+ // the command mailbox registers which appears in the Client's memory space
+-- 
+2.7.4
+
