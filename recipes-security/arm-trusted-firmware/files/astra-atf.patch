@@ -126653,3 +126653,202 @@ index cb6781d..c3b0a51 100644
 -- 
 2.7.4
 
+
+From 8df297f7478e9b39837f49b30e06ba868fcd98a1 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Wed, 21 Jan 2026 14:39:08 +0800
+Subject: [PATCH] Revert "syna: sip: add SYNA_SIP_SMC[32/64]_WARMBOOT_COUNT"
+
+This reverts commit 60089a02231a818e135db8959b5f5ba4e34a49ef.
+
+Change-Id: Ia2bb4de7b5f9888e307905078f4a5079b6454db2
+---
+ plat/syna/berlin/common/berlin_sip_svc.c  |  5 -----
+ plat/syna/berlin/common/drivers/bcm/bcm.c | 20 --------------------
+ plat/syna/berlin/include/berlin_sip_svc.h |  4 ----
+ plat/syna/berlin/include/drivers/bcm.h    |  1 -
+ 4 files changed, 30 deletions(-)
+
+diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
+index ba3a0aa..829a4bd 100644
+--- a/plat/syna/berlin/common/berlin_sip_svc.c
++++ b/plat/syna/berlin/common/berlin_sip_svc.c
+@@ -82,11 +82,6 @@ uintptr_t berlin_sip_handler(uint32_t smc_fid,
+ 	case SYNA_SIP_SMC64_OTP_WRITE_OTP:
+ 		ret = bcm_otp_write_otp(x1, (uint32_t)x2, (uint32_t)x3);
+ 		SMC_RET1(handle, ret);
+-	case SYNA_SIP_SMC32_WARMBOOT_COUNT:
+-	case SYNA_SIP_SMC64_WARMBOOT_COUNT:
+-		 uint64_t wb_count = 0;
+-		 ret = bcm_get_warmboot_cnt(&wb_count);
+-		 SMC_RET2(handle, ret, wb_count);
+ #endif
+ 	default:
+ 		return berlin_default_handler(smc_fid, x1, x2, x3, x4,
+diff --git a/plat/syna/berlin/common/drivers/bcm/bcm.c b/plat/syna/berlin/common/drivers/bcm/bcm.c
+index d56b74a..a214ddd 100644
+--- a/plat/syna/berlin/common/drivers/bcm/bcm.c
++++ b/plat/syna/berlin/common/drivers/bcm/bcm.c
+@@ -18,7 +18,6 @@
+ #define BCM_OTP_RD_PUBLIC_OTP		0x500A
+ #define BCM_OTP_UTILS_OTP_READ     	0x500D
+ #define BCM_OTP_UTILS_OTP_WRITE     0x500E
+-#define BCM_GET_WARMBOOT_COUNT      0xD004
+ 
+ #define BCM_EROM_CFG_DDR_SCRAMBLE_KEY		0x0000
+ #define BCM_EROM_LOAD_MINILOADER		0x0001
+@@ -330,26 +329,7 @@ int bcm_otp_read_otp(uint32_t index, uint32_t *pdata, uint32_t *pmask)
+ 
+ 	return status;
+ }
+-int bcm_get_warmboot_cnt(uint64_t *pdata)
+-{
+-	unsigned int status;
+-	BCM_MAILBOX_COMMAND cmd;
+ 
+-	bcm_clear_command(&cmd);
+-	/* 1. Set the physical address for BCM to write the result into */
+-	cmd.arg0 = (uint32_t)(uintptr_t)virt_to_phy(pdata);
+-	cmd.command = BCM_GET_WARMBOOT_COUNT;
+-
+-	memset(pdata, 0, sizeof(uint64_t));
+-	/* 2. Flush D-cache: Ensure memory is ready before BCM hardware access */
+-	flush_dcache_range((uintptr_t)pdata, sizeof(uint64_t));
+-	/* 3. Execute Mailbox command: This triggers the BCM firmware logic */
+-	status = bcm_exec_func(&cmd);
+-	/* 4. Invalidate D-cache: Force CPU to read the fresh data written by BCM
+-          from physical RAM instead of stale local cache lines */
+-	inv_dcache_range((uintptr_t)pdata, sizeof(uint64_t));
+-	return status;
+-}
+ int bcm_otp_write_otp(uint32_t index, uint32_t data, uint32_t mask)
+ {
+ 	unsigned int status;
+diff --git a/plat/syna/berlin/include/berlin_sip_svc.h b/plat/syna/berlin/include/berlin_sip_svc.h
+index bd00d92..684b7d0 100644
+--- a/plat/syna/berlin/include/berlin_sip_svc.h
++++ b/plat/syna/berlin/include/berlin_sip_svc.h
+@@ -29,8 +29,4 @@
+ #define SYNA_SIP_SMC32_RD_PUBLIC_OTP				0x8200000C
+ #define SYNA_SIP_SMC64_RD_PUBLIC_OTP				0xC200000C
+ 
+-
+-#define SYNA_SIP_SMC32_WARMBOOT_COUNT				0x8200000D
+-#define SYNA_SIP_SMC64_WARMBOOT_COUNT				0xC200000D
+-
+ #endif /* BERLIN_SIP_SVC_H */
+diff --git a/plat/syna/berlin/include/drivers/bcm.h b/plat/syna/berlin/include/drivers/bcm.h
+index 1b30e87..92c9d80 100644
+--- a/plat/syna/berlin/include/drivers/bcm.h
++++ b/plat/syna/berlin/include/drivers/bcm.h
+@@ -101,5 +101,4 @@ int bcm_erom_program_otp(uint64_t pphy_otp_layout, uint64_t size_opt_layout);
+ int bcm_otp_read_otp(uint32_t index, uint32_t *pdata, uint32_t *pmask);
+ int bcm_otp_write_otp(uint32_t index, uint32_t data, uint32_t mask);
+ int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size);
+-int bcm_get_warmboot_cnt(uint64_t *pdata);
+ #endif
+-- 
+2.7.4
+
+
+From 65d148c2000444e11e37c6c75e825a9ee213592b Mon Sep 17 00:00:00 2001
+From: Darren Huang <darren.huang@synaptics.com>
+Date: Wed, 21 Jan 2026 14:41:30 +0800
+Subject: [PATCH] syna: sip: add SYNA_SIP_SMC[32/64]_SECURE_SRAM_ACCESS
+
+Change-Id: I0171cf6e1f1944efc6697fceff69ffdfa162ad40
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/berlin_sip_svc.c  |  7 +++++++
+ plat/syna/berlin/common/drivers/bcm/bcm.c | 24 ++++++++++++++++++++++++
+ plat/syna/berlin/include/berlin_sip_svc.h |  4 ++++
+ plat/syna/berlin/include/drivers/bcm.h    |  1 +
+ 4 files changed, 36 insertions(+)
+
+diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
+index 829a4bd..aa633ab 100644
+--- a/plat/syna/berlin/common/berlin_sip_svc.c
++++ b/plat/syna/berlin/common/berlin_sip_svc.c
+@@ -82,6 +82,13 @@ uintptr_t berlin_sip_handler(uint32_t smc_fid,
+ 	case SYNA_SIP_SMC64_OTP_WRITE_OTP:
+ 		ret = bcm_otp_write_otp(x1, (uint32_t)x2, (uint32_t)x3);
+ 		SMC_RET1(handle, ret);
++	case SYNA_SIP_SMC32_SECURE_SRAM_ACCESS:
++	case SYNA_SIP_SMC64_SECURE_SRAM_ACCESS:
++		uint32_t access_type = (uint32_t)x1;
++		uint32_t idx = (uint32_t)x2;
++		uint64_t val= (uint64_t)x3;
++		ret = bcm_access_secure_sram(access_type, idx, &val);
++		SMC_RET2(handle, ret, val);
+ #endif
+ 	default:
+ 		return berlin_default_handler(smc_fid, x1, x2, x3, x4,
+diff --git a/plat/syna/berlin/common/drivers/bcm/bcm.c b/plat/syna/berlin/common/drivers/bcm/bcm.c
+index a214ddd..3d7fa06 100644
+--- a/plat/syna/berlin/common/drivers/bcm/bcm.c
++++ b/plat/syna/berlin/common/drivers/bcm/bcm.c
+@@ -18,6 +18,7 @@
+ #define BCM_OTP_RD_PUBLIC_OTP		0x500A
+ #define BCM_OTP_UTILS_OTP_READ     	0x500D
+ #define BCM_OTP_UTILS_OTP_WRITE     0x500E
++#define BCM_ACCESS_SRAM             0xD004
+ 
+ #define BCM_EROM_CFG_DDR_SCRAMBLE_KEY		0x0000
+ #define BCM_EROM_LOAD_MINILOADER		0x0001
+@@ -329,7 +330,30 @@ int bcm_otp_read_otp(uint32_t index, uint32_t *pdata, uint32_t *pmask)
+ 
+ 	return status;
+ }
++int bcm_access_secure_sram(uint32_t type, uint32_t idx, uint64_t *pdata)
++{
++	unsigned int status;
++	BCM_MAILBOX_COMMAND cmd;
++
++    if(!pdata) return -1;
++
++    bcm_clear_command(&cmd);
+ 
++    cmd.arg0 = (uint32_t)type;
++    cmd.arg1 = idx;
++    /* 1. Set the physical address for BCM to write the result into */
++    cmd.arg2 = (uint32_t)(uintptr_t)virt_to_phy(pdata);
++    cmd.command = BCM_ACCESS_SRAM;
++
++	/* 2. Flush D-cache: Ensure memory is ready before BCM hardware access */
++	flush_dcache_range((uintptr_t)pdata, sizeof(uint64_t));
++	/* 3. Execute Mailbox command: This triggers the BCM firmware logic */
++	status = bcm_exec_func(&cmd);
++	/* 4. Invalidate D-cache: Force CPU to read the fresh data written by BCM
++          from physical RAM instead of stale local cache lines */
++	inv_dcache_range((uintptr_t)pdata, sizeof(uint64_t));
++	return status;
++}
+ int bcm_otp_write_otp(uint32_t index, uint32_t data, uint32_t mask)
+ {
+ 	unsigned int status;
+diff --git a/plat/syna/berlin/include/berlin_sip_svc.h b/plat/syna/berlin/include/berlin_sip_svc.h
+index 684b7d0..50f454e 100644
+--- a/plat/syna/berlin/include/berlin_sip_svc.h
++++ b/plat/syna/berlin/include/berlin_sip_svc.h
+@@ -29,4 +29,8 @@
+ #define SYNA_SIP_SMC32_RD_PUBLIC_OTP				0x8200000C
+ #define SYNA_SIP_SMC64_RD_PUBLIC_OTP				0xC200000C
+ 
++
++#define SYNA_SIP_SMC32_SECURE_SRAM_ACCESS			0x8200000D
++#define SYNA_SIP_SMC64_SECURE_SRAM_ACCESS			0xC200000D
++
+ #endif /* BERLIN_SIP_SVC_H */
+diff --git a/plat/syna/berlin/include/drivers/bcm.h b/plat/syna/berlin/include/drivers/bcm.h
+index 92c9d80..97cb49c 100644
+--- a/plat/syna/berlin/include/drivers/bcm.h
++++ b/plat/syna/berlin/include/drivers/bcm.h
+@@ -101,4 +101,5 @@ int bcm_erom_program_otp(uint64_t pphy_otp_layout, uint64_t size_opt_layout);
+ int bcm_otp_read_otp(uint32_t index, uint32_t *pdata, uint32_t *pmask);
+ int bcm_otp_write_otp(uint32_t index, uint32_t data, uint32_t mask);
+ int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size);
++int bcm_access_secure_sram(uint32_t type, uint32_t idx, uint64_t *pdata);
+ #endif
+-- 
+2.7.4
+
