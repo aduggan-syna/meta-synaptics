@@ -126894,3 +126894,466 @@ index ff5b990..c2e2833 100644
 -- 
 2.7.4
 
+
+From 047d162619b17ea43b47f7ae5bce6e6eff543624 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Wed, 27 Aug 2025 16:19:32 +0800
+Subject: [PATCH] platypus: enable perif reset fastcall
+
+add memory region setup
+add perif reset call for platypus and dolphin
+get PCI memory region from system
+
+Change-Id: I9d8522dd664913d607fdeac94f54a58cbdbc8fe6
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/berlin_bl31_setup.c        |   3 +-
+ plat/syna/berlin/common/berlin_sip_svc.c           |  12 +++
+ .../common/drivers/secure_register/perif_reset.c   | 116 +++++++++++++++++++++
+ .../syna/berlin/common/drivers/tos/tz_boot_param.c |  52 +++++++++
+ plat/syna/berlin/include/berlin_sip_svc.h          |   3 +
+ plat/syna/berlin/include/drivers/perif_reset.h     |  12 +++
+ plat/syna/berlin/include/drivers/tz_boot_param.h   |  19 ++++
+ plat/syna/berlin/include/soc/dolphin/berlin_def.h  |  14 +++
+ .../berlin/include/soc/dolphin/perif_reset_id.h    |  24 +++++
+ plat/syna/berlin/include/soc/platypus/berlin_def.h |  14 +++
+ .../berlin/include/soc/platypus/perif_reset_id.h   |  23 ++++
+ plat/syna/berlin/soc/platypus/berlin_soc.mk        |   1 +
+ 12 files changed, 292 insertions(+), 1 deletion(-)
+ create mode 100644 plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+ create mode 100644 plat/syna/berlin/include/drivers/perif_reset.h
+ create mode 100644 plat/syna/berlin/include/soc/dolphin/perif_reset_id.h
+ create mode 100644 plat/syna/berlin/include/soc/platypus/perif_reset_id.h
+
+diff --git a/plat/syna/berlin/common/berlin_bl31_setup.c b/plat/syna/berlin/common/berlin_bl31_setup.c
+index abde8e1..ee358b7 100644
+--- a/plat/syna/berlin/common/berlin_bl31_setup.c
++++ b/plat/syna/berlin/common/berlin_bl31_setup.c
+@@ -339,11 +339,12 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 	}
+ #endif
+ 
++	tz_boot_param_init((void *)(uintptr_t)args->boot_param);
++
+ 	/*
+ 	 * save the secure boot param when cold boot for suspend/resume
+ 	 */
+ 	if (plat_params_from_bl2) {
+-		tz_boot_param_init((void *)(uintptr_t)args->boot_param);
+ 		tos_save_secure_boot_param((void *)(uintptr_t)args->boot_param,
+ 				plat_params_from_bl2,
+ 				nagra_boot_params,
+diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
+index aa633ab..68bd432 100644
+--- a/plat/syna/berlin/common/berlin_sip_svc.c
++++ b/plat/syna/berlin/common/berlin_sip_svc.c
+@@ -11,8 +11,10 @@
+ 
+ #include "berlin_sip_svc.h"
+ #include "secure_register.h"
++#include "perif_reset.h"
+ #include "bcm.h"
+ #pragma weak berlin_set_wakeup_sources
++#pragma weak berlin_perif_reset
+ 
+ static int berlin_sip_setup(void)
+ {
+@@ -37,6 +39,11 @@ int berlin_set_wakeup_sources(u_register_t x1, u_register_t x2, u_register_t x3,
+ 	return SMC_UNK;
+ }
+ 
++int berlin_perif_reset(u_register_t x1, u_register_t x2)
++{
++	return SMC_UNK;
++}
++
+ uintptr_t berlin_sip_handler(uint32_t smc_fid,
+ 			 u_register_t x1,
+ 			 u_register_t x2,
+@@ -90,6 +97,11 @@ uintptr_t berlin_sip_handler(uint32_t smc_fid,
+ 		ret = bcm_access_secure_sram(access_type, idx, &val);
+ 		SMC_RET2(handle, ret, val);
+ #endif
++	case SYNA_SIP_SMC32_PERIFRESET:
++	case SYNA_SIP_SMC64_PERIFRESET:
++		ret = berlin_perif_reset(x1, x2);
++		SMC_RET1(handle, ret);
++
+ 	default:
+ 		return berlin_default_handler(smc_fid, x1, x2, x3, x4,
+ 			cookie, handle, flags);
+diff --git a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+new file mode 100644
+index 0000000..f8db42b
+--- /dev/null
++++ b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+@@ -0,0 +1,116 @@
++/*
++ * Copyright (c) 2026, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++
++#include <assert.h>
++#include <common/debug.h>
++#include <common/runtime_svc.h>
++#include <lib/mmio.h>
++#include <drivers/delay_timer.h>
++
++#include "tz_boot_param.h"
++#include "perif_reset.h"
++#include "perif_reset_id.h"
++
++enum reset_type {
++	PERIF_RESET,
++	PERIF_ASSERT,
++	PERIF_DEASSERT
++};
++
++#ifdef PCIE_RESET
++
++#define PCI_REGION_NAME "system"
++
++static void set_pcie_axi_limit(void)
++{
++	const struct syna_mem_region *mr = mr_find_region_by_name(PCI_REGION_NAME);
++	if (mr == NULL) {
++		ERROR("fail to find memory region %s.\n", PCI_REGION_NAME);
++		assert(0);
++	}
++
++	mmio_write_32(PCIE_LOWER_BOUNDARY_ADDR , mr->base);
++	mmio_write_32(PCIE_UPPER_BOUNDARY_ADDR, mr->base + mr->size);
++
++	INFO("PCIE 0x%x:0x%x, 0x%x:0x%x\n",
++				PCIE_LOWER_BOUNDARY_ADDR, mmio_read_32(PCIE_LOWER_BOUNDARY_ADDR),
++				PCIE_UPPER_BOUNDARY_ADDR, mmio_read_32(PCIE_UPPER_BOUNDARY_ADDR));
++}
++
++static void set_pcie_addr_filter_flag(void)
++{
++	uint32_t val;
++
++	val = mmio_read_32(PCIE_MAC_CTRL);
++	val |= 	(1 << LSb32PCIE_MAC_CTRL_ADDR_FILTER_FLAG);
++	mmio_write_32(PCIE_MAC_CTRL, val);
++
++	INFO("PCIE MAC CTR 0x%x\n", mmio_read_32(PCIE_MAC_CTRL));
++}
++#endif
++
++static void set_bit(uint32_t reg_addr, uint32_t bit)
++{
++	uint32_t val;
++
++	val = mmio_read_32(reg_addr);
++	val |= 1 << bit;
++	mmio_write_32(reg_addr, val);
++
++#ifdef PCIE_RESET
++	if (bit == PCIE0RST_ID) {
++		set_pcie_axi_limit();
++		set_pcie_addr_filter_flag();
++	}
++#endif
++}
++static void clear_bit(uint32_t reg_addr, uint32_t bit)
++{
++	uint32_t val;
++
++	val = mmio_read_32(reg_addr);
++	val &= ~(1 << bit);
++	mmio_write_32(reg_addr, val);
++}
++
++int berlin_perif_reset(u_register_t x1, u_register_t x2)
++{
++	uint32_t type = (uint32_t)x1;
++	uint32_t id = (uint32_t)x2;
++	uint32_t reg_addr = SOC_REST_PERIF_BASE;
++
++	if (id >= MAX_PERIF_ID) {
++		ERROR("%s: unsupported id (0x%x)\n", __func__, id);
++		return SMC_UNK;
++	}
++
++	INFO("reset type %x perif id 0x%d\n", type, id);
++
++	switch (type) {
++	case PERIF_RESET:
++		// assert
++		clear_bit(reg_addr, id);
++		//wailt
++		udelay(10);
++		//deasset
++		set_bit(reg_addr, id);
++		break;
++	case PERIF_ASSERT:
++		clear_bit(reg_addr, id);
++		break;
++	case PERIF_DEASSERT:
++		set_bit(reg_addr, id);
++		break;
++	default:
++		ERROR("%s: unhandled reset type (0x%x)\n", __func__, type);
++		return SMC_UNK;
++		}
++
++	return SMC_OK;
++}
++
++
+diff --git a/plat/syna/berlin/common/drivers/tos/tz_boot_param.c b/plat/syna/berlin/common/drivers/tos/tz_boot_param.c
+index 1b6a12e..de105eb 100644
+--- a/plat/syna/berlin/common/drivers/tos/tz_boot_param.c
++++ b/plat/syna/berlin/common/drivers/tos/tz_boot_param.c
+@@ -24,6 +24,9 @@ int tz_boot_param_init(void *addr)
+ 			root->version != TZ_BOOT_PARAM_VERSION)
+ 
+ 		return -1;
++
++	mr_setup();
++
+ 	return 0;
+ }
+ 
+@@ -43,3 +46,52 @@ struct tz_boot_param *tz_boot_param_get(uint32_t id)
+ 
+ 	return 0;
+ }
++
++#define MR_MAX		16
++struct syna_mem_region g_mr[MR_MAX];
++static int mr_num = 0;
++
++int mr_setup(void)
++{
++	const struct tz_boot_param *param =
++				tz_boot_param_get(TZ_BOOT_PARAM_MEMREGION);
++	int i;
++
++	if (param) {
++		mr_num = (param->size - sizeof(struct tz_boot_param))
++			/ sizeof(struct syna_mem_region);
++
++		memcpy(g_mr, (void *)(param->data), mr_num * sizeof(struct syna_mem_region));
++		INFO("num: %d\n", mr_num);
++	} else {
++		return -1;
++	}
++
++	for (i = 0; i < mr_num; i++) {
++		INFO("@@@(%d/%d) %s, %lx, %lx, %x, %x\n", i, mr_num, g_mr[i].name,
++			(uint64_t)g_mr[i].base, (uint64_t)g_mr[i].size,
++			g_mr[i].attr, g_mr[i].userdata[0]);
++	}
++
++	return 0;
++}
++
++const struct syna_mem_region *mr_find_region_by_name(const char *name)
++{
++	const struct syna_mem_region *r = g_mr;
++	int i;
++
++	if (!name) {
++		ERROR("name == NULL\n");
++		return NULL;
++	}
++
++	for (i = 0; i < mr_num; i++, r++) {
++		if (0 == strcmp(name, r->name))
++			return r;
++	}
++	ERROR("can't find region: %s\n", name);
++
++	return NULL;
++}
++
+diff --git a/plat/syna/berlin/include/berlin_sip_svc.h b/plat/syna/berlin/include/berlin_sip_svc.h
+index 50f454e..8f1e8d0 100644
+--- a/plat/syna/berlin/include/berlin_sip_svc.h
++++ b/plat/syna/berlin/include/berlin_sip_svc.h
+@@ -33,4 +33,7 @@
+ #define SYNA_SIP_SMC32_SECURE_SRAM_ACCESS			0x8200000D
+ #define SYNA_SIP_SMC64_SECURE_SRAM_ACCESS			0xC200000D
+ 
++#define SYNA_SIP_SMC32_PERIFRESET				0x8200000E
++#define SYNA_SIP_SMC64_PERIFRESET				0xC200000E
++
+ #endif /* BERLIN_SIP_SVC_H */
+diff --git a/plat/syna/berlin/include/drivers/perif_reset.h b/plat/syna/berlin/include/drivers/perif_reset.h
+new file mode 100644
+index 0000000..9e5af6c
+--- /dev/null
++++ b/plat/syna/berlin/include/drivers/perif_reset.h
+@@ -0,0 +1,12 @@
++/*
++ * Copyright (c) 2026, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#ifndef PERIF_RESET_H
++#define PERIF_RESET_H
++
++int berlin_perif_reset(u_register_t x1, u_register_t x2);
++
++#endif /* PERIF_RESET_H */
+diff --git a/plat/syna/berlin/include/drivers/tz_boot_param.h b/plat/syna/berlin/include/drivers/tz_boot_param.h
+index 56d4cb9..c65f956 100644
+--- a/plat/syna/berlin/include/drivers/tz_boot_param.h
++++ b/plat/syna/berlin/include/drivers/tz_boot_param.h
+@@ -73,6 +73,25 @@ struct tz_verify_region {
+ 	struct region regs[4];
+ };
+ 
++/* memory region */
++struct syna_mem_region {
++	char			name[32];
++	uint32_t		base;	/* base address */
++	uint32_t		size;
++	uint32_t		attr;	/* attributes */
++	uint32_t		reserved;
++
++	/* bellow fields are user defined data.
++	 * it's to support multiple platforms by unified structure.
++	 * different platform can use them for different purpose.
++	 */
++	uint32_t		userdata[4];
++};
++
++int mr_setup(void);
++
++const struct syna_mem_region *mr_find_region_by_name(const char *name);
++
+ /** initialize the boot parameter structure.
+  *
+  * @param addr		address of boot parameter
+diff --git a/plat/syna/berlin/include/soc/dolphin/berlin_def.h b/plat/syna/berlin/include/soc/dolphin/berlin_def.h
+index 72356f2..c1b7655 100644
+--- a/plat/syna/berlin/include/soc/dolphin/berlin_def.h
++++ b/plat/syna/berlin/include/soc/dolphin/berlin_def.h
+@@ -64,7 +64,21 @@
+ 
+ #define MEMMAP_CHIP_CTRL_REG_BASE	0xF7EA0000
+ #define RA_Gbl_ResetTrigger			0x0600
++#define RA_Gbl_perifStickyResetN	0x0688
++
+ #define SOC_RESET_CTRL_BASE		(MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger)
++#define SOC_REST_PERIF_BASE		(MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_perifStickyResetN)
++
++//PCIE
++#define MEMMAP_PCIE_REG_BASE		0xF7E40000
++#define RA_PCIE_AXI_LIMIT_LOWER		0xA050
++#define RA_PCIE_AXI_LIMIT_UPPER		0xA054
++#define RA_PCIE_MAC_CTRL			0xA01C
++
++#define PCIE_LOWER_BOUNDARY_ADDR	(MEMMAP_PCIE_REG_BASE + RA_PCIE_AXI_LIMIT_LOWER)
++#define PCIE_UPPER_BOUNDARY_ADDR	(MEMMAP_PCIE_REG_BASE + RA_PCIE_AXI_LIMIT_UPPER)
++#define PCIE_MAC_CTRL				(MEMMAP_PCIE_REG_BASE + RA_PCIE_MAC_CTRL)
++#define LSb32PCIE_MAC_CTRL_ADDR_FILTER_FLAG		8
+ 
+ #define SM_SEND_MSGQ			0xF7F9F400
+ #define SMREG_BASE				0xF7FE2000 //SOC_SM_MEMMAP_SMREG_BASE
+diff --git a/plat/syna/berlin/include/soc/dolphin/perif_reset_id.h b/plat/syna/berlin/include/soc/dolphin/perif_reset_id.h
+new file mode 100644
+index 0000000..912b5ba
+--- /dev/null
++++ b/plat/syna/berlin/include/soc/dolphin/perif_reset_id.h
+@@ -0,0 +1,24 @@
++/*
++ * Copyright (c) 2026, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++#ifndef PERIF_RESET_ID_H
++#define PERIF_RESET_ID_H
++
++#define PCIE_RESET 1
++
++enum syna_perif_id {
++	USB3PHYRST_ID,
++	PCIE0RST_ID,
++	USB0PHYRST_ID,
++	USB0CORERST_ID,
++	USB0MAHBRST_ID,
++	SDIOPHYRST_ID,
++	EMMCPHYRST_ID,
++	PCIEPHYRST_ID,
++	ISPGRST_ID,
++	MAX_PERIF_ID
++};
++
++#endif /* PERIF_RESET_ID_H */
+diff --git a/plat/syna/berlin/include/soc/platypus/berlin_def.h b/plat/syna/berlin/include/soc/platypus/berlin_def.h
+index c2e2833..88d12e9 100644
+--- a/plat/syna/berlin/include/soc/platypus/berlin_def.h
++++ b/plat/syna/berlin/include/soc/platypus/berlin_def.h
+@@ -73,7 +73,21 @@
+ 
+ #define MEMMAP_CHIP_CTRL_REG_BASE	0xF7EA0000
+ #define RA_Gbl_ResetTrigger			0x0600
++#define RA_Gbl_perifStickyResetN	0x0688
++
+ #define SOC_RESET_CTRL_BASE		(MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_ResetTrigger)
++#define SOC_REST_PERIF_BASE		(MEMMAP_CHIP_CTRL_REG_BASE + RA_Gbl_perifStickyResetN)
++
++//PCIE
++#define MEMMAP_PCIE_REG_BASE		0xF7E40000
++#define RA_PCIE_AXI_LIMIT_LOWER		0xA050
++#define RA_PCIE_AXI_LIMIT_UPPER		0xA054
++#define RA_PCIE_MAC_CTRL			0xA01C
++
++#define PCIE_LOWER_BOUNDARY_ADDR	(MEMMAP_PCIE_REG_BASE + RA_PCIE_AXI_LIMIT_LOWER)
++#define PCIE_UPPER_BOUNDARY_ADDR	(MEMMAP_PCIE_REG_BASE + RA_PCIE_AXI_LIMIT_UPPER)
++#define PCIE_MAC_CTRL				(MEMMAP_PCIE_REG_BASE + RA_PCIE_MAC_CTRL)
++#define LSb32PCIE_MAC_CTRL_ADDR_FILTER_FLAG		8
+ 
+ // SM
+ #define SM_SEND_MSGQ			0xF7F97400
+diff --git a/plat/syna/berlin/include/soc/platypus/perif_reset_id.h b/plat/syna/berlin/include/soc/platypus/perif_reset_id.h
+new file mode 100644
+index 0000000..2abe840
+--- /dev/null
++++ b/plat/syna/berlin/include/soc/platypus/perif_reset_id.h
+@@ -0,0 +1,23 @@
++/*
++ * Copyright (c) 2026, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++#ifndef PERIF_RESET_ID_H
++#define PERIF_RESET_ID_H
++
++#define PCIE_RESET 1
++
++enum syna_perif_id {
++	USB3PHYRST_ID,
++	PCIE0RST_ID,
++	USB0PHYRST_ID,
++	USB0CORERST_ID,
++	USB0MAHBRST_ID,
++	PCIEPHYRST_ID,
++	ISPGRST_ID,
++	MAX_PERIF_ID
++};
++
++#endif /* PERIF_RESET_ID_H */
++
+diff --git a/plat/syna/berlin/soc/platypus/berlin_soc.mk b/plat/syna/berlin/soc/platypus/berlin_soc.mk
+index beadfae..d27c7f3 100644
+--- a/plat/syna/berlin/soc/platypus/berlin_soc.mk
++++ b/plat/syna/berlin/soc/platypus/berlin_soc.mk
+@@ -4,6 +4,7 @@
+ #
+ 
+ BL31_SOURCES		+=	lib/cpus/aarch64/cortex_a55.S		\
++				${COMMON_DIR}/drivers/secure_register/perif_reset.c     \
+ 				${SOC_DIR}/suspend.S			\
+ 				${SOC_DIR}/plat_setup.c			\
+ 				${SOC_DIR}/plat_pm.c
+-- 
+2.7.4
+
