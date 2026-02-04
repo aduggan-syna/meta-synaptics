@@ -126852,3 +126852,45 @@ index 92c9d80..97cb49c 100644
 -- 
 2.7.4
 
+
+From 0d1c50633e75979b2135aaf4eae7e0948868d7ce Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Fri, 23 Jan 2026 09:26:29 +0800
+Subject: [PATCH] dolphin/platypus: skip the uart initialisation
+
+Change-Id: Ibcece379a8cf24a67522f6ccd75a6c929331d747
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/include/soc/dolphin/berlin_def.h  | 2 +-
+ plat/syna/berlin/include/soc/platypus/berlin_def.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/plat/syna/berlin/include/soc/dolphin/berlin_def.h b/plat/syna/berlin/include/soc/dolphin/berlin_def.h
+index 1345369..72356f2 100644
+--- a/plat/syna/berlin/include/soc/dolphin/berlin_def.h
++++ b/plat/syna/berlin/include/soc/dolphin/berlin_def.h
+@@ -42,7 +42,7 @@
+ 
+ /* uart */
+ #define UART_0_BASE					0xF7FCD000
+-#define BERLIN_UART_CLOCK			25000000
++#define BERLIN_UART_CLOCK			0
+ #define BERLIN_UART_BAUDRATE		115200
+ 
+ /* GIC */
+diff --git a/plat/syna/berlin/include/soc/platypus/berlin_def.h b/plat/syna/berlin/include/soc/platypus/berlin_def.h
+index ff5b990..c2e2833 100644
+--- a/plat/syna/berlin/include/soc/platypus/berlin_def.h
++++ b/plat/syna/berlin/include/soc/platypus/berlin_def.h
+@@ -49,7 +49,7 @@
+ #define BERLIN_UART_BAUDRATE		19200
+ #define BERLIN_UART_CLOCK			(BERLIN_UART_BAUDRATE * 16)
+ #else
+-#define BERLIN_UART_CLOCK			25000000
++#define BERLIN_UART_CLOCK			0
+ #define BERLIN_UART_BAUDRATE		115200
+ #endif
+ /* GIC */
+-- 
+2.7.4
+
