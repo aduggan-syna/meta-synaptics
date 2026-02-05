@@ -126853,7 +126853,7 @@ index 92c9d80..97cb49c 100644
 2.7.4
 
 
-From 0d1c50633e75979b2135aaf4eae7e0948868d7ce Mon Sep 17 00:00:00 2001
+From db2776479fdaed831292752de7515d50df6e12bd Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Fri, 23 Jan 2026 09:26:29 +0800
 Subject: [PATCH] dolphin/platypus: skip the uart initialisation
@@ -126895,7 +126895,7 @@ index ff5b990..c2e2833 100644
 2.7.4
 
 
-From 047d162619b17ea43b47f7ae5bce6e6eff543624 Mon Sep 17 00:00:00 2001
+From 8b7b7c9f62c90863ae1728d5ba56a91ee6f40746 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Wed, 27 Aug 2025 16:19:32 +0800
 Subject: [PATCH] platypus: enable perif reset fastcall
@@ -126904,7 +126904,7 @@ add memory region setup
 add perif reset call for platypus and dolphin
 get PCI memory region from system
 
-Change-Id: I9d8522dd664913d607fdeac94f54a58cbdbc8fe6
+Change-Id: I648068ea0bfea8d0696b6df9ce8589afb055f338
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 ---
  plat/syna/berlin/common/berlin_bl31_setup.c        |   3 +-
@@ -127354,6 +127354,35 @@ index beadfae..d27c7f3 100644
  				${SOC_DIR}/suspend.S			\
  				${SOC_DIR}/plat_setup.c			\
  				${SOC_DIR}/plat_pm.c
+-- 
+2.7.4
+
+
+From e47d02d58440e5ff73b2ca01a3e5bfb984437eb0 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Thu, 5 Feb 2026 10:24:15 +0800
+Subject: [PATCH] plat: syna: fix klamath boot issue
+
+Change-Id: I3c9d9ff64cc7c91555b4186cbbdba849469e3810
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/berlin_bl31_setup.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/plat/syna/berlin/common/berlin_bl31_setup.c b/plat/syna/berlin/common/berlin_bl31_setup.c
+index ee358b7..70090a0 100644
+--- a/plat/syna/berlin/common/berlin_bl31_setup.c
++++ b/plat/syna/berlin/common/berlin_bl31_setup.c
+@@ -339,7 +339,8 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
+ 	}
+ #endif
+ 
+-	tz_boot_param_init((void *)(uintptr_t)args->boot_param);
++	if (bl32_image_ep_info.args.arg1)
++		tz_boot_param_init((void *)(uintptr_t)bl32_image_ep_info.args.arg1);
+ 
+ 	/*
+ 	 * save the secure boot param when cold boot for suspend/resume
 -- 
 2.7.4
 
