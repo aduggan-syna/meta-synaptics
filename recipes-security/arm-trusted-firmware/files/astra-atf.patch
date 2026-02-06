@@ -127386,3 +127386,50 @@ index ee358b7..70090a0 100644
 -- 
 2.7.4
 
+
+From 3c3d511c6adb7c9acd60b9effd9dd51d915a5bce Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Fri, 6 Feb 2026 15:20:48 +0800
+Subject: [PATCH] SIP: perif_reset: use PCIE region for PCIE setting
+
+Change-Id: I18f6918ebfc1f7011180e871acf99f475e7b00e6
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ .../berlin/common/drivers/secure_register/perif_reset.c   | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+index f8db42b..7350f00 100644
+--- a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
++++ b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+@@ -23,16 +23,23 @@ enum reset_type {
+ 
+ #ifdef PCIE_RESET
+ 
+-#define PCI_REGION_NAME "system"
++#define PCIE_REGION_NAME "PCIE"
+ 
+ static void set_pcie_axi_limit(void)
+ {
+-	const struct syna_mem_region *mr = mr_find_region_by_name(PCI_REGION_NAME);
+-	if (mr == NULL) {
+-		ERROR("fail to find memory region %s.\n", PCI_REGION_NAME);
++	const struct syna_mem_region *mr_pcie = mr_find_region_by_name(PCIE_REGION_NAME);
++	const struct syna_mem_region *mr = mr_find_region_by_name("system");
++
++	if (!mr || !mr->base || !mr->size) {
+ 		assert(0);
+ 	}
+ 
++	if (mr_pcie != NULL) {
++		if((mr_pcie->base > mr->base) &&
++			((mr_pcie->base + mr_pcie->size) < (mr->base + mr->size)))
++			mr = mr_pcie;
++	}
++
+ 	mmio_write_32(PCIE_LOWER_BOUNDARY_ADDR , mr->base);
+ 	mmio_write_32(PCIE_UPPER_BOUNDARY_ADDR, mr->base + mr->size);
+ 
+-- 
+2.7.4
+
