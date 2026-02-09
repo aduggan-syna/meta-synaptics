@@ -127433,3 +127433,44 @@ index f8db42b..7350f00 100644
 -- 
 2.7.4
 
+
+From 0570d2a40a7e7b644ad8993b3deda2071f73fed3 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Mon, 9 Feb 2026 14:43:10 +0800
+Subject: [PATCH] plat: syna: fix tos suspend hang issue
+
+Change-Id: Ifa0a9a034dd5a9511c7610139337147a0afb1500
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/tos/tz.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/plat/syna/berlin/common/drivers/tos/tz.c b/plat/syna/berlin/common/drivers/tos/tz.c
+index c6ba21d..3db7e51 100644
+--- a/plat/syna/berlin/common/drivers/tos/tz.c
++++ b/plat/syna/berlin/common/drivers/tos/tz.c
+@@ -106,7 +106,7 @@ static int tos_compute_ddr_sha(void *param)
+ {
+ 	int i, num;
+ 	struct tz_boot_param *boot_param;
+-	struct region *value;
++	struct region value[MAX_DDR_REG_NUM] = {0};
+ 
+ 	if (!param)
+ 		return -1;
+@@ -117,11 +117,11 @@ static int tos_compute_ddr_sha(void *param)
+ 	boot_param = tz_boot_param_get(TZ_BOOT_VERIFY_REGION);
+ 	if (boot_param) {
+ 		/* the region need sha256 verify on nagra */
+-		value = (struct region*)boot_param->data;
+ 		num = (boot_param->size - sizeof(struct tz_boot_param))
+ 			/ sizeof(struct region);
+ 
+ 		assert(num <= MAX_DDR_REG_NUM);
++		memcpy(value, boot_param->data, num*sizeof(struct region));
+ 
+ #if defined(BCM_CALCULATE_HASH) && defined(CFG_SYNA_BCM)
+ 		struct ddr_reg_info ddr_info[MAX_DDR_REG_NUM];
+-- 
+2.7.4
+
