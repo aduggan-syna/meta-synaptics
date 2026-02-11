@@ -131,8 +131,8 @@ unand_shrink_part() {
 
   outdir_product_release_unand=${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}
   if [ ! -f "${outdir_product_release_unand}/subimgs/${shrink_part}.subimg" ]; then
-    echo "ERROR: can't find $shrink_part in subimgs"
-    exit 1
+    echo "WARN: can't find $shrink_part in subimgs"
+    return 0
   fi
 
   last_item=$(echo "$list_parts" | tail -n 1 | awk '{print $1}')
@@ -275,5 +275,5 @@ IMAGE_CMD:synanandimg () {
         fi
     done
     unand_gen_images "uNAND_full" "${subimg_list}"
-    #unand_shrink_part "uNAND_full" "${subimg_list}" "rootfs_b"
+    unand_shrink_part "uNAND_full" "${subimg_list}" "rootfs_b"
 }
