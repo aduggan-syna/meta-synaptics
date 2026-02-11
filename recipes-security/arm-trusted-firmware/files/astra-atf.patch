@@ -127434,7 +127434,7 @@ index f8db42b..7350f00 100644
 2.7.4
 
 
-From 0570d2a40a7e7b644ad8993b3deda2071f73fed3 Mon Sep 17 00:00:00 2001
+From 1789009a227629b1193c144ab7535f45f807887c Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
 Date: Mon, 9 Feb 2026 14:43:10 +0800
 Subject: [PATCH] plat: syna: fix tos suspend hang issue
@@ -127471,6 +127471,83 @@ index c6ba21d..3db7e51 100644
  
  #if defined(BCM_CALCULATE_HASH) && defined(CFG_SYNA_BCM)
  		struct ddr_reg_info ddr_info[MAX_DDR_REG_NUM];
+-- 
+2.7.4
+
+
+From 6a96717e41eda6b635bda23f7a7c33c4606929fb Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Wed, 11 Feb 2026 16:36:20 +0800
+Subject: [PATCH] SIP: perif_reset: add bootloader and system1 for PCIE setting
+
+Change-Id: I878e486156926e013cec83a45d55989b21b4b1b4
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ .../common/drivers/secure_register/perif_reset.c   | 42 +++++++++++++++++-----
+ 1 file changed, 34 insertions(+), 8 deletions(-)
+
+diff --git a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+index 7350f00..c7e8cb9 100644
+--- a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
++++ b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+@@ -25,23 +25,49 @@ enum reset_type {
+ 
+ #define PCIE_REGION_NAME "PCIE"
+ 
++#define MAX_SYSTEM_NUM 3
++
++const char *systems[MAX_SYSTEM_NUM] = {"bootloader", "system", "system1"};
++
+ static void set_pcie_axi_limit(void)
+ {
+ 	const struct syna_mem_region *mr_pcie = mr_find_region_by_name(PCIE_REGION_NAME);
+-	const struct syna_mem_region *mr = mr_find_region_by_name("system");
++	const struct syna_mem_region *mr = NULL;
++	uint32_t lower_addr = 0;
++	uint32_t upper_addr = 0;
++	int i;
++
++	for (i = 0; i < MAX_SYSTEM_NUM; i++) {
++		mr = mr_find_region_by_name(systems[i]);
++		if (mr){
++			if (!lower_addr && !upper_addr) {
++				lower_addr = mr->base;
++				upper_addr = mr->base + mr->size;
++				continue;
++			}
++			if (mr->base < lower_addr)
++				lower_addr = mr->base;
++
++			if (mr->base + mr->size > upper_addr)
++				upper_addr = mr->base + mr->size;
++		}
+ 
+-	if (!mr || !mr->base || !mr->size) {
+-		assert(0);
+ 	}
+ 
+ 	if (mr_pcie != NULL) {
+-		if((mr_pcie->base > mr->base) &&
+-			((mr_pcie->base + mr_pcie->size) < (mr->base + mr->size)))
+-			mr = mr_pcie;
++		if((mr_pcie->base > lower_addr) &&
++			((mr_pcie->base + mr_pcie->size) < upper_addr)) {
++			lower_addr = mr_pcie->base;
++			upper_addr = mr_pcie->base + mr_pcie->size;
++		}
++	}
++
++	if (!lower_addr || !upper_addr) {
++		assert(0);
+ 	}
+ 
+-	mmio_write_32(PCIE_LOWER_BOUNDARY_ADDR , mr->base);
+-	mmio_write_32(PCIE_UPPER_BOUNDARY_ADDR, mr->base + mr->size);
++	mmio_write_32(PCIE_LOWER_BOUNDARY_ADDR , lower_addr);
++	mmio_write_32(PCIE_UPPER_BOUNDARY_ADDR, upper_addr);
+ 
+ 	INFO("PCIE 0x%x:0x%x, 0x%x:0x%x\n",
+ 				PCIE_LOWER_BOUNDARY_ADDR, mmio_read_32(PCIE_LOWER_BOUNDARY_ADDR),
 -- 
 2.7.4
 
