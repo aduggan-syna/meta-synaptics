@@ -245,7 +245,7 @@ IMAGE_CMD:synanandimg () {
     vol_size=`expr ${max_erase_blks} / ${mtbd_size2vol_size}`
 
     #make ubifs rootfs
-    mkfs_ubifs " -e ${leb} -c ${max_erase_blks} -m ${CONFIG_NAND_PAGE_SIZE} -x none" " -vv -m ${CONFIG_NAND_PAGE_SIZE} -p ${CONFIG_NAND_BLOCK_SIZE} -s ${CONFIG_NAND_PAGE_SIZE}" "${vol_size}" "${IMAGE_ROOTFS}" "rootfs"
+    mkfs_ubifs " -e ${leb} -c ${max_erase_blks} -m ${CONFIG_NAND_PAGE_SIZE}" " -vv -m ${CONFIG_NAND_PAGE_SIZE} -p ${CONFIG_NAND_BLOCK_SIZE} -s ${CONFIG_NAND_PAGE_SIZE}" "${vol_size}" "${IMAGE_ROOTFS}" "rootfs"
 
     for i in ${subimg_list}; do
         subimg_name=`echo $mapping_list | grep -o "/${i}\(_[a|b]\)\?/[[:alnum:]_-]*" | head -1 | cut -d / -f3`
