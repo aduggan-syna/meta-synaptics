@@ -11,7 +11,10 @@ require synasdk-config.inc
 DEPENDS = "optee-client optee-os-tadevkit python3-cryptography-native"
 DEPENDS += " synasdk-config-native"
 
-SRC_URI = "${SYNA_SRC_OPTEE_DEV}"
+SRC_URI = " \
+   ${SYNA_SRC_OPTEE_DEV} \
+   file://99-video-deint.rules \
+"
 
 SRCREV = "${SYNA_SRCREV_OPTEE_DEV}"
 PV = "${ASTRA_VERSION}+git${SRCPV}"
@@ -47,6 +50,8 @@ do_install() {
     mkdir -p ${D}${nonarch_base_libdir}/optee_armtz
     install -D -p -m0444 ${B}/out/*.ta ${D}${nonarch_base_libdir}/optee_armtz/
     install -D -p -m0444 ${B}/out/*.elf ${D}${nonarch_base_libdir}/optee_armtz
+    install -d ${D}${sysconfdir}/udev/rules.d
+    install -m 0644 ${WORKDIR}/99-video-deint.rules ${D}${sysconfdir}/udev/rules.d/99-video-deint.rules
 }
 
 do_deploy () {

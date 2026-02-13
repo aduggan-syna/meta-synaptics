@@ -1,0 +1,1 @@
+SUBSYSTEM=="video4linux", KERNEL=="video*", KERNELS=="0.deinterlace", DRIVERS=="ovpd", SYMLINK+="video-deint"
