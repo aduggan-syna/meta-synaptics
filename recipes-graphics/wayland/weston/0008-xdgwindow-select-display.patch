@@ -1,3 +1,6 @@
+
+Upstream-Status: Inappropriate [ astra specific ]
+
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
 index 084e602..3644d3c 100644
 --- a/desktop-shell/shell.c
@@ -5,7 +8,7 @@ index 084e602..3644d3c 100644
 @@ -4049,25 +4049,28 @@ weston_view_set_initial_position(struct weston_view *view,
  	pixman_rectangle32_t area;
  	struct weston_coord_global pos;
- 
+
 -	/* As a heuristic place the new window on the same output as the
 -	 * pointer. Falling back to the output containing 0, 0.
 -	 *
@@ -23,7 +26,7 @@ index 084e602..3644d3c 100644
 +		 */
 +		wl_list_for_each(seat, &compositor->seat_list, link) {
 +			struct weston_pointer *pointer = weston_seat_get_pointer(seat);
- 
+
 -		if (pointer) {
 -			pos = pointer->pos;
 -			break;
@@ -33,7 +36,7 @@ index 084e602..3644d3c 100644
 +				}
  		}
 -	}
- 
+
 -	wl_list_for_each(output, &compositor->output_list, link) {
 -		if (weston_output_contains_coord(output, pos)) {
 -			target_output = output;
@@ -45,7 +48,7 @@ index 084e602..3644d3c 100644
 +			}
  		}
  	}
- 
+
 diff --git a/include/libweston/shell-utils.h b/include/libweston/shell-utils.h
 index 01306c1..105d79e 100644
 --- a/include/libweston/shell-utils.h
@@ -53,13 +56,13 @@ index 01306c1..105d79e 100644
 @@ -49,6 +49,9 @@ struct weston_curtain {
  struct weston_output *
  weston_shell_utils_get_default_output(struct weston_compositor *compositor);
- 
+
 +struct weston_output *
 +weston_shell_utils_get_output_user_override(struct weston_compositor *compositor);
 +
  struct weston_output *
  weston_shell_utils_get_focused_output(struct weston_compositor *compositor);
- 
+
 diff --git a/libweston/shell-utils/shell-utils.c b/libweston/shell-utils/shell-utils.c
 index 5587d44..849be5f 100644
 --- a/libweston/shell-utils/shell-utils.c
@@ -72,13 +75,13 @@ index 5587d44..849be5f 100644
 +
 +#define OUTPUT_NAME_MAX_LEN 9 //HDMI-A-1
 +
- 
+
  /**
   * \defgroup shell-utils Shell utils
 @@ -50,6 +54,42 @@ weston_shell_utils_get_default_output(struct weston_compositor *compositor)
  			    struct weston_output, link);
  }
- 
+
 +WL_EXPORT struct weston_output *
 +weston_shell_utils_get_output_user_override(struct weston_compositor *compositor)
 +{
@@ -121,11 +124,11 @@ index 5587d44..849be5f 100644
 @@ -81,6 +121,10 @@ weston_shell_utils_get_focused_output(struct weston_compositor *compositor)
  			break;
  	}
- 
+
 +	if(!output) {
 +		output = weston_shell_utils_get_output_user_override(compositor);
 +	}
 +
  	return output;
  }
- 
+
