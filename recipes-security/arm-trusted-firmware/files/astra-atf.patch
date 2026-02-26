@@ -127551,3 +127551,31 @@ index 7350f00..c7e8cb9 100644
 -- 
 2.7.4
 
+
+From 488873afaab6e7f9fd8833e76fff912e7a360235 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Fri, 13 Feb 2026 10:59:05 +0800
+Subject: [PATCH] perif_reset: change system1 to system_1
+
+Change-Id: I9e64e0bd6c449bc634e5f9555cffcbf90dd5ff1f
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/secure_register/perif_reset.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+index c7e8cb9..df3e579 100644
+--- a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
++++ b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
+@@ -27,7 +27,7 @@ enum reset_type {
+ 
+ #define MAX_SYSTEM_NUM 3
+ 
+-const char *systems[MAX_SYSTEM_NUM] = {"bootloader", "system", "system1"};
++const char *systems[MAX_SYSTEM_NUM] = {"bootloader", "system", "system_1"};
+ 
+ static void set_pcie_axi_limit(void)
+ {
+-- 
+2.7.4
+
