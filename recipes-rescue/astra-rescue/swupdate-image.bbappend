@@ -8,13 +8,7 @@ remove_swupdate_init_script () {
 }
 
 # Add extra packages to the rootfs
-IMAGE_INSTALL += "kernel-module-stmmac \
-	kernel-module-stmmac-platform \
-	kernel-module-dwmac-generic \
-	kernel-module-libphy \
-	kernel-module-of-mdio \
-	kernel-module-phylink \
-	kernel-modules \
+IMAGE_INSTALL += "kernel-modules \
 	openssh \
 	openssh-sshd \
 	openssh-scp \
@@ -29,10 +23,7 @@ IMAGE_INSTALL += "kernel-module-stmmac \
 	rescue-support \
 "
 
-IMAGE_INSTALL:remove:sl1620 = "kernel-module-libphy kernel-module-of-mdio kernel-module-phylink"
-
-IMAGE_INSTALL:remove:sl1680 = "kernel-module-of-mdio kernel-module-libphy kernel-module-phylink"
-
 IMAGE_INSTALL:append:sl1620 = " linux-firmware-syna"
+
 # Add cpio.gz to image formats, forcefully
 IMAGE_FSTYPES:forcevariable += " cpio.gz"

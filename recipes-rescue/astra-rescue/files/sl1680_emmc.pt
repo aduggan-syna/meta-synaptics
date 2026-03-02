@@ -1,6 +1,6 @@
 #layout         partition_name          erase/format    first action    write_protection
 16M@16M         factory_setting         format          default         none
-64M             rescue                  format          default         none
+100M            rescue                  format          default         none
 1M              key_a                   default         default         none
 7M              tzk_a                   default         default         none
 16M             bl_a                    default         default         none

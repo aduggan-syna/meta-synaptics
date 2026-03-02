@@ -21,7 +21,7 @@ rescue_configure() {
             echo 'CONFIG_SYNA_RESCUE_MODE=y' >> "${UBOOT_DEFCONFIG}"
 
             sed -i '/^CONFIG_ENV_OFFSET=/d' "${UBOOT_DEFCONFIG}"
-            echo "CONFIG_ENV_OFFSET=0x77f0000" >> "${UBOOT_DEFCONFIG}"
+            echo "CONFIG_ENV_OFFSET=0x9BF0000" >> "${UBOOT_DEFCONFIG}"
 
             sed -i '/^CONFIG_SYS_REDUNDAND_ENVIRONMENT/d' "${UBOOT_DEFCONFIG}"
             echo "#CONFIG_SYS_REDUNDAND_ENVIRONMENT is not set" >> "${UBOOT_DEFCONFIG}"
