@@ -1,6 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 
-SRC_URI += " file://android-tools-adbd.service"
+SRC_URI += " file://android-tools-adbd.service \
+             file://0006-change-pthread_kill-for-glibc.patch"
 
 # Add simg2simg needed by image_synaimg
 TOOLS_TO_BUILD:append:class-native = " simg2simg"

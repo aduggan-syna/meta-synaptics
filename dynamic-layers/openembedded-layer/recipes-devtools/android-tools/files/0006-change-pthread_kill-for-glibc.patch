@@ -1,0 +1,25 @@
+diff --git a/system/core/adb/daemon/usb.cpp b/system/core/adb/daemon/usb.cpp
+index 1fe2d3aa..d78b0f13 100644
+--- a/system/core/adb/daemon/usb.cpp
++++ b/system/core/adb/daemon/usb.cpp
+@@ -436,6 +436,12 @@ struct UsbFfsConnection : public Connection {
+         }
+ 
+         pthread_t worker_thread_handle = worker_thread_.native_handle();
++#if defined(__linux__)
++        pthread_kill(worker_thread_handle, kInterruptionSignal);
++        std::this_thread::sleep_for(100ms);
++        pthread_kill(worker_thread_handle, 0);
++#endif
++#if defined(__ANDROID__)
+         while (true) {
+             int rc = pthread_kill(worker_thread_handle, kInterruptionSignal);
+             if (rc != 0) {
+@@ -454,6 +460,7 @@ struct UsbFfsConnection : public Connection {
+                 LOG(ERROR) << "failed to send interruption signal to worker: " << strerror(rc);
+             }
+         }
++#endif
+ 
+         worker_thread_.join();
+     }

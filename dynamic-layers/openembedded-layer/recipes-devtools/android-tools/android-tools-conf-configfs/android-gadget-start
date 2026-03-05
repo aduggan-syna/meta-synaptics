@@ -1,0 +1,23 @@
+#!/bin/sh
+
+#Not report error in case write UDCfile failed sometime, can retry again
+#set -e
+
+usb_controller=`ls /sys/class/udc`
+UDCfile=/sys/kernel/config/usb_gadget/adb/UDC
+ep2file=/dev/usb-ffs/adb/ep2
+
+i=10
+while [ $i -gt 0 ]
+do
+    usb_controllerInUDC=`cat ${UDCfile}`
+    if [ -f ${ep2file} ] && [ "${usb_controllerInUDC}" != "${usb_controller}" ]; then
+        echo ${usb_controller} > ${UDCfile}
+	if [ $? != 0 ]; then
+	    echo "Write usb_controller ${usb_controller} to ${UDCfile} failed!"
+	fi
+	break
+    fi
+    i=$((i-1))
+    sleep 3
+done

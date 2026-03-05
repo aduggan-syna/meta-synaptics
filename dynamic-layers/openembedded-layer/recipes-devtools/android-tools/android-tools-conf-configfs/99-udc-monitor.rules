@@ -1,0 +1,1 @@
+ACTION=="change", SUBSYSTEM=="udc", RUN+="/usr/bin/android-gadget-start"
