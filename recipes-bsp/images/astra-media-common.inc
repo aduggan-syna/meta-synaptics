@@ -51,6 +51,11 @@ WAYLAND_PACKAGES = " \
     gstreamer1.0-plugins-bad-waylandsink \
 "
 
+RUST_PACKAGES = " \
+    rust \
+    cargo \
+"
+
 IMAGE_INSTALL:append = " \
     kernel-modules \
     linux-firmware-syna \
@@ -152,6 +157,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
 
 IMAGE_INSTALL:append:dolphin = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
+    ${RUST_PACKAGES} \
     synasdk-v4l2isp-daemon \
     synasdk-v4l2isp-test \
     synasdk-v4l2isp-qtapp \
