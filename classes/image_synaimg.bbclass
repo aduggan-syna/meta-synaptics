@@ -38,6 +38,7 @@ do_image_synaimg[depends] += " \
     vim-native:do_populate_sysroot \
     bc-native:do_populate_sysroot \
     synasdk-tools-native:do_populate_sysroot \
+    synasdk-sm:do_deploy \
     virtual/bootloader:do_deploy \
     synasdk-preboot:do_deploy \
     synasdk-security:do_deploy \

@@ -24,8 +24,7 @@ DEPENDS = " \
     flex-native \
 "
 
-# TODO: we should use the yocto toolchain
-DEPENDS += "gcc-arm-aarch64-linux-gnu-native gcc-arm-arm-linux-gnueabihf-native"
+do_compile[depends] += "synasdk-sm:do_populate_sysroot"
 
 COMPATIBLE_MACHINE = "syna"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -58,6 +57,9 @@ do_compile () {
         export LOCALVERSION=".${SYNA_SDK_REVISION}"
     fi
     CONFIG_TOOLCHAIN_BSP=${HOST_PREFIX}
+    if [ -f "${WORKDIR}/recipe-sysroot/${nonarch_base_libdir}/output_sm/bin/sm.bin" ]; then
+        install -D ${WORKDIR}/recipe-sysroot/${nonarch_base_libdir}/output_sm/bin/sm.bin ${B}/target/release/uboot/intermediate/output_sm/bin/sm.bin
+    fi
     clean=0 . build/module/uboot/build.sh "${CONFIG_FILE}"
 
     if [ $? -ne 0 ]; then
