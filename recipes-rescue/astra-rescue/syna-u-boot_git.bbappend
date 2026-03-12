@@ -1,4 +1,4 @@
-do_configure:prepend() {
+rescue_configure() {
     echo ${MACHINE}
     if [ "${MACHINE}" = "sl1620" ]; then
         MACHINE_NAME="myna2"
@@ -11,7 +11,7 @@ do_configure:prepend() {
         return 0
     fi
 
-    UBOOT_DEFCONFIG="${S}/boot/u-boot/configs/${MACHINE_NAME}_suboot_defconfig"
+    UBOOT_DEFCONFIG="${S}/configs/${MACHINE_NAME}_suboot_defconfig"
 
     if [ -f "${UBOOT_DEFCONFIG}" ]; then
         sed -i '/^CONFIG_SYNA_RESCUE_MODE[ =]/d' "${UBOOT_DEFCONFIG}"
@@ -39,4 +39,16 @@ do_configure:prepend() {
     else
         echo "WARNING: UBOOT_DEFCONFIG file not found: ${UBOOT_DEFCONFIG}"
     fi
+}
+
+do_configure:prepend:dolphin() {
+    rescue_configure
+}
+
+do_configure:prepend:platypus() {
+    rescue_configure
+}
+
+do_configure:prepend:myna2() {
+    rescue_configure
 }
