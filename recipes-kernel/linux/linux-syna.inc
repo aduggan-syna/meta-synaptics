@@ -55,51 +55,8 @@ CMDLINE:syna = "${CMDLINE_EMMC_BOOT}"
 CMDLINE:sl2611nand = "${CMDLINE_NAND_BOOT}"
 CMDLINE:sl2619nand = "${CMDLINE_NAND_BOOT}"
 
+inherit syna-security
 require recipes-devtools/synasdk/synasdk-config.inc
-
-genx_secure_image() {
-  v_image_type=$1; shift
-  in_extras=$1; shift
-  in_length=$1; shift
-  f_input=$1; shift
-  f_output=$1; shift
-
-  ### Check input file ###
-  [ -f $f_input ]
-
-  ### Exectuable for generating secure image ###
-  exec_cmd=gen_x_secure_image
-
-  ### Prepare arguments ###
-  unset exec_args
-
-  # Other parameters
-  exec_args="${exec_args} --chip-name=${syna_chip_name}"
-  exec_args="${exec_args} --chip-rev=${syna_chip_rev}"
-  exec_args="${exec_args} --img_type=$v_image_type"
-  exec_args="${exec_args} --key_type=ree"
-
-  #exec_args="${exec_args} --seg_id=0x00000000"
-  #exec_args="${exec_args} --seg_id_mask=0xFFFFFFFF"
-  #exec_args="${exec_args} --version=0x00000001"
-  #exec_args="${exec_args} --version_mask=0xFFFFFFFF"
-  exec_args="${exec_args} --length=$in_length"
-  exec_args="${exec_args} --extras=$in_extras"
-
-  exec_args="${exec_args} --workdir-security-tools=${security_tools_path}"
-  exec_args="${exec_args} --workdir-security-keys=${security_keys_path}"
-  if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
-      exec_args="${exec_args} --tool-version=genx_v3"
-  else
-      exec_args="${exec_args} --tool-version=genx"
-  fi
-
-  # Input and output
-  exec_args="${exec_args} --in_payload=${f_input} --out_store=${f_output}"
-
-  ### Generate secure image ###
-  eval ${exec_cmd} "${exec_args}"
-}
 
 do_compile:append() {
 
@@ -136,7 +93,7 @@ do_deploy:append() {
     if [ "is${CONFIG_GENX_ENABLE}" = "isy" ]; then
         ${security_tools_path}in_extras.py "LINUX_KERNEL" ${DEPLOYDIR}/in_linux_kernel.bin 0x00000001
         #call internal function
-        genx_secure_image "LINUX_KERNEL" ${DEPLOYDIR}/in_linux_kernel.bin 0x0 ${DEPLOYDIR}/linux_bootimgs_raw.bin ${DEPLOYDIR}/linux_bootimgs_en.bin
+        genx_secure_image "LINUX_KERNEL" "ree" ${DEPLOYDIR}/in_linux_kernel.bin 0x0 ${DEPLOYDIR}/linux_bootimgs_raw.bin ${DEPLOYDIR}/linux_bootimgs_en.bin
     else
         gen_secure_image --code-type=5 --add-custk-store=0 --add-ersak-store=0 --chip-name=${syna_chip_name} --chip-rev=${syna_chip_rev} --market-id=`printf 0x%x ${syna_chip_mid}` --workdir-security-tools=${security_tools_path} --workdir-security-keys=${security_keys_path}  --input-file=${DEPLOYDIR}/linux_bootimgs_raw.bin --output-file=${DEPLOYDIR}/linux_bootimgs_en.bin
     fi
