@@ -34,6 +34,7 @@ SRC_URI:append:dolphin = " \
     file://OV5647_480p.xml \
     file://OV5647_2k.xml \
     file://ISP_Manual_OV5647_2k.json \
+    file://ISP_Manual_OV5647_480p.json \
     file://ISP_Auto_OV5647_2k.json \
     file://isp_media_server.service \
     file://isp_media_server.sh \
@@ -85,5 +86,6 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/OV5647_480p.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/OV5647_2k.xml ${D}${datadir}
     install -m 0644 ${WORKDIR}/ISP_Manual_OV5647_2k.json ${D}${datadir}
+    install -m 0644 ${WORKDIR}/ISP_Manual_OV5647_480p.json ${D}${datadir}
     install -m 0644 ${WORKDIR}/ISP_Auto_OV5647_2k.json ${D}${datadir}
 }
