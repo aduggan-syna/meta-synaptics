@@ -87,7 +87,7 @@ do_deploy () {
         prepend_image_info.sh "${B}/../../uboot_en.bin" "${DEPLOYDIR}/bootloader_nopreload.subimg"
     fi
 
-    if [ "${MACHINE}" != "sl1620usb" ] && [ "${MACHINE}" != "sl1640usb" ] && [ "${MACHINE}" != "sl1680usb" ]; then
+    if [ "${MACHINE}" != "sl1620usb" ] && [ "${MACHINE}" != "sl1640usb" ] && [ "${MACHINE}" != "sl1680usb" ] && [ "${MACHINE}" != "sl2619usb" ]; then
         if [ -f "${B}/../../sm_fw_en.bin" ]; then
             install -m 0644 "${B}/../../sm_fw_en.bin" "${DEPLOYDIR}"
         fi

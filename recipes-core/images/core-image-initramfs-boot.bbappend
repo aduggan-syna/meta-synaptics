@@ -14,3 +14,5 @@ PACKAGE_INSTALL:append:sl1620spi = " initramfs-module-debug"
 PACKAGE_INSTALL:append:sl1640spi = " initramfs-module-debug"
 
 PACKAGE_INSTALL:append:sl1620usb = " ${ADBD_RPACKAGES}"
+
+PACKAGE_INSTALL:append:sl2619usb = " ${ADBD_RPACKAGES}"

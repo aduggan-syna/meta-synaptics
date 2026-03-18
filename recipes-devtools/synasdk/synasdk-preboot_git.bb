@@ -78,7 +78,13 @@ do_deploy() {
         fi
     else
         if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
-            install -m 0644 target/preboot/preboot_ksb.bin ${DEPLOYDIR}/preboot.subimg
+            if [ "${MACHINE}" = "sl2619usb" ]; then
+                install -m 0644 target/preboot/intermediate/release/key.bin ${DEPLOYDIR}/key.bin
+                install -m 0644 target/preboot/intermediate/release/spk_raw.bin ${DEPLOYDIR}/spk.bin
+                install -m 0644 target/preboot/intermediate/release/bl_en.bin ${DEPLOYDIR}/m52bl.bin
+            else
+                install -m 0644 target/preboot/preboot_ksb.bin ${DEPLOYDIR}/preboot.subimg
+            fi
             install -m 0644 target/preboot/sysmgr_en.bin ${DEPLOYDIR}/sysmgr.subimg
         else
             install -m 0644 target/preboot/preboot_esmt.bin ${DEPLOYDIR}/preboot.subimg

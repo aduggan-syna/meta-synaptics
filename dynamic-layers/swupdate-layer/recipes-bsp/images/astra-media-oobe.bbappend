@@ -19,6 +19,7 @@ IMAGE_INSTALL:append = " \
 IMAGE_INSTALL:remove:sl1620usb = "${SWUPDATE_INSTALL}"
 IMAGE_INSTALL:remove:sl1640usb = "${SWUPDATE_INSTALL}"
 IMAGE_INSTALL:remove:sl1680usb = "${SWUPDATE_INSTALL}"
+IMAGE_INSTALL:remove:sl2619usb = "${SWUPDATE_INSTALL}"
 
 # Include dependencies and SWUpdate
 inherit swupdate
@@ -27,7 +28,7 @@ SRC_URI = "file://generate_swu.sh \
            file://generate_swu_klamath.sh"
 
 do_swuimage() {
-    if [ ${MACHINE} == "sl1620usb" ] || [ ${MACHINE} == "sl1640usb" ] || [ ${MACHINE} == "sl1680usb" ]; then
+    if [ ${MACHINE} == "sl1620usb" ] || [ ${MACHINE} == "sl1640usb" ] || [ ${MACHINE} == "sl1680usb" ] || [ ${MACHINE} == "sl2619usb" ]; then
         return
     fi
     # Change to build directory (or wherever your images are generated)

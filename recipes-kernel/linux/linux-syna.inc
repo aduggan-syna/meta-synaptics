@@ -34,15 +34,19 @@ DEPENDS:append:syna = " \
 "
 
 CMDLINE_EMMC_BOOT = "console=ttyS0,115200 rootwait rootfstype=ext4"
-CMDLINE_EMMC_BOOT:sl1620usb = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
-CMDLINE_EMMC_BOOT:sl1640usb = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
-CMDLINE_EMMC_BOOT:sl1680usb = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
-CMDLINE_EMMC_BOOT:sl1680spi = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
-CMDLINE_EMMC_BOOT:sl1620spi = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
-CMDLINE_EMMC_BOOT:sl1640spi = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
+CMDLINE_EARLY_BOOT = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
+CMDLINE_NAND_BOOT = "console=ttyS0,115200 ro rootfstype=ubifs ubi.mtd=rootfs root=/dev/ubi0_0 rootwait"
+CMDLINE_EMMC_BOOT:sl1620usb = "${CMDLINE_EARLY_BOOT}"
+CMDLINE_EMMC_BOOT:sl1640usb = "${CMDLINE_EARLY_BOOT}"
+CMDLINE_EMMC_BOOT:sl1680usb = "${CMDLINE_EARLY_BOOT}"
+CMDLINE_EMMC_BOOT:sl2619usb = "${CMDLINE_EARLY_BOOT}"
+CMDLINE_EMMC_BOOT:sl1680spi = "${CMDLINE_EARLY_BOOT}"
+CMDLINE_EMMC_BOOT:sl1620spi = "${CMDLINE_EARLY_BOOT}"
+CMDLINE_EMMC_BOOT:sl1640spi = "${CMDLINE_EARLY_BOOT}"
+CMDLINE_EMMC_BOOT:sl2611nand = "${CMDLINE_NAND_BOOT}"
+CMDLINE_EMMC_BOOT:sl2619nand = "${CMDLINE_NAND_BOOT}"
 CMDLINE_EMMC_BOOT:append = "${@bb.utils.contains('KGDB_ENABLE', '1', ' kgdboc=ttyS0,115200', '', d)}"
 CMDLINE_EMMC_BOOT:append = "${@bb.utils.contains('KGDB_WAIT', '1', ' kgdbwait', '', d)}"
-CMDLINE_NAND_BOOT = "console=ttyS0,115200 ro rootfstype=ubifs ubi.mtd=rootfs root=/dev/ubi0_0 rootwait"
 
 # Set the verbosity of kernel messages during runtime
 # You can define CMDLINE_DEBUG in your local.conf or distro.conf to override this behaviour
@@ -52,8 +56,6 @@ CMDLINE_DEBUG ?= ""
 CMDLINE_EMMC_BOOT:append = " ${CMDLINE_DEBUG}"
 
 CMDLINE:syna = "${CMDLINE_EMMC_BOOT}"
-CMDLINE:sl2611nand = "${CMDLINE_NAND_BOOT}"
-CMDLINE:sl2619nand = "${CMDLINE_NAND_BOOT}"
 
 inherit syna-security
 require recipes-devtools/synasdk/synasdk-config.inc
