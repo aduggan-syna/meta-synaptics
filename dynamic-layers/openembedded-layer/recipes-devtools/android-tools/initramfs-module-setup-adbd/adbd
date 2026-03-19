@@ -24,19 +24,13 @@ adbd_hook_handler() {
 		mount -t devpts devpts /dev/pts
                 msg "mount configfs"
 		mount -t configfs none /sys/kernel/config
-		msg "Load neccessary drivers..."
-		load_kernel_module pwm_berlin
-		load_kernel_module i2c_dyndmx_pinctrl
-		load_kernel_module phy_syna_usb
-		load_kernel_module roles
-		load_kernel_module dwc2
-		load_kernel_module reset_berlin
 		msg "Setup android gadget..."
 		/usr/bin/android-gadget-setup
 		msg "Start adbd"
 		/usr/bin/adbd &
 		msg "Start android gadget..."
 		/usr/bin/android-gadget-start
+		/lib/systemd/systemd-udevd --daemon
 	fi
 }
 
