@@ -194,3 +194,10 @@ ROOTFS_POSTPROCESS_COMMAND += "mount_usb; add_version; "
 LICENSE = "MIT"
 
 inherit_defer ${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'selinux-image', 'core-image', d)}
+
+python () {
+    machine = d.getVar('MACHINE')
+    if machine == 'sl2619usb' or machine == 'sl1620usb' or machine == 'sl1640usb' or machine == 'sl1680usb':
+        bb.build.deltask('do_rootfs', d)
+        bb.build.deltask('do_image', d)
+}
