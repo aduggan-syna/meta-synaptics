@@ -127579,3 +127579,217 @@ index c7e8cb9..df3e579 100644
 -- 
 2.7.4
 
+
+From 859bfc7652d23681ce3ab3cb61a15065f252cbb2 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Wed, 11 Mar 2026 08:48:01 +0800
+Subject: [PATCH] syna: sip: add SYNA_SIP_SMC[64|32]_BCM_CMD
+
+SYNA_SIP_SMC32_BCM_CMD 0x82000003
+SYNA_SIP_SMC64_BCM_CMD 0xC2000003
+
+Change-Id: I17888554d568434c56f7161eb92041ec2ed61a1d
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/berlin_sip_svc.c           | 30 ++++++++++++++++
+ plat/syna/berlin/common/drivers/bcm/bcm.c          | 41 ++++++++++++++++++++++
+ .../common/drivers/mailbox/synaprot_mailbox.c      | 33 +++++++++++++++++
+ .../common/drivers/mailbox/synaprot_mailbox.h      |  2 ++
+ plat/syna/berlin/include/berlin_sip_svc.h          |  3 ++
+ plat/syna/berlin/include/drivers/bcm.h             |  2 ++
+ 6 files changed, 111 insertions(+)
+
+diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
+index 68bd432..0b46a2f 100644
+--- a/plat/syna/berlin/common/berlin_sip_svc.c
++++ b/plat/syna/berlin/common/berlin_sip_svc.c
+@@ -12,7 +12,14 @@
+ #include "berlin_sip_svc.h"
+ #include "secure_register.h"
+ #include "perif_reset.h"
++
++#ifdef CFG_SYNA_BCM
+ #include "bcm.h"
++#endif
++#ifdef CFG_SYNAPROT_MAILBOX
++#include "synaprot_mailbox.h"
++#endif
++
+ #pragma weak berlin_set_wakeup_sources
+ #pragma weak berlin_perif_reset
+ 
+@@ -57,6 +64,7 @@ uintptr_t berlin_sip_handler(uint32_t smc_fid,
+ 	uint32_t op = (uint32_t)x1;
+ 	uint32_t index = (uint32_t)x2;
+ 	uint32_t value = (uint32_t)x3;
++	u_register_t x5, x6, x7;
+ 
+ 	switch (smc_fid) {
+ 	case SYNA_SIP_SMC32_SREGISTER_OP:
+@@ -68,6 +76,14 @@ uintptr_t berlin_sip_handler(uint32_t smc_fid,
+ 		ret = berlin_set_wakeup_sources(x1, x2, x3, x4);
+ 		SMC_RET1(handle, ret);
+ #ifdef CFG_SYNA_BCM
++	case SYNA_SIP_SMC32_BCM_CMD:
++	case SYNA_SIP_SMC64_BCM_CMD:
++		x5 = SMC_GET_GP(handle, CTX_GPREG_X5);
++		x6 = SMC_GET_GP(handle, CTX_GPREG_X6);
++		x7 = SMC_GET_GP(handle, CTX_GPREG_X7);
++		ret = bcm_cmd_handle(x1, x2, x3, x4, x5, x6, x7);
++		SMC_RET1(handle, ret);
++
+ 	case SYNA_SIP_SMC32_USB_LOAD:
+ 	case SYNA_SIP_SMC64_USB_LOAD:
+ 		ret = bcm_erom_load_usb_image(x1, x2, x3, x4);
+@@ -96,6 +112,20 @@ uintptr_t berlin_sip_handler(uint32_t smc_fid,
+ 		uint64_t val= (uint64_t)x3;
+ 		ret = bcm_access_secure_sram(access_type, idx, &val);
+ 		SMC_RET2(handle, ret, val);
++
++#elif defined(CFG_SYNAPROT_MAILBOX)
++	case SYNA_SIP_SMC32_BCM_CMD:
++	case SYNA_SIP_SMC64_BCM_CMD:
++		mailbox_rsp_t rsp = {0};
++
++		x5 = SMC_GET_GP(handle, CTX_GPREG_X5);
++		x6 = SMC_GET_GP(handle, CTX_GPREG_X6);
++		x7 = SMC_GET_GP(handle, CTX_GPREG_X7);
++		ret = mailbox_cmd_handle(x1, x2, x3, x4, x5, x6, x7, &rsp);
++
++		SMC_RET8(handle, ret, rsp.cmd_ret,
++				rsp.cmd_status[0], rsp.cmd_status[1], rsp.cmd_status[2],
++				rsp.cmd_status[3], rsp.cmd_status[4], rsp.cmd_status[5]);
+ #endif
+ 	case SYNA_SIP_SMC32_PERIFRESET:
+ 	case SYNA_SIP_SMC64_PERIFRESET:
+diff --git a/plat/syna/berlin/common/drivers/bcm/bcm.c b/plat/syna/berlin/common/drivers/bcm/bcm.c
+index 3d7fa06..71647e2 100644
+--- a/plat/syna/berlin/common/drivers/bcm/bcm.c
++++ b/plat/syna/berlin/common/drivers/bcm/bcm.c
+@@ -386,3 +386,44 @@ int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size)
+ 
+ 	return status;
+ }
++
++static bool bcm_sip_cmd_is_supported(uint32_t cmd_id)
++{
++    switch (cmd_id)
++    {
++        case BCM_GET_RANDOM:
++        case BCM_EROM_LOAD_USB_IMAGE:
++        case BCM_OTP_PROGRAM_OTP:
++        case BCM_OTP_RD_PUBLIC_OTP:
++        case BCM_OTP_UTILS_OTP_READ:
++        case BCM_OTP_UTILS_OTP_WRITE:
++        case BCM_ACCESS_SRAM:
++            return true;
++
++        default:
++            return false;
++    }
++}
++
++int bcm_cmd_handle(uint32_t cmd_id, uint32_t arg0, uint32_t arg1, uint32_t arg2,
++					uint32_t arg3, uint32_t arg4 , uint32_t arg5)
++{
++	unsigned int status;
++	BCM_MAILBOX_COMMAND cmd;
++
++	if (!bcm_sip_cmd_is_supported(cmd_id))
++		return -1;
++
++	bcm_clear_command(&cmd);
++	cmd.arg0 = arg0;
++	cmd.arg1 = arg1;
++	cmd.arg2 = arg2;
++	cmd.arg3 = arg3;
++	cmd.arg4 = arg4;
++	cmd.arg5 = arg5;
++
++	cmd.command = cmd_id;
++	status = bcm_exec_func(&cmd);
++
++	return status;
++}
+diff --git a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
+index 9941df0..bba5b77 100644
+--- a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
++++ b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
+@@ -278,3 +278,36 @@ void mailbox_init(void)
+ 
+ 	INFO("mailbox init done.\n");
+ }
++
++static bool mailbox_sip_cmd_is_supported(uint32_t cmd_id)
++{
++    switch (cmd_id)
++    {
++        case SP_CMD_QUERY_SPK_VERSION:
++            return true;
++
++        default:
++            return false;
++    }
++}
++
++int mailbox_cmd_handle(uint32_t cmd_id, uint32_t arg0, uint32_t arg1, uint32_t arg2,
++					uint32_t arg3, uint32_t arg4 , uint32_t arg5, mailbox_rsp_t *rsp)
++{
++	mailbox_command_t cmd = {0};
++
++	if (!mailbox_sip_cmd_is_supported(cmd_id))
++		return -1;
++
++	cmd.command.cmd_val = cmd_id;
++	cmd.param[0] = arg0;
++	cmd.param[1] = arg1;
++	cmd.param[2] = arg2;
++	cmd.param[3] = arg3;
++	cmd.param[4] = arg4;
++	cmd.param[5] = arg5;
++
++	cmd.param_num = 6;
++
++	return mbox_send_command(&cmd, rsp);
++}
+diff --git a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h
+index 222272e..af5f8d7 100755
+--- a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h
++++ b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h
+@@ -87,6 +87,8 @@ typedef struct mailbox_rsp {
+ #define SP_CMD_QUERY_SPK_VERSION          SP_PI_CMD(HOST2SYNA_SENDER_A55, MAILBOX_TEE, HOST2SYNA_CMD_SOC, SPI_PI_QUERY_SPK_VERSION)
+ #define SP_CMD_SECURE_SEPARATION_DONE     SP_PI_CMD(HOST2SYNA_SENDER_A55, MAILBOX_TEE, HOST2SYNA_CMD_KLAMATH, SP_PI_SECURE_SEPARATION_DONE)
+ void mailbox_init(void);
++int mailbox_cmd_handle(uint32_t cmd_id, uint32_t arg0, uint32_t arg1, uint32_t arg2,
++		uint32_t arg3, uint32_t arg4 , uint32_t arg5, mailbox_rsp_t *rsp);
+ 
+ 
+ #endif // _SYNA_MAILBOX_
+diff --git a/plat/syna/berlin/include/berlin_sip_svc.h b/plat/syna/berlin/include/berlin_sip_svc.h
+index 8f1e8d0..30de991 100644
+--- a/plat/syna/berlin/include/berlin_sip_svc.h
++++ b/plat/syna/berlin/include/berlin_sip_svc.h
+@@ -14,6 +14,9 @@
+ #define SYNA_SIP_SMC32_WAKEUP_CONFIG				0x82000002
+ #define SYNA_SIP_SMC64_WAKEUP_CONFIG				0xC2000002
+ 
++#define SYNA_SIP_SMC32_BCM_CMD					0x82000003
++#define SYNA_SIP_SMC64_BCM_CMD					0xC2000003
++
+ #define SYNA_SIP_SMC32_OTP_PROGRAM				0x82000008
+ #define SYNA_SIP_SMC64_OTP_PROGRAM				0xC2000008
+ 
+diff --git a/plat/syna/berlin/include/drivers/bcm.h b/plat/syna/berlin/include/drivers/bcm.h
+index 97cb49c..472336f 100644
+--- a/plat/syna/berlin/include/drivers/bcm.h
++++ b/plat/syna/berlin/include/drivers/bcm.h
+@@ -102,4 +102,6 @@ int bcm_otp_read_otp(uint32_t index, uint32_t *pdata, uint32_t *pmask);
+ int bcm_otp_write_otp(uint32_t index, uint32_t data, uint32_t mask);
+ int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size);
+ int bcm_access_secure_sram(uint32_t type, uint32_t idx, uint64_t *pdata);
++int bcm_cmd_handle(uint32_t cmd_id, uint32_t arg0, uint32_t arg1, uint32_t arg2,
++			uint32_t arg3, uint32_t arg4 , uint32_t arg5);
+ #endif
+-- 
+2.7.4
+
