@@ -30,7 +30,8 @@ inherit swupdate
 
 SRC_URI = "file://generate_swu.sh \
 	   file://generate_swu_klamath.sh \
-           file://rescue_ota.sh"
+           file://rescue_ota.sh \
+           file://swupdate_cert_utils.sh"
 
 do_swuimage() {
     if [ ${MACHINE} == "sl1620usb" ] || [ ${MACHINE} == "sl1640usb" ] || [ ${MACHINE} == "sl1680usb" ] || [ ${MACHINE} == "sl2619usb" ]; then

@@ -14,7 +14,8 @@ IMAGE_INSTALL:append = " \
 inherit swupdate
 
 SRC_URI = "file://generate_swu.sh \
-           file://generate_swu_klamath.sh"
+           file://generate_swu_klamath.sh \
+           file://swupdate_cert_utils.sh"
 
 do_swuimage() {
     # Change to build directory (or wherever your images are generated)
