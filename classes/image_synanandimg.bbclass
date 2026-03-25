@@ -239,6 +239,7 @@ IMAGE_CMD:synanandimg () {
     for driver in ${large_drivers}; do
         find ${IMAGE_ROOTFS}/${nonarch_base_libdir}/modules/${PREFERRED_VERSION_linux-syna}/kernel/drivers/${driver} -name "*.ko" | \
         xargs xz
+        find ${IMAGE_ROOTFS}/${nonarch_base_libdir}/modules/${PREFERRED_VERSION_linux-syna}/kernel/drivers/${driver} -name *.xz -exec sh -c 'mv "$1" "${1%.xz}"' _ {} \;
     done
 
     mtbd_size2vol_size=`expr 1024 \* 1024 / ${CONFIG_NAND_BLOCK_SIZE}`
