@@ -33,7 +33,7 @@ DEPENDS:append:syna = " \
     vim-native \
 "
 
-CMDLINE_EMMC_BOOT = "console=ttyS0,115200 rootwait rootfstype=ext4"
+CMDLINE_EMMC_BOOT = "net.ifnames=0 console=ttyS0,115200 rootwait rootfstype=ext4"
 CMDLINE_EARLY_BOOT = "shell earlycon console=ttyS0,115200 rootwait rootfstype=ext4"
 CMDLINE_NAND_BOOT = "console=ttyS0,115200 ro rootfstype=ubifs ubi.mtd=rootfs root=/dev/ubi0_0 rootwait"
 CMDLINE_EMMC_BOOT:sl1620usb = "${CMDLINE_EARLY_BOOT}"
