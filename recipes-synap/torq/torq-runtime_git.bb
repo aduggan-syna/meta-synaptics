@@ -9,7 +9,7 @@ SRC_URI = " \
     git://github.com/google/googletest.git;branch=main;protocol=https;name=googletest;submodules=1;destsuffix=git/third_party/iree/third_party/googletest \
     git://github.com/dvidelabs/flatcc.git;branch=master;protocol=https;name=flatcc;submodules=1;destsuffix=git/third_party/iree/third_party/flatcc \
 "
-SRCREV_torq = "b6d7cfdecd9e14bc3f74a2a9ebbe980a946e683e"
+SRCREV_torq = "fae21a1acdcc4327fed2888068ae9942ce731dd7"
 SRCREV_iree = "e36749f09b2f82adda7d239625edec071f70f5d4"
 SRCREV_benchmark = "1e96bb0ab5e758861f5bbbd4edbd0a8d9a2a7cae"
 SRCREV_googletest = "c8393f8554419dc27b688c535b8fa4afb82146a4"
