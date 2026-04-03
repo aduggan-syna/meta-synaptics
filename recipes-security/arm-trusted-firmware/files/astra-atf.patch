@@ -127849,3 +127849,32 @@ index 472336f..0723f39 100644
 -- 
 2.7.4
 
+
+From 8b587e65e221cb4e460c9e4d710d1fcfcb9414aa Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Fri, 3 Apr 2026 10:03:55 +0800
+Subject: [PATCH] bcm: remove bcm command check from TEE
+
+Change-Id: I10dec5eed64849f888ce631bb7c377cfeac3a15b
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/bcm/bcm.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/plat/syna/berlin/common/drivers/bcm/bcm.c b/plat/syna/berlin/common/drivers/bcm/bcm.c
+index cb2cc17..08a24c9 100644
+--- a/plat/syna/berlin/common/drivers/bcm/bcm.c
++++ b/plat/syna/berlin/common/drivers/bcm/bcm.c
+@@ -411,9 +411,6 @@ int bcm_cmd_handle(uint32_t cmd_id, uint32_t arg0, uint32_t arg1, uint32_t arg2,
+ 	unsigned int status;
+ 	BCM_MAILBOX_COMMAND cmd;
+ 
+-	if (!bcm_sip_cmd_is_supported(cmd_id))
+-		return -1;
+-
+ 	bcm_clear_command(&cmd);
+ 	cmd.arg0 = arg0;
+ 	cmd.arg1 = arg1;
+-- 
+2.7.4
+
