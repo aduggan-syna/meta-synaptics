@@ -41,7 +41,7 @@ do_patch(){
             cd ${WORKDIR}
             patch -p1 < myna2_brcm_bt_start.patch
             ;;
-        sl2619|sl2615|sl2611|klamath)
+        sl2619|sl2615|sl2611|klamath|sl2619nand)
             cd ${WORKDIR}
             patch -p1 < klamath_brcm_bt_start.patch
             ;;
