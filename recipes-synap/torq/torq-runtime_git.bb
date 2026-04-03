@@ -3,7 +3,7 @@ LICENSE = "Apache-2.0-with-LLVM-exception"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=2e982d844baa4df1c80de75470e0c5cb"
 
 SRC_URI = " \
-    git://github.com/synaptics-torq/torq-compiler.git;branch=main;protocol=https;submodules=1;name=torq \
+    git://github.com/synaptics-torq/torq-compiler.git;branch=v1.5;protocol=https;submodules=1;name=torq \
     git://github.com/synaptics-torq/iree.git;branch=torq-old;protocol=https;name=iree;submodules=1;destsuffix=git/third_party/iree \
     git://github.com/google/benchmark.git;branch=main;protocol=https;name=benchmark;submodules=1;destsuffix=git/third_party/iree/third_party/benchmark \
     git://github.com/google/googletest.git;branch=main;protocol=https;name=googletest;submodules=1;destsuffix=git/third_party/iree/third_party/googletest \
