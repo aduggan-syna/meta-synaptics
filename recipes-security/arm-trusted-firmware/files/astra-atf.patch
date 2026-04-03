@@ -127878,3 +127878,31 @@ index cb2cc17..08a24c9 100644
 -- 
 2.7.4
 
+
+From 20bc3267c1a3a879b0ab489f76e926f52150c875 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Fri, 3 Apr 2026 10:03:36 +0800
+Subject: [PATCH] myna2: skip the uart initialisation
+
+Change-Id: I1d8f32f9b46aa9d6048f9a13a0c70ac09a2a18fb
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/include/soc/myna2/berlin_def.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/syna/berlin/include/soc/myna2/berlin_def.h b/plat/syna/berlin/include/soc/myna2/berlin_def.h
+index dcc9596..ce27567 100644
+--- a/plat/syna/berlin/include/soc/myna2/berlin_def.h
++++ b/plat/syna/berlin/include/soc/myna2/berlin_def.h
+@@ -49,7 +49,7 @@
+ #define BERLIN_UART_BAUDRATE		19200
+ #define BERLIN_UART_CLOCK			(BERLIN_UART_BAUDRATE * 16)
+ #else
+-#define BERLIN_UART_CLOCK			25000000
++#define BERLIN_UART_CLOCK			0
+ #define BERLIN_UART_BAUDRATE		115200
+ #endif
+ /* GIC */
+-- 
+2.7.4
+
