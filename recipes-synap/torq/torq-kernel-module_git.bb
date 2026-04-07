@@ -7,9 +7,9 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e
 SRC_URI = "git://github.com/synaptics-torq/torq-compiler.git;branch=v1.5;protocol=https;submodules=1;subpath=runtime/torq_hw/hal/SL2610;destsuffix=git/runtime/torq_hw/hal/SL2610;name=torq_driver"
 SRC_URI += "file://COPYING"
 
-SRCREV_torq_driver = "fae21a1acdcc4327fed2888068ae9942ce731dd7"
+SRCREV_torq_driver = "${AUTOREV}"
 SRCREV_FORMAT = "torq_driver"
-PV = "git+${@d.getVar('SRCREV_torq_driver')[:8]}"
+PV = "1.0+git${SRCPV}"
 
 S = "${WORKDIR}/git/runtime/torq_hw/hal/SL2610"
 B = "${WORKDIR}/build"

@@ -9,14 +9,14 @@ SRC_URI = " \
     git://github.com/google/googletest.git;branch=main;protocol=https;name=googletest;submodules=1;destsuffix=git/third_party/iree/third_party/googletest \
     git://github.com/dvidelabs/flatcc.git;branch=master;protocol=https;name=flatcc;submodules=1;destsuffix=git/third_party/iree/third_party/flatcc \
 "
-SRCREV_torq = "fae21a1acdcc4327fed2888068ae9942ce731dd7"
+SRCREV_torq = "${AUTOREV}"
 SRCREV_iree = "0802453ba39cc43bae75f05610e34cd35a4892e9"
 SRCREV_benchmark = "1e96bb0ab5e758861f5bbbd4edbd0a8d9a2a7cae"
 SRCREV_googletest = "c8393f8554419dc27b688c535b8fa4afb82146a4"
 SRCREV_flatcc = "9362cd00f0007d8cbee7bff86e90fb4b6b227ff3"
 
 SRCREV_FORMAT = "torq"
-PV = "git+${@d.getVar('SRCREV_torq')[:8]}"
+PV = "1.0+git${SRCPV}"
 S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig
