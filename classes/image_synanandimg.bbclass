@@ -32,6 +32,7 @@ do_image_synanandimg[depends] += " \
     synasdk-preboot:do_deploy \
     synasdk-security:do_deploy \
     synasdk-tzk:do_deploy \
+    linux-syna:do_deploy \
     ${EXTRA_FW_DEPENDS} \
     ${EXTRA_FASTLOGO_DEPENDS} \
 "
