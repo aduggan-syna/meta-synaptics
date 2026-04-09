@@ -127906,3 +127906,175 @@ index dcc9596..ce27567 100644
 -- 
 2.7.4
 
+
+From 9007acb21858dee73efbe532d0f5cde0c02b84ee Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Thu, 9 Apr 2026 16:59:46 +0800
+Subject: [PATCH] sip: klamath: add SYNA_SIP_SMC[64|32]_RD_PUBLIC_OTP
+
+Change-Id: I9fe1b6fc81b0be17a2b412e02c0f14dcd7afbfb7
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/berlin_sip_svc.c          |  3 +-
+ plat/syna/berlin/include/platform_def.h           |  4 ++
+ plat/syna/berlin/include/soc/klamath/berlin_def.h |  7 ++-
+ plat/syna/berlin/soc/klamath/berlin_soc.mk        |  1 +
+ plat/syna/berlin/soc/klamath/plat_sip_call.c      | 74 +++++++++++++++++++++++
+ 5 files changed, 86 insertions(+), 3 deletions(-)
+ create mode 100644 plat/syna/berlin/soc/klamath/plat_sip_call.c
+
+diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
+index ca8c9d8..b2a183c 100644
+--- a/plat/syna/berlin/common/berlin_sip_svc.c
++++ b/plat/syna/berlin/common/berlin_sip_svc.c
+@@ -22,13 +22,14 @@
+ 
+ #pragma weak berlin_set_wakeup_sources
+ #pragma weak berlin_perif_reset
++#pragma weak berlin_default_handler
+ 
+ static int berlin_sip_setup(void)
+ {
+ 	return 0;
+ }
+ 
+-static uint64_t berlin_default_handler(uint32_t smc_fid,
++uint64_t berlin_default_handler(uint32_t smc_fid,
+ 				   uint64_t x1,
+ 				   uint64_t x2,
+ 				   uint64_t x3,
+diff --git a/plat/syna/berlin/include/platform_def.h b/plat/syna/berlin/include/platform_def.h
+index 6ed81bf..0984650 100644
+--- a/plat/syna/berlin/include/platform_def.h
++++ b/plat/syna/berlin/include/platform_def.h
+@@ -53,7 +53,11 @@
+  ******************************************************************************/
+ #define PLAT_PHY_ADDR_SPACE_SIZE        (1ull << 32)
+ #define PLAT_VIRT_ADDR_SPACE_SIZE       (1ull << 32)
++
++#ifndef MAX_XLAT_TABLES
+ #define MAX_XLAT_TABLES			3
++#endif
++
+ #define MAX_MMAP_REGIONS		16
+ 
+ /*******************************************************************************
+diff --git a/plat/syna/berlin/include/soc/klamath/berlin_def.h b/plat/syna/berlin/include/soc/klamath/berlin_def.h
+index 22d7f3c..a31f2aa 100644
+--- a/plat/syna/berlin/include/soc/klamath/berlin_def.h
++++ b/plat/syna/berlin/include/soc/klamath/berlin_def.h
+@@ -8,14 +8,17 @@
+ #define __BERLIN_DEF_H__
+ 
+ #include <platform_def.h>
++/* Enable the dynamic translation tables library. */
++#define PLAT_XLAT_TABLES_DYNAMIC	1
++#define MAX_XLAT_TABLES		6
+ 
+ #define BERLIN_TZDRAM_BASE				0x00120000
+ #define BERLIN_TZDRAM_SIZE				0x00040000
+ 
+ #define BERLIN_DEVICE0_BASE				0xF6000000
+ #define BERLIN_DEVICE0_SIZE				0x04000000
+-#define BERLIN_DEVICE1_BASE				0xe3000000
+-#define BERLIN_DEVICE1_SIZE				0x04000000
++#define BERLIN_DEVICE1_BASE				0xe1000000
++#define BERLIN_DEVICE1_SIZE				0x06000000
+ 
+ #define BERLIN_CLUSTER_COUNT				1
+ #define BERLIN_MAX_CPUS_PER_CLUSTER			2
+diff --git a/plat/syna/berlin/soc/klamath/berlin_soc.mk b/plat/syna/berlin/soc/klamath/berlin_soc.mk
+index 72c5adb..4f5d3fa 100644
+--- a/plat/syna/berlin/soc/klamath/berlin_soc.mk
++++ b/plat/syna/berlin/soc/klamath/berlin_soc.mk
+@@ -6,6 +6,7 @@
+ BL31_SOURCES		+=	lib/cpus/aarch64/cortex_a55.S		\
+ 				${COMMON_DIR}/drivers/watchdog/wdt.c			\
+ 				${SOC_DIR}/suspend.S			\
++				${SOC_DIR}/plat_sip_call.c			\
+ 				${SOC_DIR}/plat_setup.c			\
+ 				${SOC_DIR}/plat_pm.c
+ ARM_PLAT_MT		:=	1
+diff --git a/plat/syna/berlin/soc/klamath/plat_sip_call.c b/plat/syna/berlin/soc/klamath/plat_sip_call.c
+new file mode 100644
+index 0000000..6ddf127
+--- /dev/null
++++ b/plat/syna/berlin/soc/klamath/plat_sip_call.c
+@@ -0,0 +1,74 @@
++ /*
++ * Copyright (c) 2026, Synaptics Corporation. All rights reserved.
++ *
++ * SPDX-License-Identifier: BSD-3-Clause
++ */
++
++#include <assert.h>
++#include <errno.h>
++
++#include <arch.h>
++#include <arch_helpers.h>
++#include <common/debug.h>
++#include <lib/mmio.h>
++#include <lib/xlat_tables/xlat_tables_v2.h>
++#include <common/runtime_svc.h>
++
++#include "berlin_sip_svc.h"
++
++#define SOC2MCU_DTCM_S              0xE1000000 //START_MCU_DTCM_S 0x30000000
++#define OTP_DUMP_SIZE				(0x36C)
++
++int plat_read_public_otp(uint64_t otp_buff, uint64_t size)
++{
++	uintptr_t va_otp_buf = (uintptr_t)otp_buff;
++	unsigned int attr = MT_MEMORY | MT_RW | MT_NS;
++	int ret = 0;
++	const uint8_t *opt_base = (uint8_t *)(uintptr_t)SOC2MCU_DTCM_S;
++
++	if (size > OTP_DUMP_SIZE)
++		return -EINVAL;
++
++	if (!otp_buff || (otp_buff % 64ULL) != 0ULL)
++		return -EINVAL;
++
++	ret = mmap_add_dynamic_region(otp_buff, va_otp_buf, PAGE_SIZE_4KB, attr);
++	if (ret != 0) {
++		ERROR("Failed to add dynamic mmap entry @0x%lx, size = 0x%lx, ret = %d\n", va_otp_buf, size, ret);
++		panic();
++	}
++
++	inv_dcache_range(va_otp_buf, size);
++	memcpy((void *)va_otp_buf, opt_base, size);
++	flush_dcache_range(va_otp_buf, size);
++
++	return ret;
++}
++
++/*******************************************************************************
++ * This function is responsible for handling all klamath SiP calls
++ ******************************************************************************/
++uint64_t berlin_default_handler(uint32_t smc_fid,
++		     uint64_t x1,
++		     uint64_t x2,
++		     uint64_t x3,
++		     uint64_t x4,
++		     const void *cookie,
++		     void *handle,
++		     uint64_t flags)
++{
++	int ret = 0;
++
++	switch (smc_fid) {
++	case SYNA_SIP_SMC32_RD_PUBLIC_OTP:
++	case SYNA_SIP_SMC64_RD_PUBLIC_OTP:
++		ret = plat_read_public_otp(x1, x2);
++		break;
++	default:
++		ret = -ENOTSUP;
++		break;
++	}
++
++	SMC_RET1(handle, ret);
++
++}
+-- 
+2.7.4
+
