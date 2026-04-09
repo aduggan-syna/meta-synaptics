@@ -1,15 +1,19 @@
 Upstream-Status: Inappropriate [ astra specific ]
 
 diff --git a/init b/init
-index fb31c635be..1fd7ce4d38 100644
+index fb31c63..e7947fc 100644
 --- a/init
 +++ b/init
-@@ -59,6 +59,8 @@ case "$1" in
+@@ -59,6 +59,12 @@ case "$1" in
  start)
  	echo -n "Configuring network interfaces... "
  	sysctl -e -p /etc/sysctl.conf >/dev/null 2>&1
-+	mac_addr=`cat /factory_setting/MAC_ADDR`
-+	ip link set eth0 address "${mac_addr}"
++	if [ -f /factory_setting/MAC_ADDR ]; then
++		mac_addr=`cat /factory_setting/MAC_ADDR`
++		if [ "null${mac_addr}" != "null" ]; then
++			ip link set eth0 address "${mac_addr}"
++		fi
++	fi
  	ifup -a
  	echo "done."
  	;;

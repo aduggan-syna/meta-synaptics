@@ -4,7 +4,7 @@ LICENSE = "CLOSED"
 LICENSE_FLAGS = "Synaptics-EULA"
 PR = "r0"
 
-inherit systemd
+inherit systemd update-rc.d
 
 COMPATIBLE_MACHINE = "platypus|dolphin|myna2|klamath"
 
@@ -17,44 +17,30 @@ RDEPENDS:${PN} += " \
 
 SRC_URI:append = " \
     file://brcm_bt_start.service \
+    file://brcm_bt_start.sh \
 "
 
-SRC_URI:append:dolphin = " \
-    file://dolphin_brcm_bt_start.patch \
-"
-
-SRC_URI:append:myna2 = " \
-    file://myna2_brcm_bt_start.patch \
-"
-
-SRC_URI:append:klamath = " \
-    file://klamath_brcm_bt_start.patch \
-"
-
-do_patch(){
-    case "${MACHINE}" in
-        sl1680)
-            cd ${WORKDIR}
-            patch -p1 < dolphin_brcm_bt_start.patch
-            ;;
-        sl1620)
-            cd ${WORKDIR}
-            patch -p1 < myna2_brcm_bt_start.patch
-            ;;
-        sl2619|sl2615|sl2611|klamath|sl2619nand)
-            cd ${WORKDIR}
-            patch -p1 < klamath_brcm_bt_start.patch
-            ;;
-    esac
-}
+btuart:myna2 = "/dev/ttyS1"
+btuart:klamath = "/dev/ttyS1"
+btuart:platypus = "/dev/ttyS2"
+btuart:dolphin = "/dev/ttyS3"
 
 do_install() {
-    install -d ${D}${systemd_system_unitdir}
-    install -m 0644 ${WORKDIR}/brcm_bt_start.service ${D}${systemd_system_unitdir}
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
+        install -d ${D}${systemd_system_unitdir}
+        install -m 0644 ${WORKDIR}/brcm_bt_start.service ${D}${systemd_system_unitdir}
+        sed -i -e s:@btuart@:${btuart}:g \
+            ${D}${systemd_system_unitdir}/brcm_bt_start.service
+    fi
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', 'true', 'false', d)}; then
+        install -D -p -m0755 ${WORKDIR}/brcm_bt_start.sh ${D}${sysconfdir}/init.d/brcm_bt_start
+        sed -i -e s:@sysconfdir@:${sysconfdir}:g \
+               -e s:@bindir@:${bindir}:g \
+               -e s:@btuart@:${btuart}:g \
+                  ${D}${sysconfdir}/init.d/brcm_bt_start
+    fi
 }
 
 SYSTEMD_SERVICE:${PN} += "${@bb.utils.contains('DISTRO_FEATURES', 'bluetooth', 'brcm_bt_start.service', '', d)}"
-FILES:${PN} += " \
-    ${systemd_system_unitdir} \
-"
-
+INITSCRIPT_NAME:${PN} = "brcm_bt_start"
+INITSCRIPT_PACKAGES = "${PN}"

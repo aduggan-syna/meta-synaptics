@@ -1,0 +1,2 @@
+ACTION=="add", SUBSYSTEMS=="usb", RUN+="/usr/bin/mount-usb.sh %k"
+ACTION=="remove", SUBSYSTEMS=="usb", RUN+="/usr/bin/umount-usb.sh %k"

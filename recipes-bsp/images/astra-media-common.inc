@@ -70,10 +70,11 @@ IMAGE_INSTALL:append = " \
     synasdk-bootctrl \
     synasdk-power \
     synasdk-sysctl-conf \
-    synasdk-macaddr \
     syna-mount-generator \
     synasdk-syna-settings-framework \
     "
+
+IMAGE_INSTALL:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'synasdk-macaddr', '', d)}"
 
 IMAGE_INSTALL:append = " \
     wget \
@@ -189,7 +190,9 @@ add_version () {
     echo "${ASTRA_VERSION}" > ${IMAGE_ROOTFS}/etc/astra_version
 }
 
-ROOTFS_POSTPROCESS_COMMAND += "mount_usb; add_version; "
+IMAGE_INSTALL:append = " ${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', 'synasdk-mount-usb', '', d)}"
+ROOTFS_POSTPROCESS_COMMAND += " ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'mount_usb; ', '', d)}"
+ROOTFS_POSTPROCESS_COMMAND += "add_version; "
 
 LICENSE = "MIT"
 
