@@ -31,6 +31,7 @@ SRC_URI += "${@bb.utils.contains('KGDB_ENABLE', '1', ' \
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://add-docker.cfg', '', d)}"
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'file://selinux.cfg', '', d)}"
 SRC_URI:append:klamath = "file://0001-ov5647-add-flip-ctrls-and-1280x720p.patch"
+SRC_URI:append:sl2619_coral = " file://gpio-led.cfg"
 
 python () {
     # append defconfig if exists
