@@ -21,19 +21,25 @@ def run_command(command):
         print(f"[ERROR] Command not found: {command}")
         return ""
 
+def flush_ipv6(interface="wlan0"):
+    print(f"[IPv6] Flushing stale IPv6 state on {interface}...")
+    run_command(f"ip -6 addr flush dev {interface} scope global")
+    run_command(f"ip -6 route flush dev {interface}")
+    run_command(f"sysctl -w net.ipv6.conf.{interface}.disable_ipv6=1")
+    time.sleep(1)
+    run_command(f"sysctl -w net.ipv6.conf.{interface}.disable_ipv6=0")
+    print(f"[IPv6] Flush complete on {interface}.")
+
 def is_authenticated():
     status_output = run_command("wpa_cli -i wlan0 status")
     return "wpa_state=COMPLETED" in status_output
-
 
 def wifi_connection(ssid, psk, auth, password):
     run_command("ifconfig wlan0 up")
     run_command("killall udhcpc")
     run_command("killall wpa_supplicant")
-
     print("Creating the WPA Supplicant configuration directory...")
     os.makedirs("/etc/wpa_supplicant", exist_ok=True)
-
     result = subprocess.run("iw dev | awk '$1==\"Interface\"{print $2}' | head -n 1",
                             shell=True, capture_output=True, text=True)
     if result.returncode != 0 or not result.stdout.strip():
@@ -41,15 +47,12 @@ def wifi_connection(ssid, psk, auth, password):
         return False
     interface = result.stdout.strip()
     config_file = f"/etc/wpa_supplicant/wpa_supplicant-{interface}.conf"
-
     ssid_t = '"' + ssid + '"'
     if 'PSK' in auth or len(psk) == 0:
         if psk == "":
                 config_content = f"""ctrl_interface=/var/run/wpa_supplicant
         ctrl_interface_group=0
         update_config=1
-
-
         network={{
             ssid={ssid_t}
             key_mgmt=NONE
@@ -60,8 +63,6 @@ def wifi_connection(ssid, psk, auth, password):
             config_content = f"""ctrl_interface=/var/run/wpa_supplicant
             ctrl_interface_group=0
     update_config=1
-
-
         network={{
             ssid={ssid_t}
             psk={psk}
@@ -74,7 +75,6 @@ def wifi_connection(ssid, psk, auth, password):
             ctrl_interface=/var/run/wpa_supplicant
             ctrl_interface_group=0
             update_config=1
-
             network={{
                 ssid={ssid_t}
                 psk="{psk}"
@@ -86,7 +86,6 @@ def wifi_connection(ssid, psk, auth, password):
     print("config file: ", config_content)
     with open(config_file, "w") as f:
         f.write(config_content)
-
     print("Restarting the wpa_supplicant service...")
     run_command("systemctl restart wpa_supplicant@wlan0.service")
     retries = 0
@@ -99,8 +98,9 @@ def wifi_connection(ssid, psk, auth, password):
         time.sleep(4)
         retries += 1
 
+    flush_ipv6(interface)
+
     with open("/etc/wifi_gui_connected", "w") as f:
         f.write("gui:true\n")
-    run_command("udhcpc -i wlan0")
+    run_command(f"udhcpc -i {interface}")
     return True
-
