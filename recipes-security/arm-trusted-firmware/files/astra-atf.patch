@@ -128159,3 +128159,73 @@ index c7ac7a2..e561ff6 100644
 -- 
 2.7.4
 
+
+From a9148739de8605f676028c6461418113dcb4643e Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Tue, 7 Apr 2026 14:42:03 +0800
+Subject: [PATCH] syna: resume to linux instead of miniloader
+
+Change-Id: I2a945ed52e14840747bb3415621a6131defff749
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/berlin_bl31_setup.c | 37 ++++-------------------------
+ 1 file changed, 5 insertions(+), 32 deletions(-)
+
+diff --git a/plat/syna/berlin/common/berlin_bl31_setup.c b/plat/syna/berlin/common/berlin_bl31_setup.c
+index 70090a0..39ef5d4 100644
+--- a/plat/syna/berlin/common/berlin_bl31_setup.c
++++ b/plat/syna/berlin/common/berlin_bl31_setup.c
+@@ -132,7 +132,7 @@ static entry_point_info_t bl33_image_ep_info;
+ static unsigned char nagra_boot_params[MAX_SECURE_BOOT_PARA_SIZE];
+ unsigned char *nagra_boot_p = NULL;
+ unsigned int boot_mode = NORMAL_BOOT;
+-static uint64_t nw_entry_addr;
++static uint64_t nw_entry_addr __unused;
+ 
+ /*******************************************************************************
+  * Gets SPSR for BL32 entry
+@@ -175,37 +175,10 @@ uint32_t berlin_get_spsr_for_bl33_entry(void)
+ 
+ void berlin_context_resume(void)
+ {
+-	unsigned long os_entry;
+-	unsigned long nw_entry;
+-	cpu_context_t *ctx;
+-	el3_state_t *state;
+-
+-	/* gen2 platform */
+-	if (!(boot_mode & GENX)) {
+-		/*
+-		 * tell sm we back
+-		 */
+-#ifdef CFG_SYNA_SM
+-		sm_do_system_warmup(0);
+-#endif
+-	} else {
+-		nw_entry = nw_entry_addr;
+-		ctx = cm_get_context(NON_SECURE);
+-		assert(ctx);
+-
+-		/* Populate EL3 state so that ERET jumps to the correct entry */
+-		state = get_el3state_ctx(ctx);
+-		os_entry = read_ctx_reg(state, CTX_ELR_EL3);
+-		write_ctx_reg(state, CTX_ELR_EL3, nw_entry);
+-		/* set the X0 for bootmode */
+-		write_ctx_reg(get_gpregs_ctx(ctx), CTX_GPREG_X0, boot_mode | WARM_BOOT);
+-
+-		/* set the X1 for os reentry point */
+-		write_ctx_reg(get_gpregs_ctx(ctx), CTX_GPREG_X1, os_entry);
+-
+-		NOTICE("%s(), line %d boot_mode = 0x%x, os_entry = 0x%lx, nw_entry = 0x%lx\n",
+-			__func__, __LINE__, boot_mode | WARM_BOOT, os_entry, nw_entry);
+-	}
++	/*
++	 * tell sm we back
++	 */
++	sm_do_system_warmup(0);
+ }
+ 
+ static inline void reset_soc(void)
+-- 
+2.7.4
+
