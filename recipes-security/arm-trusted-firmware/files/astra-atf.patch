@@ -128078,3 +128078,84 @@ index 0000000..6ddf127
 -- 
 2.7.4
 
+
+From 5b52cb5b9ac725ca89d179d3b2f9133febcb76e3 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Fri, 27 Mar 2026 15:34:29 +0800
+Subject: [PATCH] bcm: add lock to protect bcm access
+
+Change-Id: Ia07e6a7be2a5f993def5d2cee91080f220f84560
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/bcm/bcm_hal.c | 26 ++++++++++++++++++++++++++
+ plat/syna/berlin/suspend/berlin_suspend.mk    |  2 +-
+ 2 files changed, 27 insertions(+), 1 deletion(-)
+
+diff --git a/plat/syna/berlin/common/drivers/bcm/bcm_hal.c b/plat/syna/berlin/common/drivers/bcm/bcm_hal.c
+index 3ce3a38..81a0c72 100644
+--- a/plat/syna/berlin/common/drivers/bcm/bcm_hal.c
++++ b/plat/syna/berlin/common/drivers/bcm/bcm_hal.c
+@@ -7,6 +7,7 @@
+ #include <common/debug.h>
+ #include "bcm_hal.h"
+ #include "bcm_reg.h"
++#include <lib/spinlock.h>
+ 
+ #if 0
+ #define bcm_display INFO
+@@ -21,6 +22,29 @@
+ 
+ #define devmem_phy_to_virt(x) (x)
+ 
++#ifndef BERLIN_SUSPEND_SRAM
++static spinlock_t bcm_lock;
++
++static void syna_bcm_lock(void)
++{
++	spin_lock(&bcm_lock);
++
++}
++static void syna_bcm_unlock(void)
++{
++	spin_unlock(&bcm_lock);
++
++}
++#else
++static void syna_bcm_lock(void)
++{
++
++}
++static void syna_bcm_unlock(void)
++{
++
++}
++#endif
+ static void bcm_delay_us(unsigned us)
+ {
+ 	volatile unsigned int i = us;
+@@ -133,7 +157,9 @@ int bcm_exec_func(const BCM_MAILBOX_COMMAND* cmd)
+ 	BCM_MAILBOX_STATUS status;
+ 
+ 	bcm_clear_status(&status);
++	syna_bcm_lock();
+ 	execute_bcm_command(cmd, &status);
++	syna_bcm_unlock();
+ 
+ 	return status.return_status;
+ }
+diff --git a/plat/syna/berlin/suspend/berlin_suspend.mk b/plat/syna/berlin/suspend/berlin_suspend.mk
+index c7ac7a2..e561ff6 100644
+--- a/plat/syna/berlin/suspend/berlin_suspend.mk
++++ b/plat/syna/berlin/suspend/berlin_suspend.mk
+@@ -101,7 +101,7 @@ LINKERELF           := ${MODULE_OUTPUT_DIR}/$(MODULE_NAME).elf
+ BINUTILSDUMP        := ${MODULE_OUTPUT_DIR}/$(MODULE_NAME).dump
+ BINUTILSCOPY        := ${BUILD_PLAT}/$(MODULE_NAME).bin
+ 
+-CFLAGS += -I${SUSPEND_DIR} -I${SOC_DIR}
++CFLAGS += -I${SUSPEND_DIR} -I${SOC_DIR} -DBERLIN_SUSPEND_SRAM
+ LDFLAGS += --no-warn-rwx-segments
+ define CRULES
+ $(1): $(3)
+-- 
+2.7.4
+
