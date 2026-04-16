@@ -124,6 +124,7 @@ KERNEL_MODULE_AUTOLOAD:append = " \
     synadhd361 \
     tsp \
     m2m \
+    ovp-v4l2 \
 "
 
 KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
@@ -145,7 +146,7 @@ KERNEL_MODULE_PROBECONF:append = "syna-vpu "
 KERNEL_MODULE_PROBECONF:append = "vpu "
 KERNEL_MODULE_PROBECONF:append = "m2m "
 KERNEL_MODULE_PROBECONF:append = "tsp "
-
+KERNEL_MODULE_PROBECONF:append = "ovp-v4l2 "
 
 module_conf_syna_drm = "softdep syna_drm pre: amp_bm fxl6408 rpi-panel-attiny-regulator panel-waveshare-dsi${@'\n'}options syna_drm hdmi_preferred_mode=1920x1080"
 module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
