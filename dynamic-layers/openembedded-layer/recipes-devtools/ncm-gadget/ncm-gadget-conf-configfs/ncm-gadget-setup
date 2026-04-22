@@ -1,0 +1,56 @@
+#!/bin/sh
+
+manufacturer=Synaptics
+model="NCM Device"
+ncm_ifname=usb0
+COMMON_SCRIPT=/usr/bin/ncm-gadget-common.sh
+
+if [ ! -r "$COMMON_SCRIPT" ]; then
+  echo "Error: missing helper script $COMMON_SCRIPT" >&2
+  exit 1
+fi
+
+. "$COMMON_SCRIPT"
+serial="$(detect_serial)"
+
+if [ -r /etc/ncm-gadget-setup.machine ]; then
+  . /etc/ncm-gadget-setup.machine
+fi
+
+[ -d /sys/kernel/config/usb_gadget ] || modprobe libcomposite
+
+create_ncm_gadget_defaults() {
+  mkdir -p strings/0x409
+  mkdir -p configs/c.1
+  mkdir -p configs/c.1/strings/0x409
+  echo -n 0x1d6b > idVendor
+  echo -n 0x0104 > idProduct
+  echo "$serial" > strings/0x409/serialnumber
+  echo "$manufacturer" > strings/0x409/manufacturer
+  echo "$model" > strings/0x409/product
+  echo "Config 1: NCM" > configs/c.1/strings/0x409/configuration
+}
+
+cd /sys/kernel/config/usb_gadget || exit 1
+find_or_create_gadget g1 create_ncm_gadget_defaults
+
+if [ ! -d functions/ncm.usb0 ]; then
+  mkdir -p functions/ncm.usb0
+  if [ -w functions/ncm.usb0/ifname ]; then
+    echo "$ncm_ifname" > functions/ncm.usb0/ifname 2>/dev/null || true
+  fi
+fi
+
+mkdir -p configs/c.1 2>/dev/null || true
+mkdir -p configs/c.1/strings/0x409 2>/dev/null || true
+
+if [ ! -L configs/c.1/ncm.usb0 ]; then
+  ln -s functions/ncm.usb0 configs/c.1/ncm.usb0 2>/dev/null || {
+    echo "Warning: Could not link NCM function" >&2
+  }
+fi
+
+# Wait a bit for FunctionFS to be mounted if ADB is also enabled.
+enable_gadget_udc 1
+
+exit 0

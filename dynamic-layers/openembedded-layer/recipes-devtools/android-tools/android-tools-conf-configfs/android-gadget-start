@@ -1,23 +1,17 @@
 #!/bin/sh
 
-#Not report error in case write UDCfile failed sometime, can retry again
-#set -e
+# Android gadget start - re-enable gadget on UDC (called via udev)
+# Waits for FunctionFS (ep2) to be available before enabling
 
-usb_controller=`ls /sys/class/udc`
-UDCfile=/sys/kernel/config/usb_gadget/adb/UDC
-ep2file=/dev/usb-ffs/adb/ep2
+COMMON_SCRIPT=/usr/bin/android-gadget-common.sh
 
-i=10
-while [ $i -gt 0 ]
-do
-    usb_controllerInUDC=`cat ${UDCfile}`
-    if [ -f ${ep2file} ] && [ "${usb_controllerInUDC}" != "${usb_controller}" ]; then
-        echo ${usb_controller} > ${UDCfile}
-	if [ $? != 0 ]; then
-	    echo "Write usb_controller ${usb_controller} to ${UDCfile} failed!"
-	fi
-	break
-    fi
-    i=$((i-1))
-    sleep 3
-done
+if [ ! -r "$COMMON_SCRIPT" ]; then
+  echo "Error: missing helper script $COMMON_SCRIPT" >&2
+  exit 1
+fi
+
+. "$COMMON_SCRIPT"
+enable_gadget_udc_with_retry 10 3 /dev/usb-ffs/adb/ep2
+
+exit 0
+

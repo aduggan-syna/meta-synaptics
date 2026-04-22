@@ -1,0 +1,21 @@
+# Machine-specific override for NCM gadget setup
+# Place this file at /etc/ncm-gadget-setup.machine on your device
+
+# Custom USB vendor and product IDs (optional)
+# idVendor=0x0547
+# idProduct=0x2145
+
+# Custom manufacturer string
+# manufacturer="Your Company"
+
+# Custom model/product name
+# model="Your Device Model"
+
+# Custom serial number (overrides other detection methods)
+# serial="CUSTOM-SERIAL-123"
+
+# Custom network interface name
+# ncm_ifname=eth0
+
+# USB Device Controller (usually auto-detected, override only if needed)
+# usb_controller=f7b00000.usb

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# NCM gadget cleanup - called on service stop
+
+COMMON_SCRIPT=/usr/bin/ncm-gadget-common.sh
+
+if [ ! -r "$COMMON_SCRIPT" ]; then
+  echo "Error: missing helper script $COMMON_SCRIPT" >&2
+  exit 1
+fi
+
+. "$COMMON_SCRIPT"
+cleanup_gadget_function ncm.usb0
+
+exit 0

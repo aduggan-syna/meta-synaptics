@@ -140,6 +140,8 @@ IMAGE_INSTALL:append:sl2619 = " \
     ${GST_PACKAGES} \
     ${GPU_RELATED_PACKAGES} \
     ${NPU_RELATED_PACKAGES} \
+    ncm-gadget-conf-configfs \
+    android-tools-adbd \
 "
 
 PLATYPUS_DOLPHIN_INSTALL = " \

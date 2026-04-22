@@ -1,53 +1,64 @@
 #!/bin/sh
 
-set -e
-
 manufacturer=Synaptics
 model="Android device"
-if [ -f /factory_setting/serialno ]; then
-  serial="$(cat /factory_setting/serialno)"
+COMMON_SCRIPT=/usr/bin/android-gadget-common.sh
+
+if [ ! -r "$COMMON_SCRIPT" ]; then
+  echo "Error: missing helper script $COMMON_SCRIPT" >&2
+  exit 1
 fi
 
-if [ "null$serial" == "null" ]; then
-  if grep chipid /proc/cmdline; then
-    serial=`awk -F'chipid=' '{print $2}'|awk '{print $1}'`
-  fi
-  if [ "null$serial" == "null" ]; then
-    serial=`cat /etc/hostname`
-  fi
-  if [ "null$serial" == "null" ]; then
-    serial="SLx6x0"
-  fi
-fi
+. "$COMMON_SCRIPT"
+serial="$(detect_serial)"
 
-if [ -r /etc/android-gadget-setup.machine ] ; then
-	. /etc/android-gadget-setup.machine
+if [ -r /etc/android-gadget-setup.machine ]; then
+  . /etc/android-gadget-setup.machine
 fi
 
 [ -d /sys/kernel/config/usb_gadget ] || modprobe libcomposite
 
-cd /sys/kernel/config/usb_gadget
+create_android_gadget_defaults() {
+  mkdir -p strings/0x409
+  mkdir -p configs/c.1
+  mkdir -p configs/c.1/strings/0x409
 
-[ -d adb ] && /usr/bin/android-gadget-cleanup || true
+  echo -n 0x1d6b > idVendor
+  echo -n 0x0104 > idProduct
+  echo "$serial" > strings/0x409/serialnumber
+  echo "$manufacturer" > strings/0x409/manufacturer
+  echo "$model" > strings/0x409/product
+  echo "Conf 1" > configs/c.1/strings/0x409/configuration
+}
 
-mkdir adb
-cd adb
+cd /sys/kernel/config/usb_gadget || exit 1
+find_or_create_gadget g1 create_android_gadget_defaults
 
-mkdir configs/c.1
-mkdir functions/ffs.usb0
-mkdir strings/0x409
-mkdir configs/c.1/strings/0x409
-echo -n 0x18d1 > idVendor
-echo -n 0xd002 > idProduct
-echo "$serial" > strings/0x409/serialnumber
-echo "$manufacturer" > strings/0x409/manufacturer
-echo "$model" > strings/0x409/product
-echo "Conf 1" > configs/c.1/strings/0x409/configuration
-ln -s functions/ffs.usb0 configs/c.1
+# Temporarily disable gadget before adding/removing configfs links.
+if [ -r UDC ] && [ -s UDC ]; then
+  udc_name=$(cat UDC 2>/dev/null)
+  if [ -n "$udc_name" ] && [ "$udc_name" != "off" ]; then
+    echo "Disabling gadget temporarily to add ADB function" >&2
+    echo "" > UDC
+    sleep 1
+  fi
+fi
+
+if [ ! -d functions/ffs.usb0 ]; then
+  mkdir -p functions/ffs.usb0
+fi
+
+if [ ! -L configs/c.1/ffs.usb0 ]; then
+  ln -s functions/ffs.usb0 configs/c.1/ffs.usb0
+fi
 
 if [ -f /sys/bus/usb/devices/usb3/power/autosuspend ]; then
-  echo 10 > /sys/bus/usb/devices/usb3/power/autosuspend
+  echo 10 > /sys/bus/usb/devices/usb3/power/autosuspend 2>/dev/null || true
 fi
 
 mkdir -p /dev/usb-ffs/adb
-mount -t functionfs usb0 /dev/usb-ffs/adb
+mount -t functionfs usb0 /dev/usb-ffs/adb 2>/dev/null || true
+
+enable_gadget_udc
+
+exit 0
