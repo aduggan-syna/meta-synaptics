@@ -1,0 +1,81 @@
+#!/bin/sh
+
+INTERFACE=${INTERFACE:-usb0}
+MAX_WAIT=${MAX_WAIT:-10}
+IP_MODE=${IP_MODE:-dhcp-fallback}
+STATIC_IP=${STATIC_IP:-192.168.137.2}
+STATIC_NETMASK=${STATIC_NETMASK:-255.255.255.0}
+STATIC_GATEWAY=${STATIC_GATEWAY:-}
+STATIC_DNS_SERVERS=${STATIC_DNS_SERVERS:-}
+STATIC_DNS_SEARCH=${STATIC_DNS_SEARCH:-}
+
+if [ -r /etc/ncm-gadget-setup.machine ]; then
+  . /etc/ncm-gadget-setup.machine
+fi
+
+INTERFACE=${ncm_ifname:-$INTERFACE}
+
+configure_static_dns() {
+  if [ -z "$STATIC_DNS_SERVERS" ]; then
+    return 0
+  fi
+
+  resolv_tmp=/tmp/ncm-gadget-resolv.conf
+  : > "$resolv_tmp"
+
+  if [ -n "$STATIC_DNS_SEARCH" ]; then
+    echo "search $STATIC_DNS_SEARCH" >> "$resolv_tmp"
+  fi
+
+  for dns_server in $STATIC_DNS_SERVERS; do
+    echo "nameserver $dns_server" >> "$resolv_tmp"
+  done
+
+  mv "$resolv_tmp" /etc/resolv.conf
+}
+
+configure_static_ip() {
+  echo "Configuring static IP on $INTERFACE: $STATIC_IP/$STATIC_NETMASK" >&2
+  ifconfig "$INTERFACE" "$STATIC_IP" netmask "$STATIC_NETMASK" up
+  if [ -n "$STATIC_GATEWAY" ]; then
+    route add default gw "$STATIC_GATEWAY" "$INTERFACE" 2>/dev/null || true
+  fi
+  configure_static_dns
+}
+
+wait_for_interface() {
+  count=0
+  while [ "$count" -lt "$MAX_WAIT" ]; do
+    if [ -d "/sys/class/net/$INTERFACE" ]; then
+      return 0
+    fi
+    count=$((count + 1))
+    sleep 1
+  done
+
+  echo "Timed out waiting for $INTERFACE" >&2
+  return 1
+}
+
+wait_for_interface
+ifconfig "$INTERFACE" up
+
+case "$IP_MODE" in
+  static)
+    configure_static_ip
+    ;;
+  dhcp)
+    exec udhcpc -f -i "$INTERFACE" -t 10
+    ;;
+  dhcp-fallback)
+    if udhcpc -f -i "$INTERFACE" -n -t 10; then
+      exit 0
+    fi
+    echo "DHCP failed on $INTERFACE, using static fallback" >&2
+    configure_static_ip
+    ;;
+  *)
+    echo "Invalid IP_MODE '$IP_MODE'. Use: dhcp, static, or dhcp-fallback" >&2
+    exit 1
+    ;;
+esac

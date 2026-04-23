@@ -1,9 +1,9 @@
-# Machine-specific override for ADB gadget setup
-# Place this file at /etc/android-gadget-setup.machine on your device
+# Machine-specific override for NCM gadget setup
+# Place this file at /etc/ncm-gadget-setup.machine on your device
 
 # Custom USB vendor and product IDs (optional)
-# idVendor=0x18d1
-# idProduct=0xd002
+# idVendor=0x1d6b
+# idProduct=0x0104
 
 # Custom manufacturer string
 # manufacturer="Your Company"
@@ -13,3 +13,22 @@
 
 # Custom serial number (overrides other detection methods)
 # serial="CUSTOM-SERIAL-123"
+
+# Custom network interface name
+# ncm_ifname=usb0
+
+# IP mode for usb gadget networking:
+# dhcp          -> only DHCP client
+# static        -> only static IP
+# dhcp-fallback -> DHCP first, static fallback if DHCP fails
+# IP_MODE=dhcp-fallback
+
+# Static IP configuration used for static mode and DHCP fallback mode
+# STATIC_IP=192.168.137.2
+# STATIC_NETMASK=255.255.255.0
+# STATIC_GATEWAY=192.168.137.1
+# STATIC_DNS_SERVERS="1.1.1.1 8.8.8.8"
+# STATIC_DNS_SEARCH="."
+
+# USB Device Controller (usually auto-detected, override only if needed)
+# usb_controller=f7b00000.usb

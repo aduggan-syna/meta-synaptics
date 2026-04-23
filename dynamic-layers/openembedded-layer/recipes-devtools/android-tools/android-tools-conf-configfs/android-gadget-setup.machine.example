@@ -1,9 +1,9 @@
-# Machine-specific override for NCM gadget setup
-# Place this file at /etc/ncm-gadget-setup.machine on your device
+# Machine-specific override for ADB gadget setup
+# Place this file at /etc/android-gadget-setup.machine on your device
 
 # Custom USB vendor and product IDs (optional)
-# idVendor=0x0547
-# idProduct=0x2145
+# idVendor=0x1d6b
+# idProduct=0x0104
 
 # Custom manufacturer string
 # manufacturer="Your Company"

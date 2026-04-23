@@ -1,0 +1,14 @@
+[Unit]
+Description=IP Configuration For NCM USB Gadget
+After=ncm-gadget-setup.service
+BindsTo=ncm-gadget-setup.service
+PartOf=ncm-gadget-setup.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ncm-gadget-dhcp
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
