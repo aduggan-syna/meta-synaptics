@@ -53,13 +53,27 @@ EARLY_SYNA_TA:dolphin=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e9.stripped.elf \
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f4.stripped.elf \
 "
-EARLY_TA_CFG = " CFG_EARLY_TA=y EARLY_TA_PATHS="${EARLY_SYNA_TA}""
+SYNA_SMP_TA = " \
+"
+EARLY_TA_CFG = " CFG_EARLY_TA=y "
 EARLY_TA_CFG:sl1680spi = ""
 EARLY_TA_CFG:sl1620spi = ""
 EARLY_TA_CFG:sl1640spi = ""
 EARLY_TA_CFG:sl2619xspi = ""
 EXTRA_OEMAKE += "${EARLY_TA_CFG}"
 EXTRA_OEMAKE += " CFG_TEE_CORE_LOG_LEVEL=1 "
+
+do_compile:prepend() {
+    . ${CONFIG_FILE}
+    . ${CHIP_RC_FILE}
+
+    if [ "is${CONFIG_SMP_OFF}" = "isy" ]; then
+        export EARLY_TA_PATHS="${EARLY_SYNA_TA}"
+    else
+        export EARLY_TA_PATHS="${EARLY_SYNA_TA} ${SYNA_SMP_TA}"
+    fi
+
+}
 
 do_install:append() {
     # Launch script to generate required configurations (ex. ${syna_chip_rev})

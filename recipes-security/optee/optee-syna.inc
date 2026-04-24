@@ -49,4 +49,8 @@ do_compile:prepend() {
         export CFG_TEE_SDP_MEM_BASE="${spd_base}"
         export CFG_TEE_SDP_MEM_SIZE="${spd_size}"
     fi
+
+    if [ "is${CONFIG_SMP_OFF}" = "isy" ]; then
+        export CFG_RF="n"
+    fi
 }
