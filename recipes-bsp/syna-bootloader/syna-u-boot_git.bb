@@ -104,6 +104,11 @@ do_deploy () {
                  ${CONFIG_NAND_BLOCK_SIZE} ${CONFIG_NAND_TOTAL_SIZE}"
         fi
 
+        if [ "${MACHINE}" = "sl2619xspi" ]; then
+            exec_cmd="parse_pt_xspi 101 101 \
+                ${CONFIG_XSPI_BLOCK_SIZE} ${CONFIG_XSPI_TOTAL_SIZE}"
+        fi
+
         exec_args="${EMMC_PT_FILE} \
                   ${DEPLOYDIR}/linux_params_mtdparts \
                   ${DEPLOYDIR}/version_table \

@@ -53,6 +53,10 @@ do_install () {
     if [ "null${SYNA_SDK_FLASH_TYPE_CFG_FILE}" != "null" ]; then
         install -m 0644 ${S}/configs/product/${SYNA_SDK_CONFIG_NAME}/${SYNA_SDK_FLASH_TYPE_CFG_FILE} ${D}${prefix}/share/syna/build
     fi
+
+    if [ "null${SYNA_SDK_FLASH_ATTR}" != "null" ]; then
+        install -m 0644 ${S}/configs/product/${SYNA_SDK_CONFIG_NAME}/flash_attr/${SYNA_SDK_FLASH_ATTR} ${D}${prefix}/share/syna/build
+    fi
 }
 
 PACKAGES = " \

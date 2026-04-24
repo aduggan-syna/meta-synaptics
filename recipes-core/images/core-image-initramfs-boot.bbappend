@@ -19,3 +19,5 @@ PACKAGE_INSTALL:append:sl2619usb = " ${ADBD_RPACKAGES}"
 
 # Need append 90-rootfs when setting NO_RECOMMENDATIONS 1
 PACKAGE_INSTALL:append:sl2619nand = " initramfs-module-rootfs"
+
+PACKAGE_INSTALL:append:sl2619xspi = " initramfs-module-debug"

@@ -15,7 +15,7 @@ PV = "${ASTRA_VERSION}+git${SRCPV}"
 
 DEPENDS += " openssl-native synasdk-config-native"
 
-TOOL_NAMES = "parse_pt crc mkbootimg mkyaffs2img parse_pt_emmc gen_uniimg gen_subimg_info genimg"
+TOOL_NAMES = "parse_pt crc mkbootimg mkyaffs2img parse_pt_emmc gen_uniimg gen_subimg_info genimg parse_pt_xspi"
 
 do_compile() {
     cd ${S}/build/tools/src/executables

@@ -15,6 +15,8 @@ IMAGE_TYPES:append:syna = " \
 EXTRA_FW_DEPENDS = ""
 EXTRA_FW_DEPENDS:dolphin = "synasdk-fw-enc:do_deploy"
 EXTRA_FW_DEPENDS:platypus = "synasdk-fw-enc:do_deploy"
+EXTRA_BOOTINFO_DEPENDS = ""
+EXTRA_BOOTINFO_DEPENDS:klamath = "synasdk-bootinfo:do_deploy"
 DEPENDS += "android-tools-native"
 
 
@@ -34,15 +36,21 @@ do_image_synaspiimg[depends] += " \
     synasdk-tzk:do_deploy \
     linux-syna:do_deploy \
     ${EXTRA_FW_DEPENDS} \
+    ${EXTRA_BOOTINFO_DEPENDS} \
 "
 
 gen_preboot_subimg() {
   spi_vt_size=2048
-  spi_header_size=1024
 
-  . "${STAGING_DIR_NATIVE}/usr/share/syna/build/${SYNA_SDK_FLASH_TYPE_CFG_FILE}"
+  if [ "${SYNA_SDK_FLASH_TYPE_CFG_FILE}" != "" ] && [ -f "${STAGING_DIR_NATIVE}/usr/share/syna/build/${SYNA_SDK_FLASH_TYPE_CFG_FILE}" ]; then
+      . "${STAGING_DIR_NATIVE}/usr/share/syna/build/${SYNA_SDK_FLASH_TYPE_CFG_FILE}"
+  else
+      f_spi_pt="${STAGING_DIR_NATIVE}/usr/share/syna/build/${SYNA_SDK_PT_FILE}"
+      spi_boot_part_size=$(awk '$2 == "preboot_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
+  fi
 
   f_input=$1; shift
+  spi_header_size=$1; shift
 
   ### Fill the gap ###
   f_len=$(stat -c %s "${f_input}")
@@ -76,50 +84,82 @@ gen_preboot_subimg() {
   fi
 }
 
+padding_spi_suboot_combo() {
+    padding_size=$1; shift
+    f_spi_combo=$1; shift
+    if [ $padding_size -lt 0 ]; then
+        echo "Subimg large then partition"
+        exit 1
+    fi
+    if [ $padding_size -gt 0 ]; then
+        f_PADDING="${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/dummy.bin"
+        dd if=/dev/zero of="$f_PADDING" bs=1 count="$padding_size"
+        cat "$f_PADDING" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
+        rm -f $f_PADDING
+    fi
+}
+
 genx_spi_suboot_combo() {
   # Parse arguments
+  f_bootinfo=$1; shift
   f_preboot=$1; shift
+  f_sysmgr=$1; shift
   f_tee=$1; shift
   f_bl=$1; shift
   f_spi_combo=$1; shift
 
   # Dynamic partition size calculation
   f_spi_pt="${STAGING_DIR_NATIVE}/usr/share/syna/build/${SYNA_SDK_PT_FILE}"
-  spi_preboot_end=$(awk '$2 == "preboot_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
   spi_tzk_size=$(awk '$2 == "tzk_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
-  spi_tzk_end=$(expr "$spi_preboot_end" + "$spi_tzk_size")
+  if [ "$f_bootinfo" != "" ]; then
+      spi_bootinfo_end=$(awk '$2 == "bootinfo" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
+      spi_preboot_size=$(awk '$2 == "preboot_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
+      spi_preboot_end=$(expr "$spi_bootinfo_end" + "$spi_preboot_size")
+      spi_sysmgr_size=$(awk '$2 == "sysmgr_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
+      spi_sysmgr_end=$(expr "$spi_preboot_end" + "$spi_sysmgr_size")
+      spi_tzk_end=$(expr "$spi_sysmgr_end" + "$spi_tzk_size")
+  else
+      spi_preboot_end=$(awk '$2 == "preboot_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
+      spi_tzk_end=$(expr "$spi_preboot_end" + "$spi_tzk_size")
+  fi
   spi_bl_size=$(awk '$2 == "bl_a" { sub(/K$/, "", $1); print $1 * 1024 }' "$f_spi_pt")
   spi_bl_end=$(expr "$spi_tzk_end" + "$spi_bl_size")
 
+  if [ "$f_bootinfo" != "" ]; then
+      # Pack bootinfo
+      cat "${DEPLOY_DIR_IMAGE}/$f_bootinfo" > "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
+      spi_bootinfo_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
+      padding_size=$(expr "$spi_bootinfo_end" - "$spi_bootinfo_size")
+      padding_spi_suboot_combo $padding_size $f_spi_combo
+  else
+      dd if=/dev/zero bs=1024 count=1 > "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
+  fi
+
   # Pack preboot
-  dd if=/dev/zero bs=1024 count=1 > "$f_spi_combo"
-  cat "$f_preboot" >> "$f_spi_combo"
-
-  preboot_size=$(stat -c %s "${f_spi_combo}")
+  cat "${DEPLOY_DIR_IMAGE}/$f_preboot" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
+  preboot_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
   padding_size=$(expr "$spi_preboot_end" - "$preboot_size" || true)
+  padding_spi_suboot_combo $padding_size $f_spi_combo
 
-  f_PADDING="${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/dummy.bin"
-  dd if=/dev/zero of="$f_PADDING" bs=1 count="$padding_size"
-  cat "$f_PADDING" >> "$f_spi_combo"
+  # Pack sysmgr if existed
+  if [ "$f_sysmgr" != "" ]; then
+      cat "${DEPLOY_DIR_IMAGE}/$f_sysmgr" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
+      sysmgr_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
+      padding_size=$(expr "$spi_sysmgr_end" - "$sysmgr_size" || true)
+      padding_spi_suboot_combo $padding_size $f_spi_combo
+  fi
 
   # Pack TEE
-  cat "$f_tee" >> "$f_spi_combo"
-
-  tee_size=$(stat -c %s "${f_spi_combo}")
+  cat "${DEPLOY_DIR_IMAGE}/$f_tee" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
+  tee_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
   padding_size=$(expr "$spi_tzk_end" - "$tee_size" || true)
-
-  dd if=/dev/zero of="$f_PADDING" bs=1 count="$padding_size"
-  cat "$f_PADDING" >> "$f_spi_combo"
+  padding_spi_suboot_combo $padding_size $f_spi_combo
 
   # Pack BL
-  cat "$f_bl" >> "$f_spi_combo"
-
-  bl_size=$(stat -c %s "${f_spi_combo}")
+  cat "${DEPLOY_DIR_IMAGE}/$f_bl" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
+  bl_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
   padding_size=$(expr "$spi_bl_end" - "$bl_size" || true)
-
-  dd if=/dev/zero of="$f_PADDING" bs=1 count="$padding_size"
-  cat "$f_PADDING" >> "$f_spi_combo"
-  rm -f "$f_PADDING"
+  padding_spi_suboot_combo $padding_size $f_spi_combo
 }
 
 IMAGE_CMD:synaspiimg () {
@@ -137,10 +177,20 @@ IMAGE_CMD:synaspiimg () {
     cp "${DEPLOY_DIR_IMAGE}/preboot.subimg" "${DEPLOY_DIR_IMAGE}/preboot_aligned.subimg"
 
 # Align preboot subimg
-    gen_preboot_subimg "${DEPLOY_DIR_IMAGE}/preboot_aligned.subimg"
+    spi_header_size=1024
+    if [ ${MACHINE} = "sl2619xspi" ]; then
+        spi_header_size=0
+    fi
+    gen_preboot_subimg "${DEPLOY_DIR_IMAGE}/preboot_aligned.subimg" ${spi_header_size}
 
-# Make spi_suboot.bin which including preboot, tee and bootloader subimg
-    genx_spi_suboot_combo "${DEPLOY_DIR_IMAGE}/preboot_aligned.subimg" "${DEPLOY_DIR_IMAGE}/tee.subimg" "${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/spi_suboot.bin"
+# Make spi_suboot.bin
+    if [ ${MACHINE} = "sl2619xspi" ]; then
+        #include bootinfo, preboot, sysmgr, tee and bootloader subimg
+        genx_spi_suboot_combo "bootinfo.subimg" "preboot_aligned.subimg" "sysmgr.subimg" "tee.subimg" "bootloader_nopreload.subimg" "${SYNAIMG_DEPLOY_SUBDIR}/spi_suboot.bin"
+    else
+        #including preboot, tee and bootloader subimg
+        genx_spi_suboot_combo "" "preboot_aligned.subimg" "" "tee.subimg" "bootloader_nopreload.subimg" "${SYNAIMG_DEPLOY_SUBDIR}/spi_suboot.bin"
+    fi
 
     cp "${DEPLOY_DIR_IMAGE}/linux_bootimgs.subimg" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/boot.subimg"
 
