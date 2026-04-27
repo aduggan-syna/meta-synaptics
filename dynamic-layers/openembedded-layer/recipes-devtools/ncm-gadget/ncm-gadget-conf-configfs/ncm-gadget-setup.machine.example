@@ -23,9 +23,15 @@
 # dhcp-fallback -> DHCP first, static fallback if DHCP fails
 # IP_MODE=dhcp-fallback
 
+# NetworkManager integration:
+# If networkmanager-nmcli is included at build time, NM is used.
+# Otherwise, the non-NM path is used.
+# NM_CONN_NAME=ncm-gadget-usb0
+
 # Static IP configuration used for static mode and DHCP fallback mode
 # STATIC_IP=192.168.137.2
 # STATIC_NETMASK=255.255.255.0
+# STATIC_PREFIX=24
 # STATIC_GATEWAY=192.168.137.1
 # STATIC_DNS_SERVERS="1.1.1.1 8.8.8.8"
 # STATIC_DNS_SEARCH="."

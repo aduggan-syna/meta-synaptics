@@ -3,8 +3,11 @@
 INTERFACE=${INTERFACE:-usb0}
 MAX_WAIT=${MAX_WAIT:-10}
 IP_MODE=${IP_MODE:-dhcp-fallback}
+USE_NETWORKMANAGER=@NCM_USE_NETWORKMANAGER_DEFAULT@
+NM_CONN_NAME=${NM_CONN_NAME:-ncm-gadget-${INTERFACE}}
 STATIC_IP=${STATIC_IP:-192.168.137.2}
 STATIC_NETMASK=${STATIC_NETMASK:-255.255.255.0}
+STATIC_PREFIX=${STATIC_PREFIX:-}
 STATIC_GATEWAY=${STATIC_GATEWAY:-}
 STATIC_DNS_SERVERS=${STATIC_DNS_SERVERS:-}
 STATIC_DNS_SEARCH=${STATIC_DNS_SEARCH:-}
@@ -14,6 +17,13 @@ if [ -r /etc/ncm-gadget-setup.machine ]; then
 fi
 
 INTERFACE=${ncm_ifname:-$INTERFACE}
+NM_CONN_NAME=${NM_CONN_NAME:-ncm-gadget-${INTERFACE}}
+
+nm_available() {
+  command -v nmcli >/dev/null 2>&1 || return 1
+  [ "$(nmcli -t -f RUNNING general 2>/dev/null)" = "running" ] || return 1
+  return 0
+}
 
 configure_static_dns() {
   if [ -z "$STATIC_DNS_SERVERS" ]; then
@@ -43,6 +53,77 @@ configure_static_ip() {
   configure_static_dns
 }
 
+configure_nm_connection() {
+  ipv4_method=$1
+
+  nmcli con delete "$NM_CONN_NAME" >/dev/null 2>&1 || true
+  nmcli con add type ethernet ifname "$INTERFACE" con-name "$NM_CONN_NAME" ipv4.method "$ipv4_method" ipv6.method ignore >/dev/null
+
+  if [ "$ipv4_method" = "manual" ]; then
+    if [ -n "$STATIC_PREFIX" ]; then
+      nm_prefix=$STATIC_PREFIX
+    else
+      nm_prefix=$(netmask_to_prefix "$STATIC_NETMASK") || return 1
+    fi
+
+    nmcli con mod "$NM_CONN_NAME" ipv4.addresses "$STATIC_IP/$nm_prefix" >/dev/null
+
+    if [ -n "$STATIC_GATEWAY" ]; then
+      nmcli con mod "$NM_CONN_NAME" ipv4.gateway "$STATIC_GATEWAY" >/dev/null
+    fi
+
+    if [ -n "$STATIC_DNS_SERVERS" ]; then
+      nmcli con mod "$NM_CONN_NAME" ipv4.dns "$STATIC_DNS_SERVERS" ipv4.ignore-auto-dns yes >/dev/null
+    fi
+
+    if [ -n "$STATIC_DNS_SEARCH" ]; then
+      nmcli con mod "$NM_CONN_NAME" ipv4.dns-search "$STATIC_DNS_SEARCH" >/dev/null
+    fi
+  fi
+
+  nmcli con up "$NM_CONN_NAME" >/dev/null
+}
+
+netmask_to_prefix() {
+  mask=$1
+  prefix=0
+  old_ifs=$IFS
+  IFS=.
+  set -- $mask
+  IFS=$old_ifs
+
+  for octet in "$@"; do
+    case "$octet" in
+      255) prefix=$((prefix + 8)) ;;
+      254) prefix=$((prefix + 7)) ;;
+      252) prefix=$((prefix + 6)) ;;
+      248) prefix=$((prefix + 5)) ;;
+      240) prefix=$((prefix + 4)) ;;
+      224) prefix=$((prefix + 3)) ;;
+      192) prefix=$((prefix + 2)) ;;
+      128) prefix=$((prefix + 1)) ;;
+      0) ;;
+      *)
+        echo "Invalid STATIC_NETMASK '$mask'" >&2
+        return 1
+        ;;
+    esac
+  done
+
+  echo "$prefix"
+  return 0
+}
+
+configure_nm_static() {
+  echo "Configuring static IP with NetworkManager on $INTERFACE" >&2
+  configure_nm_connection manual
+}
+
+configure_nm_dhcp() {
+  echo "Configuring DHCP with NetworkManager on $INTERFACE" >&2
+  configure_nm_connection auto
+}
+
 wait_for_interface() {
   count=0
   while [ "$count" -lt "$MAX_WAIT" ]; do
@@ -60,19 +141,44 @@ wait_for_interface() {
 wait_for_interface
 ifconfig "$INTERFACE" up
 
+use_nm=false
+if [ "$USE_NETWORKMANAGER" = "1" ]; then
+  nm_available || {
+    echo "NetworkManager was selected at build time but nmcli/NetworkManager is unavailable" >&2
+    exit 1
+  }
+  use_nm=true
+fi
+
 case "$IP_MODE" in
   static)
-    configure_static_ip
+    if [ "$use_nm" = true ]; then
+      configure_nm_static
+    else
+      configure_static_ip
+    fi
     ;;
   dhcp)
-    exec udhcpc -f -i "$INTERFACE" -t 10
+    if [ "$use_nm" = true ]; then
+      configure_nm_dhcp
+    else
+      exec udhcpc -f -i "$INTERFACE" -t 10
+    fi
     ;;
   dhcp-fallback)
-    if udhcpc -f -i "$INTERFACE" -n -t 10; then
-      exit 0
+    if [ "$use_nm" = true ]; then
+      if configure_nm_dhcp; then
+        exit 0
+      fi
+      echo "NetworkManager DHCP failed on $INTERFACE, using static fallback" >&2
+      configure_nm_static
+    else
+      if udhcpc -f -i "$INTERFACE" -n -t 10; then
+        exit 0
+      fi
+      echo "DHCP failed on $INTERFACE, using static fallback" >&2
+      configure_static_ip
     fi
-    echo "DHCP failed on $INTERFACE, using static fallback" >&2
-    configure_static_ip
     ;;
   *)
     echo "Invalid IP_MODE '$IP_MODE'. Use: dhcp, static, or dhcp-fallback" >&2
