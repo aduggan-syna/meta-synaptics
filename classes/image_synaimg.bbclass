@@ -24,6 +24,7 @@ EXTRA_FW_DEPENDS = ""
 EXTRA_FW_DEPENDS:dolphin = "synasdk-fw-enc:do_deploy"
 EXTRA_FW_DEPENDS:platypus = "synasdk-fw-enc:do_deploy"
 EXTRA_FASTLOGO_DEPENDS = "synasdk-fastlogo:do_deploy"
+EXTRA_FASTLOGO_DEPENDS:sl2611 = ""
 DEPENDS += "android-tools-native"
 
 
