@@ -3,17 +3,10 @@ DESCRIPTION = "Userspace utility to set gamma correction on DRM CRTCs."
 SECTION = "devtools"
 LICENSE = "CLOSED"
 LICENSE_FLAGS = "Synaptics-EULA"
-PR = "r0"
-
-PV = "1.0"
 
 COMPATIBLE_MACHINE = "syna"
 
 DEPENDS = "libdrm"
-
-do_fetch[depends] += "synasdk-application-release:do_deploy"
-do_fetch[noexec] = "1"
-do_unpack[noexec] = "1"
 
 S = "${DEPLOY_DIR_IMAGE}/release/synasdk-application-release/application/display"
 B = "${WORKDIR}/build"
