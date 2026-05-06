@@ -1,6 +1,7 @@
 IMAGE_INSTALL:append = " \
     android-tools \
     android-tools-adbd \
+    ncm-gadget-conf-configfs \
     iperf2 \
     iperf3 \
     ethtool \

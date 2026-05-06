@@ -1,6 +1,7 @@
 ADBD_RPACKAGES = " initramfs-module-debug \
                    initramfs-module-setup-adbd \
                    android-tools-adbd \
+                   ncm-gadget-conf-configfs \
                    android-tools-conf-configfs"
 
 PACKAGE_INSTALL:append:sl1640usb = " ${ADBD_RPACKAGES}"
