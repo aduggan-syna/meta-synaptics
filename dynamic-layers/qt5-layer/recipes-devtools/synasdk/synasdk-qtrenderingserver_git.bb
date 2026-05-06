@@ -12,7 +12,7 @@ SRCREV = "${SYNA_SRCREV_DEMOS}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/demos/qtrenderingserver"
+S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/demos/qt5/qtrenderingserver"
 
 inherit qmake5
 

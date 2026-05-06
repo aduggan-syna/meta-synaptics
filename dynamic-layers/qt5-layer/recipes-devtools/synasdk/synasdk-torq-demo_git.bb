@@ -20,7 +20,7 @@ SRCREV = "${SYNA_SRCREV_DEMOS}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/demos/torq-demo"
+S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/demos/qt5/torq-demo"
 
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=4158a261ca7f2525513e31ba9c50ae98"
 

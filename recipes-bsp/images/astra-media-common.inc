@@ -136,7 +136,6 @@ IMAGE_INSTALL:append:klamath = " \
     synasdk-v4l2isp-qtapp \
     synasdk-gamma-set \
 "
-
 IMAGE_INSTALL:append:sl2619 = " \
     ${TORQ_PACKAGES} \
     ${GST_PACKAGES} \

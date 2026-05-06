@@ -18,7 +18,7 @@ SRCREV = "${SYNA_SRCREV_DEMOS}"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/demos/framework/syna-player-framework"
+S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/demos/qt5/framework/syna-player-framework"
 
 LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=4158a261ca7f2525513e31ba9c50ae98"
 

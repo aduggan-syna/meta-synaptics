@@ -159,6 +159,43 @@ _PWD_PREV=$(pwd)
 
 TEMPLATECONF=${_PWD_PREV}/meta-synaptics/conf/templates/astra source poky/oe-init-build-env ${_BUILDDIR}
 
+# -------------------------------------------------
+# Qt version selection
+# -------------------------------------------------
+
+QT_MAJOR=${QT_MAJOR:-6}
+
+if [[ "${QT_MAJOR}" != "5" && "${QT_MAJOR}" != "6" ]]; then
+    echo "ERROR: QT_MAJOR must be 5 or 6"
+    echo "WARNING: QT Vesrion defaults to 6"
+    QT_MAJOR=6;
+fi
+
+echo "Qt${QT_MAJOR} selected for this build"
+
+if [ "${QT_MAJOR}" = "5" ]; then
+    sed -i '/meta-qt6[\/ ]/d' conf/bblayers.conf
+else
+    sed -i '/meta-qt5[\/ ]/d' conf/bblayers.conf
+fi
+
+# Remove existing Qt selection block
+sed -i '/^# BEGIN QT SELECTION$/,/^# END QT SELECTION$/d' conf/local.conf
+
+cat << EOF >> conf/local.conf
+# BEGIN QT SELECTION
+QT_MAJOR = "${QT_MAJOR}"
+
+BBMASK:append = "\${@' meta-qt5/.*' if d.getVar('QT_MAJOR') == '6' else ''}"
+BBMASK:append = "\${@' meta-qt6/.*' if d.getVar('QT_MAJOR') == '5' else ''}"
+
+BBMASK:append = "\${@' dynamic-layers/qt5-layer/.*' if d.getVar('QT_MAJOR') == '6' else ''}"
+BBMASK:append = "\${@' dynamic-layers/qt6-layer/.*' if d.getVar('QT_MAJOR') == '5' else ''}"
+
+INHERIT += "qt-sanity"
+# END QT SELECTION
+EOF
+
 _CONFIG_UPDATED=0
 _LICENSE_FLAGS_STR="$(grep LICENSE_FLAGS_ACCEPTED conf/local.conf)"
 if [ $_SYNA_EULA_ACCEPTED -eq 1 ] && [ "$_LICENSE_FLAGS_STR" != *"$_SYNA_EULA_STR"* ]; then

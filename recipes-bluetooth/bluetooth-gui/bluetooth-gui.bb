@@ -1,9 +1,11 @@
 DESCRIPTION = "Bluetooth connection GUI"
 LICENSE = "CLOSED"
 SRC_URI = "file://bl_app.py \
+           file://bl_app_qt6.py \
            file://test_connection.py \
            file://scan_devices.py \
            file://known_devices.py \
+           file://known_devices_qt6.py \
            file://bt_auto \
            file://bt_auto.service"
 
@@ -12,10 +14,18 @@ S = "${WORKDIR}"
 do_install() {
     install -d ${D}${bindir}
     install -d ${D}/usr/bin
-    install -m 0755 ${S}/bl_app.py ${D}${bindir}/bl_app.py
+
+    # Choose correct app based on QT version
+    if [ "${QT_MAJOR}" = "5" ]; then
+    	install -m 0755 ${S}/bl_app.py ${D}${bindir}/bl_app.py
+    	install -m 0755 ${S}/known_devices.py ${D}${bindir}/known_devices.py
+    else
+    	install -m 0755 ${S}/bl_app_qt6.py ${D}${bindir}/bl_app.py
+    	install -m 0755 ${S}/known_devices_qt6.py ${D}${bindir}/known_devices.py
+    fi
+
     install -m 0755 ${S}/test_connection.py ${D}${bindir}/test_connection.py
     install -m 0755 ${S}/scan_devices.py ${D}${bindir}/scan_devices.py
-    install -m 0755 ${S}/known_devices.py ${D}${bindir}/known_devices.py
     install -m 0755 ${S}/bt_auto ${D}${bindir}/bt_auto
 
     install -d ${D}${sysconfdir}/systemd/system/
