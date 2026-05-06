@@ -1,32 +1,39 @@
-SUMMARY = "DRM Gamma Correction Utility"
-DESCRIPTION = "Userspace utility to set gamma correction on DRM CRTCs."
+DESCRIPTION = "DRM Gamma Correction Utility"
 SECTION = "devtools"
 LICENSE = "CLOSED"
 LICENSE_FLAGS = "Synaptics-EULA"
+PR = "r0"
 
-COMPATIBLE_MACHINE = "syna"
+SRC_URI = "${SYNA_SRC_APPLICATION}"
+
+SRCREV = "${SYNA_SRCREV_APPLICATION}"
+
+PV = "git${SRCPV}"
+
+COMPATIBLE_MACHINE = "myna2|klamath"
 
 DEPENDS = "libdrm"
 
-S = "${DEPLOY_DIR_IMAGE}/release/synasdk-application-release/application/display"
-B = "${WORKDIR}/build"
+S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/display"
+
+INSANE_SKIP:${PN} = "ldflags"
+INHIBIT_PACKAGE_STRIP = "1"
+INHIBIT_SYSROOT_STRIP = "1"
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 
 inherit pkgconfig
 
-do_configure() {
-    mkdir -p ${B}
-    cp ${S}/gamma_set.c ${B}/
-    cp ${S}/Makefile ${B}/
-}
-
 do_compile() {
-    cd ${B}
-    oe_runmake
+    ${MAKE} BUILD_DIR=${S} -C ${S}
 }
 
-do_install() {
+do_install () {
     install -d ${D}${bindir}
-    install -m 0755 ${B}/gamma_set ${D}${bindir}/
+    install -m 0755 ${S}/gamma_set ${D}${bindir}
 }
 
-FILES:${PN} = "${bindir}/gamma_set"
+FILES:${PN} = " \
+    ${bindir}/* \
+"
+
+FILES_SOLIBSDEV = ""
