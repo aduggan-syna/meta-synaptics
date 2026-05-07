@@ -203,6 +203,7 @@ if [ "is$OOBE" = "isenabled" ]; then
     if [ "is${MACHINE}" = "issl1680" ] || [ "is${MACHINE}" = "issl1640" ]; then
         echo "DISTRO_FEATURES:append = \" virtualization\"" >> conf/local.conf
     fi
+    echo "DISTRO_FEATURES:append = \" aws-misdk\"" >> conf/local.conf
 fi
 
 unset _SYNA_EULA_STR _SYNA_EULA_FILE _PROMPT_SYNA_EULA _SYNA_EULA_ACCEPTED _LICENSE_FLAGS_STR _UPDATED_LICENSE_ACCEPTED_STR

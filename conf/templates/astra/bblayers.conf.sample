@@ -22,4 +22,5 @@ BBLAYERS ?= " \
   ##OEROOT##/../meta-swupdate \
   ##OEROOT##/../meta-virtualization \
   ##OEROOT##/../meta-selinux \
+  ##OEROOT##/../meta-aws \
   "
