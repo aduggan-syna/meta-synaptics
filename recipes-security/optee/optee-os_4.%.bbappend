@@ -40,8 +40,6 @@ EARLY_SYNA_TA:platypus=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d
                          ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae1042d.stripped.elf \
                          ${SYNA_TA_PATH}/libsynap.ta/platypus/A0/1316a183-894d-43fe-9893bb946ae1042f.stripped.elf \
                          ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f0.stripped.elf \
-                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e8.stripped.elf \
-                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e9.stripped.elf \
                          ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f4.stripped.elf \
 "
 EARLY_SYNA_TA:dolphin=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f5.stripped.elf \
@@ -50,11 +48,11 @@ EARLY_SYNA_TA:dolphin=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-
                         ${SYNA_TA_PATH}/libsynap.ta/dolphin/A0/genx/1316a183-894d-43fe-9893bb946ae1042f.stripped.elf \
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f0.stripped.elf \
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f3.stripped.elf \
-                        ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e8.stripped.elf \
-                        ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e9.stripped.elf \
                         ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f4.stripped.elf \
 "
 SYNA_SMP_TA = " \
+                 ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e8.stripped.elf \
+                 ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e9.stripped.elf \
 "
 EXTRA_OEMAKE += " CFG_TEE_CORE_LOG_LEVEL=1 "
 
