@@ -158,7 +158,6 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     pciutils \
     synasdk-factory-ta \
     synasdk-drm-factory-ca-program \
-    synasdk-m2m-test \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
@@ -174,6 +173,8 @@ IMAGE_INSTALL:append:platypus = " \
     ${PLATYPUS_DOLPHIN_INSTALL} \
     synasdk-vpu-plugin \
 "
+
+IMAGE_INSTALL:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', ' synasdk-m2m-test', '', d)}"
 
 TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-runtime-staticdev kernel-devsrc"
 

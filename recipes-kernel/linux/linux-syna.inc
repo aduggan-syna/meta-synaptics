@@ -123,10 +123,11 @@ KERNEL_MODULE_AUTOLOAD:append = " \
     synadhd103 \
     synadhd591 \
     synadhd361 \
-    tsp \
-    m2m \
     ovp-v4l2 \
 "
+
+KERNEL_MODULE_AUTOLOAD:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', ' m2m', '', d)}"
+KERNEL_MODULE_AUTOLOAD:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', ' tsp', '', d)}"
 
 KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
     isp \
@@ -145,13 +146,14 @@ KERNEL_MODULE_PROBECONF:append = "amp_bm "
 KERNEL_MODULE_PROBECONF:append = "pvrsrvkm "
 KERNEL_MODULE_PROBECONF:append = "syna-vpu "
 KERNEL_MODULE_PROBECONF:append = "vpu "
-KERNEL_MODULE_PROBECONF:append = "m2m "
-KERNEL_MODULE_PROBECONF:append = "tsp "
 KERNEL_MODULE_PROBECONF:append = "ovp-v4l2 "
+
+KERNEL_MODULE_PROBECONF:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', 'm2m', '', d)}"
+KERNEL_MODULE_PROBECONF:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', 'tsp', '', d)}"
 
 module_conf_syna_drm = "softdep syna_drm pre: amp_bm fxl6408 rpi-panel-attiny-regulator panel-waveshare-dsi${@'\n'}options syna_drm hdmi_preferred_mode=1920x1080"
 module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
 
 module_conf_syna-vpu = "softdep syna-vpu pre: amp_bm"
 module_conf_vpu = "softdep vpu pre: amp_bm"
-module_conf_m2m = "softdep m2m pre: amp_bm tsp"
+module_conf_m2m = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', 'softdep m2m pre: amp_bm tsp', '', d)}"
