@@ -125,7 +125,6 @@ IMAGE_INSTALL:append:myna2 = " \
     synasdk-brcm-bt-start \
     synasdk-factory-ta \
     synasdk-drm-factory-ca-program \
-    synasdk-gamma-set \
 "
 
 IMAGE_INSTALL:append:klamath = " \
@@ -134,7 +133,6 @@ IMAGE_INSTALL:append:klamath = " \
     synasdk-brcm-bt-start \
     synasdk-v4l2isp-test \
     synasdk-v4l2isp-qtapp \
-    synasdk-gamma-set \
 "
 
 IMAGE_INSTALL:append:sl2619 = " \
