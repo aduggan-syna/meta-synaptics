@@ -128257,3 +128257,124 @@ index ed74ea5..edbae47 100644
 -- 
 2.7.4
 
+
+From 0d572ed52c35b062d1a7d802813f8c83004851e8 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Fri, 24 Apr 2026 09:35:19 +0800
+Subject: [PATCH] dolphin:platypus: add BCM_KERNEL_PI_VERIFY_FW_XX command
+ support
+
+Change-Id: If64ffb0cc31ed47d005d28ef7585a871ff24201a
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/bcm/bcm.c  | 10 ++++++++++
+ plat/syna/berlin/include/berlin_private.h  | 30 ++++++++++++++++++++++++++++++
+ plat/syna/berlin/soc/dolphin/plat_setup.c  | 11 +++++++++++
+ plat/syna/berlin/soc/platypus/plat_setup.c | 11 +++++++++++
+ 4 files changed, 62 insertions(+)
+
+diff --git a/plat/syna/berlin/common/drivers/bcm/bcm.c b/plat/syna/berlin/common/drivers/bcm/bcm.c
+index 08a24c9..0181af2 100644
+--- a/plat/syna/berlin/common/drivers/bcm/bcm.c
++++ b/plat/syna/berlin/common/drivers/bcm/bcm.c
+@@ -387,8 +387,18 @@ int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size)
+ 	return status;
+ }
+ 
++#pragma weak is_plat_support_bcm_cmd
++
++bool is_plat_support_bcm_cmd(uint32_t cmd_id)
++{
++	return false;
++}
++
+ bool bcm_sip_cmd_is_supported(uint32_t cmd_id)
+ {
++	if (is_plat_support_bcm_cmd(cmd_id))
++		return true;
++
+     switch (cmd_id)
+     {
+         case BCM_GET_RANDOM:
+diff --git a/plat/syna/berlin/include/berlin_private.h b/plat/syna/berlin/include/berlin_private.h
+index e3b25e8..f3a6b83 100644
+--- a/plat/syna/berlin/include/berlin_private.h
++++ b/plat/syna/berlin/include/berlin_private.h
+@@ -26,6 +26,36 @@ enum {
+ 	GENX = 0x100
+ };
+ 
++enum {
++// Other CPU FW images
++	IMAGE_TYPE_FW_START = 0x30,
++	IMAGE_TYPE_TSP_FW = 0x30,
++	IMAGE_TYPE_DSP_FW = 0x31,
++	IMAGE_TYPE_GPU_FW = 0x32,
++	IMAGE_TYPE_NPU_FW = 0x33,
++	IMAGE_TYPE_SM_FW  = 0x34,
++	IMAGE_TYPE_FW_END,
++};
++
++enum {
++	BCM_KERNEL_PI_VERIFY_FW_START = 0x10,
++	BCM_KERNEL_PI_VERIFY_TSP_FW = 0x10,
++	BCM_KERNEL_PI_VERIFY_DSP_FW = 0x11,
++	BCM_KERNEL_PI_VERIFY_GPU_FW = 0x12,
++	BCM_KERNEL_PI_VERIFY_ATF = 0x13,
++	BCM_KERNEL_PI_VERIFY_TZK = 0x14,
++	BCM_KERNEL_PI_VERIFY_TZK_BOOT_PARAM = 0x15,
++	BCM_KERNEL_PI_VERIFY_TZK_OEM_SETTING = 0x16,
++	BCM_KERNEL_PI_VERIFY_TA = 0x17,
++	BCM_KERNEL_PI_VERIFY_BOOTLOADER = 0x18,
++	BCM_KERNEL_PI_VERIFY_SM_FW = 0x19,
++	BCM_KERNEL_PI_VERIFY_AVB_KEYS = 0x1A,
++	BCM_KERNEL_PI_VERIFY_LINUX = 0x1B,
++	BCM_KERNEL_PI_VERIFY_FASTBOOT = 0x1C,
++	BCM_KERNEL_PI_VERIFY_FASTLOGO = 0x20,
++	BCM_KERNEL_PI_VERIFY_FW_END = 0x20,
++};
++
+ extern unsigned int boot_mode;
+ 
+ void berlin_context_resume(void);
+diff --git a/plat/syna/berlin/soc/dolphin/plat_setup.c b/plat/syna/berlin/soc/dolphin/plat_setup.c
+index eb177b1..db8fa55 100644
+--- a/plat/syna/berlin/soc/dolphin/plat_setup.c
++++ b/plat/syna/berlin/soc/dolphin/plat_setup.c
+@@ -22,3 +22,14 @@ const unsigned char berlin_power_domain_tree_desc[] = {
+ 	/* No of CPU cores - cluster0 */
+ 	BERLIN_MAX_CPUS_PER_CLUSTER
+ };
++
++bool is_plat_support_bcm_cmd(uint32_t cmd_id)
++{
++	switch (cmd_id)
++	{
++		case BCM_KERNEL_PI_VERIFY_FW_START ... BCM_KERNEL_PI_VERIFY_FW_END:
++			return true;
++		default:
++			return false;
++	}
++}
+diff --git a/plat/syna/berlin/soc/platypus/plat_setup.c b/plat/syna/berlin/soc/platypus/plat_setup.c
+index eb177b1..db8fa55 100644
+--- a/plat/syna/berlin/soc/platypus/plat_setup.c
++++ b/plat/syna/berlin/soc/platypus/plat_setup.c
+@@ -22,3 +22,14 @@ const unsigned char berlin_power_domain_tree_desc[] = {
+ 	/* No of CPU cores - cluster0 */
+ 	BERLIN_MAX_CPUS_PER_CLUSTER
+ };
++
++bool is_plat_support_bcm_cmd(uint32_t cmd_id)
++{
++	switch (cmd_id)
++	{
++		case BCM_KERNEL_PI_VERIFY_FW_START ... BCM_KERNEL_PI_VERIFY_FW_END:
++			return true;
++		default:
++			return false;
++	}
++}
+-- 
+2.7.4
+
