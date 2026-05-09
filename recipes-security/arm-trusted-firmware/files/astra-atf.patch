@@ -128229,3 +128229,31 @@ index 70090a0..39ef5d4 100644
 -- 
 2.7.4
 
+
+From 144d43e48fb163ea9ff10db628b87cf352ce1383 Mon Sep 17 00:00:00 2001
+From: Shaojun Feng <Shaojun.Feng@synaptics.com>
+Date: Fri, 8 May 2026 19:01:23 +0800
+Subject: [PATCH] ipc: set timeout value to 1
+
+Change-Id: I4bfc02868e3a5c71636dc532a6fd8f15a897761b
+Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/mailbox/sm_ipc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c b/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
+index ed74ea5..edbae47 100644
+--- a/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
++++ b/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
+@@ -7,7 +7,7 @@
+ #include "syna_ipc.h"
+ #include "sm_ipc.h"
+ 
+-#define IPC_MB_TIMEOUT (1000*10)
++#define IPC_MB_TIMEOUT (1)
+ 
+ void sm_system_off(void)
+ {
+-- 
+2.7.4
+
