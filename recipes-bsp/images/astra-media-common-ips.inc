@@ -54,6 +54,7 @@ GPU_RELATED_PACKAGES = " \
     gstreamer1.0-plugins-syna-videoconvertscale \
     gstreamer1.0-plugins-syna-compositor \
     gstreamer1.0-plugins-syna-ai \
+    gstreamer1.0-plugins-syna-synadeint2x \
 "
 
 NPU_RELATED_PACKAGES = " \

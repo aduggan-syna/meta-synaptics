@@ -149,6 +149,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     ${GST_PACKAGES} \
     ${GPU_RELATED_PACKAGES} \
     ${NPU_RELATED_PACKAGES} \
+    synasdk-ovp-ta \
     synasdk-brcm-bt-start \
     imgtec-pvr-firmware \
     synasdk-synap-module \
