@@ -87,8 +87,10 @@ gen_preboot_subimg() {
 padding_spi_suboot_combo() {
     padding_size=$1; shift
     f_spi_combo=$1; shift
+    subimg=$1; shift
     if [ $padding_size -lt 0 ]; then
-        echo "Subimg large then partition"
+        echo "Subimg $subimg larger than partition. Invalid padding_size $padding_size!"
+        ls -l ${DEPLOY_DIR_IMAGE}
         exit 1
     fi
     if [ $padding_size -gt 0 ]; then
@@ -130,7 +132,7 @@ genx_spi_suboot_combo() {
       cat "${DEPLOY_DIR_IMAGE}/$f_bootinfo" > "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
       spi_bootinfo_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
       padding_size=$(expr "$spi_bootinfo_end" - "$spi_bootinfo_size")
-      padding_spi_suboot_combo $padding_size $f_spi_combo
+      padding_spi_suboot_combo $padding_size $f_spi_combo bootinfo
   else
       dd if=/dev/zero bs=1024 count=1 > "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
   fi
@@ -139,27 +141,27 @@ genx_spi_suboot_combo() {
   cat "${DEPLOY_DIR_IMAGE}/$f_preboot" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
   preboot_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
   padding_size=$(expr "$spi_preboot_end" - "$preboot_size" || true)
-  padding_spi_suboot_combo $padding_size $f_spi_combo
+  padding_spi_suboot_combo $padding_size $f_spi_combo preboot
 
   # Pack sysmgr if existed
   if [ "$f_sysmgr" != "" ]; then
       cat "${DEPLOY_DIR_IMAGE}/$f_sysmgr" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
       sysmgr_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
       padding_size=$(expr "$spi_sysmgr_end" - "$sysmgr_size" || true)
-      padding_spi_suboot_combo $padding_size $f_spi_combo
+      padding_spi_suboot_combo $padding_size $f_spi_combo sysmgr
   fi
 
   # Pack TEE
   cat "${DEPLOY_DIR_IMAGE}/$f_tee" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
   tee_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
   padding_size=$(expr "$spi_tzk_end" - "$tee_size" || true)
-  padding_spi_suboot_combo $padding_size $f_spi_combo
+  padding_spi_suboot_combo $padding_size $f_spi_combo tzk
 
   # Pack BL
   cat "${DEPLOY_DIR_IMAGE}/$f_bl" >> "${DEPLOY_DIR_IMAGE}/$f_spi_combo"
   bl_size=$(stat -c %s "${DEPLOY_DIR_IMAGE}/${f_spi_combo}")
   padding_size=$(expr "$spi_bl_end" - "$bl_size" || true)
-  padding_spi_suboot_combo $padding_size $f_spi_combo
+  padding_spi_suboot_combo $padding_size $f_spi_combo bootloader
 }
 
 IMAGE_CMD:synaspiimg () {
