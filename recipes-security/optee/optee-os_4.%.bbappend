@@ -34,6 +34,7 @@ SYNA_TA_PATH = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/ta_enc"
 
 STAGING_NONARCH_BASELIBDIR = "${STAGING_DIR_HOST}/${nonarch_base_libdir}"
 
+EARLY_SYNA_TA =""
 EARLY_SYNA_TA:platypus=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103f5.stripped.elf \
                          ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae10436.stripped.elf \
                          ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae1042d.stripped.elf \
@@ -55,22 +56,22 @@ EARLY_SYNA_TA:dolphin=" ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-
 "
 SYNA_SMP_TA = " \
 "
-EARLY_TA_CFG = " CFG_EARLY_TA=y "
-EARLY_TA_CFG:sl1680spi = ""
-EARLY_TA_CFG:sl1620spi = ""
-EARLY_TA_CFG:sl1640spi = ""
-EARLY_TA_CFG:sl2619xspi = ""
-EXTRA_OEMAKE += "${EARLY_TA_CFG}"
 EXTRA_OEMAKE += " CFG_TEE_CORE_LOG_LEVEL=1 "
 
 do_compile:prepend() {
     . ${CONFIG_FILE}
     . ${CHIP_RC_FILE}
 
-    if [ "is${CONFIG_SMP_OFF}" = "isy" ]; then
+    if [[ "is${CONFIG_IMAGE_XSPI}" != "isy"  && \
+          "is${CONFIG_IMAGE_SPISUBOOT}" != "isy"  && \
+          "is${EARLY_SYNA_TA}" != "is" ]]; then
+      export CFG_EARLY_TA="y"
+
+      if [ "is${CONFIG_SMP_OFF}" = "isy" ]; then
         export EARLY_TA_PATHS="${EARLY_SYNA_TA}"
-    else
+      else
         export EARLY_TA_PATHS="${EARLY_SYNA_TA} ${SYNA_SMP_TA}"
+      fi
     fi
 
 }
