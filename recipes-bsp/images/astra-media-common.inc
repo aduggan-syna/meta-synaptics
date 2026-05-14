@@ -158,6 +158,7 @@ PLATYPUS_DOLPHIN_INSTALL = " \
     pciutils \
     synasdk-factory-ta \
     synasdk-drm-factory-ca-program \
+    ovp-blacklist \
 "
 
 IMAGE_INSTALL:append:dolphin = " \
