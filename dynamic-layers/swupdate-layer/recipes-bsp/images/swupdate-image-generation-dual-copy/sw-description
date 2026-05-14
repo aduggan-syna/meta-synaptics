@@ -1,0 +1,181 @@
+software =
+{
+    version = "@@SYNA_SDK_VERSION@@";
+    description = "SWUpdate package for Astra platform";
+
+    @@MACHINE@@ = {
+        hardware-compatibility: [ "1.0" ];
+
+        stable: {
+            copy1: {
+                images: (
+                    {
+                        filename = "preboot.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0boot0";
+                        sha256 = "$swupdate_get_sha256(preboot.subimg)";
+                        name = "PREBOOT_A";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "key.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p2";
+                        sha256 = "$swupdate_get_sha256(key.subimg)";
+                        name = "KEY_A";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "tzk.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p3";
+                        sha256 = "$swupdate_get_sha256(tzk.subimg)";
+                        name = "TZKA_A";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "bl.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p6";
+                        sha256 = "$swupdate_get_sha256(bl.subimg)";
+                        name = "BL_A";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "boot.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p8";
+                        sha256 = "$swupdate_get_sha256(boot.subimg)";
+                        name = "boot_A";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "firmware.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p10";
+                        sha256 = "$swupdate_get_sha256(firmware.subimg)";
+                        name = "FIRMWARE_A";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "@@SYNA_IMAGE_NAME@@-@@MACHINE@@.rootfs.ext4.gz";
+                        type = "raw";
+                        compressed = "zlib";
+                        device = "/dev/mmcblk0p12";
+                        sha256 = "$swupdate_get_sha256(@@SYNA_IMAGE_NAME@@-@@MACHINE@@.rootfs.ext4.gz)";
+                        name = "rootfs_A";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "fastlogo.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p14";
+                        sha256 = "$swupdate_get_sha256(fastlogo.subimg)";
+                        name = "FASTLOGO_A";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    }
+                );
+                scripts: (
+                    {
+                        filename = "post.sh";
+                        type = "postinstall";
+                        sha256 = "$swupdate_get_sha256(post.sh)";
+                    }
+                );
+            }
+
+            copy2: {
+                images: (
+                    {
+                        filename = "preboot.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0boot1";
+                        sha256 = "$swupdate_get_sha256(preboot.subimg)";
+                        name = "PREBOOT_B";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "key.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p4";
+                        sha256 = "$swupdate_get_sha256(key.subimg)";
+                        name = "KEY_B";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "tzk.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p5";
+                        sha256 = "$swupdate_get_sha256(tzk.subimg)";
+                        name = "TZKA_B";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "bl.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p7";
+                        sha256 = "$swupdate_get_sha256(bl.subimg)";
+                        name = "BL_B";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "boot.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p9";
+                        sha256 = "$swupdate_get_sha256(boot.subimg)";
+                        name = "boot_B";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "firmware.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p11";
+                        sha256 = "$swupdate_get_sha256(firmware.subimg)";
+                        name = "FIRMWARE_B";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "@@SYNA_IMAGE_NAME@@-@@MACHINE@@.rootfs.ext4.gz";
+                        type = "raw";
+                        compressed = "zlib";
+                        device = "/dev/mmcblk0p13";
+                        sha256 = "$swupdate_get_sha256(@@SYNA_IMAGE_NAME@@-@@MACHINE@@.rootfs.ext4.gz)";
+                        name = "rootfs_B";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    },
+                    {
+                        filename = "fastlogo.subimg";
+                        type = "raw";
+                        device = "/dev/mmcblk0p15";
+                        sha256 = "$swupdate_get_sha256(fastlogo.subimg)";
+                        name = "FASTLOGO_B";
+                        version = "@@SYNA_SDK_VERSION@@";
+                        install-if-higher = true;
+                    }
+                );
+                scripts: (
+                    {
+                        filename = "post.sh";
+                        type = "postinstall";
+                        sha256 = "$swupdate_get_sha256(post.sh)";
+                    }
+                );
+            }
+        }
+    }
+}

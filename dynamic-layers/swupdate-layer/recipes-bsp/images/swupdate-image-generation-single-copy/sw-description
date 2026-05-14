@@ -1,0 +1,61 @@
+software =
+{
+    version = "@@SYNA_SDK_VERSION@@";
+    description = "SWUpdate package for Astra platform with rescue mode enabled";
+
+    @@MACHINE@@ = {
+        hardware-compatibility: [ "1.0" ];
+
+        images: (
+            {
+                filename = "preboot.subimg";
+                type = "raw";
+                device = "/dev/mmcblk0boot0";
+                sha256 = "$swupdate_get_sha256(preboot.subimg)";
+            },
+            {
+                filename = "key.subimg";
+                type = "raw";
+                device = "/dev/mmcblk0p3";
+                sha256 = "$swupdate_get_sha256(key.subimg)";
+            },
+            {
+                filename = "tzk.subimg";
+                type = "raw";
+                device = "/dev/mmcblk0p4";
+                sha256 = "$swupdate_get_sha256(tzk.subimg)";
+            },
+            {
+                filename = "bl.subimg";
+                type = "raw";
+                device = "/dev/mmcblk0p5";
+                sha256 = "$swupdate_get_sha256(bl.subimg)";
+            },
+            {
+                filename = "boot.subimg";
+                type = "raw";
+                device = "/dev/mmcblk0p6";
+                sha256 = "$swupdate_get_sha256(boot.subimg)";
+            },
+            {
+                filename = "firmware.subimg";
+                type = "raw";
+                device = "/dev/mmcblk0p7";
+                sha256 = "$swupdate_get_sha256(firmware.subimg)";
+            },
+            {
+                filename = "@@SYNA_IMAGE_NAME@@-@@MACHINE@@.rootfs.ext4.gz"
+                type = "raw";
+                compressed = "zlib";
+                device = "/dev/mmcblk0p8";
+                sha256 = "$swupdate_get_sha256(@@SYNA_IMAGE_NAME@@-@@MACHINE@@.rootfs.ext4.gz)";
+            },
+            {
+                filename = "fastlogo.subimg";
+                type = "raw";
+                device = "/dev/mmcblk0p9";
+                sha256 = "$swupdate_get_sha256(fastlogo.subimg)";
+            }
+        );
+    }
+}
