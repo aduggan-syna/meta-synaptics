@@ -22,6 +22,7 @@ IMAGE_INSTALL:append = " \
 
 IMAGE_INSTALL:append:dolphin = " \
     synasdk-v4l2isp-qtapp \
+    synasdk-opencv-gst-od \
 "
 
 IMAGE_INSTALL:remove:sl2611 = " \
