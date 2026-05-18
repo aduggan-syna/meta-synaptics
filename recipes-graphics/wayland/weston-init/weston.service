@@ -1,6 +1,8 @@
 [Unit]
 Description=Weston Wayland Compositor
 RequiresMountsFor=/run
+Wants=weston-rdp-tls-gen.service
+After=weston-rdp-tls-gen.service
 
 [Service]
 EnvironmentFile=-/etc/default/weston

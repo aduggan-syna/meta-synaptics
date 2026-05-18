@@ -26,4 +26,15 @@ if test -z "$XDG_RUNTIME_DIR"; then
         fi
 fi
 cd /home/root
-exec weston --backend=$BACKEND --seat=$SEATID
+
+EXTRA_OPTS=""
+case "$BACKEND" in
+        rdp-backend.so)
+                EXTRA_OPTS="--rdp-tls-cert=/etc/weston/tls.crt --rdp-tls-key=/etc/weston/tls.key"
+                ;;
+        drm-backend.so)
+                EXTRA_OPTS="--seat=$SEATID"
+                ;;
+esac
+
+exec weston --backend="$BACKEND" $EXTRA_OPTS

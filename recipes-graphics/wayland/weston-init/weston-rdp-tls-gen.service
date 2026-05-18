@@ -1,0 +1,11 @@
+[Unit]
+Description=Generate Weston RDP TLS certificates
+Before=weston.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/generate-weston-rdp-tls.sh
+
+[Install]
+WantedBy=multi-user.target
