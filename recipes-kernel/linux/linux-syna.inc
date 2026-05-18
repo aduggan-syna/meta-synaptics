@@ -111,23 +111,18 @@ do_deploy:append() {
 }
 
 # Kernel modules for Platypus and Dolphin
+# berlin_bm, vpu, syna_drm, pvrsrvkm, bcmdhd, ovp_v4l2, tsp drivers are loaded by systemd-udevd-kernel.socket
+# without MODULE_DEVICE_TABLE in module source, will not be auto loaded by udev
 KERNEL_MODULE_AUTOLOAD:append = " \
-    amp_bm \
-    vpu \
     rpi-panel-attiny-regulator \
     edt-ft5x06 \
     panel-waveshare-dsi \
-    syna_drm \
-    pvrsrvkm \
-    bcmdhd \
     synadhd103 \
     synadhd591 \
     synadhd361 \
-    ovp-v4l2 \
 "
 
 KERNEL_MODULE_AUTOLOAD:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', ' m2m', '', d)}"
-KERNEL_MODULE_AUTOLOAD:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', ' tsp', '', d)}"
 
 KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
     isp \
@@ -139,21 +134,12 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
 "
 
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
-KERNEL_MODULE_PROBECONF:append = "rpi-panel-attiny-regulator "
-KERNEL_MODULE_PROBECONF:append = "edt-ft5x06 "
-KERNEL_MODULE_PROBECONF:append = "panel-waveshare-dsi "
-KERNEL_MODULE_PROBECONF:append = "amp_bm "
 KERNEL_MODULE_PROBECONF:append = "pvrsrvkm "
-KERNEL_MODULE_PROBECONF:append = "syna-vpu "
 KERNEL_MODULE_PROBECONF:append = "vpu "
-KERNEL_MODULE_PROBECONF:append = "ovp-v4l2 "
-
 KERNEL_MODULE_PROBECONF:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', 'm2m', '', d)}"
-KERNEL_MODULE_PROBECONF:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', 'tsp', '', d)}"
 
-module_conf_syna_drm = "softdep syna_drm pre: amp_bm fxl6408 rpi-panel-attiny-regulator panel-waveshare-dsi${@'\n'}options syna_drm hdmi_preferred_mode=1920x1080"
+module_conf_syna_drm = "softdep syna_drm pre: berlin_bm rpi-panel-attiny-regulator panel-waveshare-dsi${@'\n'}options syna_drm hdmi_preferred_mode=1920x1080"
 module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
 
-module_conf_syna-vpu = "softdep syna-vpu pre: amp_bm"
-module_conf_vpu = "softdep vpu pre: amp_bm"
-module_conf_m2m = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', 'softdep m2m pre: amp_bm tsp', '', d)}"
+module_conf_vpu = "softdep vpu pre: berlin_bm"
+module_conf_m2m = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', 'softdep m2m pre: berlin_bm tsp', '', d)}"
