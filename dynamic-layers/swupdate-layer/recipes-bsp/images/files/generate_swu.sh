@@ -9,9 +9,9 @@ POST_SCRIPT_FILE="${OUTPUT_DIR}/post.sh"
 SW_DESCRIPTION_FILE="${OUTPUT_DIR}/sw-description"
 SWU_IMAGE="${OUTPUT_DIR}/image.swu"
 
-cp $OUTPUT_DIR/SYNAIMG/fastlogo.subimg.gz $OUTPUT_DIR/SYNAIMG/firmware.subimg.gz $OUTPUT_DIR/SYNAIMG/boot.subimg.gz $OUTPUT_DIR/SYNAIMG/bl.subimg.gz $OUTPUT_DIR/SYNAIMG/tzk.subimg.gz $OUTPUT_DIR/SYNAIMG/key.subimg.gz $OUTPUT_DIR/SYNAIMG/preboot.subimg.gz $OUTPUT_DIR/
+cp $OUTPUT_DIR/SYNAIMG/fastlogo.subimg.gz $OUTPUT_DIR/SYNAIMG/boot.subimg.gz $OUTPUT_DIR/SYNAIMG/bl.subimg.gz $OUTPUT_DIR/SYNAIMG/tzk.subimg.gz $OUTPUT_DIR/SYNAIMG/key.subimg.gz $OUTPUT_DIR/SYNAIMG/preboot.subimg.gz $OUTPUT_DIR/
 
-gzip -df $OUTPUT_DIR/fastlogo.subimg.gz $OUTPUT_DIR/firmware.subimg.gz $OUTPUT_DIR/boot.subimg.gz $OUTPUT_DIR/bl.subimg.gz $OUTPUT_DIR/tzk.subimg.gz $OUTPUT_DIR/key.subimg.gz $OUTPUT_DIR/preboot.subimg.gz
+gzip -df $OUTPUT_DIR/fastlogo.subimg.gz $OUTPUT_DIR/boot.subimg.gz $OUTPUT_DIR/bl.subimg.gz $OUTPUT_DIR/tzk.subimg.gz $OUTPUT_DIR/key.subimg.gz $OUTPUT_DIR/preboot.subimg.gz
 
 
 if [ "null${VERSION}" = "null" ]; then
@@ -26,7 +26,6 @@ BOOT="boot.subimg"
 KEY="key.subimg"
 TZK="tzk.subimg"
 FASTLOGO="fastlogo.subimg"
-FIRMWARE="firmware.subimg"
 PREBOOT="preboot.subimg"
 
 # Compute the SHA256 hash for each file
@@ -36,7 +35,6 @@ HASH_BOOT=$(sha256sum "$OUTPUT_DIR/$BOOT" | awk '{ print $1 }')
 HASH_KEY=$(sha256sum "$OUTPUT_DIR/$KEY" | awk '{ print $1 }')
 HASH_TZK=$(sha256sum "$OUTPUT_DIR/$TZK" | awk '{ print $1 }')
 HASH_FASTLOGO=$(sha256sum "$OUTPUT_DIR/$FASTLOGO" | awk '{ print $1 }')
-HASH_FIRMWARE=$(sha256sum "$OUTPUT_DIR/$FIRMWARE" | awk '{ print $1 }')
 HASH_PREBOOT=$(sha256sum "$OUTPUT_DIR/$PREBOOT" | awk '{ print $1 }')
 
 cat << 'EOF' > $POST_SCRIPT_FILE
@@ -260,18 +258,10 @@ software =
 		                name = "boot_A";
 				version = "$VERSION";
 			},
-                         {
-                                filename = "$FIRMWARE";
-                                device = "/dev/mmcblk0p10";
-                                sha256 = "$HASH_FIRMWARE";
-				name = "FIRMWARE_A";
-				version = "$VERSION";
-				install-if-higher = true;
-                         },
 			 {
 		                filename = "$ROOTFS";
                                 compressed = true;
-				device = "/dev/mmcblk0p12";
+				device = "/dev/mmcblk0p10";
 		                sha256 = "$HASH_ROOTFS";
                                 install-if-higher = true;
                                 name = "rootfs_A";
@@ -279,7 +269,7 @@ software =
 			 },
                          {
                                 filename = "$FASTLOGO";
-                                device = "/dev/mmcblk0p14";
+                                device = "/dev/mmcblk0p12";
                                 sha256 = "$HASH_FASTLOGO";
 				name = "FASTLOGO_A";
 				version = "$VERSION";
@@ -338,17 +328,9 @@ software =
                                 version = "$VERSION";
                          },
                          {
-                                filename = "$FIRMWARE";
-                                device = "/dev/mmcblk0p11";
-                                sha256 = "$HASH_FIRMWARE";
-                                name = "FIRMWARE_B";
-                                version = "$VERSION";
-                                install-if-higher = true;
-                         },
-                         {
                                 filename = "$ROOTFS";
                                 compressed = true;
-                                device = "/dev/mmcblk0p13";
+                                device = "/dev/mmcblk0p11";
                                 sha256 = "$HASH_ROOTFS";
                                 install-if-higher = true;
                                 name = "rootfs_B";
@@ -356,7 +338,7 @@ software =
                          },
                          {
                                 filename = "$FASTLOGO";
-                                device = "/dev/mmcblk0p15";
+                                device = "/dev/mmcblk0p13";
                                 sha256 = "$HASH_FASTLOGO";
                                 name = "FASTLOGO_B";
                                 version = "$VERSION";
@@ -401,7 +383,7 @@ echo "Creating SWU image with cpio..."
             exit 1
         fi
 	#CPIO ARCHIVE (Remove or include the images in the below command as per the requirement)
-	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
+	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
     elif [ $2 -eq 2 ]; then
         if [ ! -f public.pem ]; then
             echo "test" > passout
@@ -422,18 +404,18 @@ echo "Creating SWU image with cpio..."
                 exit 1
         fi
 	#CPIO ARCHIVE (Remove or include the images in the below command as per the requirement)
-	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
+	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
     elif [ $2 -eq 3 ]; then
 	generate_swupdate_cert || exit 1
 
         openssl cms -sign -in  sw-description -out sw-description.sig -signer mycert.cert.pem \
         -inkey mycert.key.pem -outform DER -nosmimecap -binary
 	#CPIO ARCHIVE (Remove or include the images in the below command as per the requirement)
-	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
+	(echo sw-description; echo sw-description.sig; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
 
     else
 	#CPIO ARCHIVE (Remove or include the images in the below command as per the requirement)
-	(echo sw-description; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o -name "$FIRMWARE" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
+	(echo sw-description; echo post.sh; find . -maxdepth 1 \( -name "$PREBOOT" -o -name "$KEY" -o -name "$TZK" -o -name "$BL" -o -name "$BOOT" -o  -name "$ROOTFS" -o -name "$FASTLOGO" \)) | cpio -o --format=newc > $SWU_IMAGE
     fi
     if [ $? -eq 0 ]; then
         echo "SWU image created successfully: ${SWU_IMAGE}"
