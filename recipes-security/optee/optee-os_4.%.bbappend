@@ -54,25 +54,16 @@ SYNA_SMP_TA = " \
                  ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e8.stripped.elf \
                  ${STAGING_NONARCH_BASELIBDIR}/optee_armtz/1316a183-894d-43fe-9893-bb946ae103e9.stripped.elf \
 "
+EARLY_SYNA_TA:append = " \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'smp', '${SYNA_SMP_TA}', '', d)} \
+"
 EXTRA_OEMAKE += " CFG_TEE_CORE_LOG_LEVEL=1 "
-
-do_compile:prepend() {
-    . ${CONFIG_FILE}
-    . ${CHIP_RC_FILE}
-
-    if [[ "is${CONFIG_IMAGE_XSPI}" != "isy"  && \
-          "is${CONFIG_IMAGE_SPISUBOOT}" != "isy"  && \
-          "is${EARLY_SYNA_TA}" != "is" ]]; then
-      export CFG_EARLY_TA="y"
-
-      if [ "is${CONFIG_SMP_OFF}" = "isy" ]; then
-        export EARLY_TA_PATHS="${EARLY_SYNA_TA}"
-      else
-        export EARLY_TA_PATHS="${EARLY_SYNA_TA} ${SYNA_SMP_TA}"
-      fi
-    fi
-
-}
+EARLY_TA_CFG = " CFG_EARLY_TA=y EARLY_TA_PATHS="${EARLY_SYNA_TA}""
+EARLY_TA_CFG:sl1680spi = ""
+EARLY_TA_CFG:sl1620spi = ""
+EARLY_TA_CFG:sl1640spi = ""
+EARLY_TA_CFG:sl2619xspi = ""
+EXTRA_OEMAKE += "${EARLY_TA_CFG}"
 
 do_install:append() {
     # Launch script to generate required configurations (ex. ${syna_chip_rev})
