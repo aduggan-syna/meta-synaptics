@@ -1,0 +1,103 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
+diff --git a/libweston/shell-utils/shell-utils.c b/libweston/shell-utils/shell-utils.c
+index 75fb6c5..f4a4e63 100644
+--- a/libweston/shell-utils/shell-utils.c
++++ b/libweston/shell-utils/shell-utils.c
+@@ -97,6 +97,69 @@ weston_shell_utils_get_focused_output(struct weston_compositor *compositor)
+ 	struct weston_seat *seat;
+ 	struct weston_output *output = NULL;
+ 
++	/* Prefer active touches (any touch down) even if a pointer exists.
++	 * This is checked first before pointer focus so that a finger on the
++	 * touch panel always wins over a stale pointer position.
++	 */
++	wl_list_for_each(seat, &compositor->seat_list, link) {
++		struct weston_touch *touch = weston_seat_get_touch(seat);
++		if (touch && touch->num_tp > 0) {
++			struct weston_output *o = NULL;
++			if (touch->focus)
++				o = touch->focus->output;
++			else {
++				struct weston_touch_device *tdev;
++				wl_list_for_each(tdev, &touch->device_list, link) {
++					if (tdev->ops && tdev->ops->get_output) {
++						o = tdev->ops->get_output(tdev);
++						if (o) break;
++					}
++				}
++			}
++			if (o) {
++				return o;
++			}
++		}
++	}
++
++	/* If no pointer devices are present anywhere, prefer the touch
++	 * device's udev-mapped output (more reliable than grab_pos which
++	 * starts at 0,0 and could map to HDMI before the panel is touched).
++	 */
++	{
++		int any_pointer = 0;
++		struct weston_seat *s;
++		wl_list_for_each(s, &compositor->seat_list, link) {
++			if (weston_seat_get_pointer(s)) {
++				any_pointer = 1;
++				break;
++			}
++		}
++		if (!any_pointer) {
++			output = weston_shell_utils_get_output_user_override(compositor);
++			if (output)
++				return output;
++			wl_list_for_each(s, &compositor->seat_list, link) {
++				struct weston_touch *touch = weston_seat_get_touch(s);
++				struct weston_touch_device *tdev;
++				if (!touch)
++					continue;
++				if (touch->focus)
++					return touch->focus->output;
++				/* Prefer the udev-mapped output over grab_pos (grab_pos
++				 * may be 0,0 which maps to HDMI-A-1 if never touched). */
++				wl_list_for_each(tdev, &touch->device_list, link) {
++					if (tdev->ops && tdev->ops->get_output) {
++						struct weston_output *to = tdev->ops->get_output(tdev);
++						if (to) {
++							return to;
++						}
++					}
++				}
++			}
++		}
++	}
++
+ 	wl_list_for_each(seat, &compositor->seat_list, link) {
+ 		struct weston_touch *touch = weston_seat_get_touch(seat);
+ 		struct weston_pointer *pointer = weston_seat_get_pointer(seat);
+@@ -110,6 +173,26 @@ weston_shell_utils_get_focused_output(struct weston_compositor *compositor)
+ 		 * objections, I think this is sufficient. */
+ 		if (touch && touch->focus)
+ 			output = touch->focus->output;
++		/* If the last significant user input was a touch (touch->grab_serial
++		 * is higher than pointer->grab_serial), prefer the touch device's
++		 * udev-mapped output even though num_tp==0 (touch_up already fired
++		 * and touch->focus was cleared before weston_view_set_initial_position
++		 * runs).  This fixes: mouse on HDMI -> user touches panel -> new app
++		 * should open on DSI-1 not HDMI.
++		 */
++		else if (touch && pointer && pointer->focus &&
++			 touch->grab_serial > pointer->grab_serial) {
++			struct weston_touch_device *tdev;
++			wl_list_for_each(tdev, &touch->device_list, link) {
++				if (tdev->ops && tdev->ops->get_output) {
++					struct weston_output *o = tdev->ops->get_output(tdev);
++					if (o) {
++						output = o;
++						break;
++					}
++				}
++			}
++		}
+ 		else if (pointer && pointer->focus)
+ 			output = pointer->focus->output;
+ 		else if (keyboard && keyboard->focus)
