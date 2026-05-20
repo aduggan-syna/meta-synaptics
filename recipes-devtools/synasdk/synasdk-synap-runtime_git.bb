@@ -33,6 +33,11 @@ DEPENDS:platypus = "${NPU_DEPENDS}"
 DEPENDS:dolphin = "${NPU_DEPENDS}"
 DEPENDS:append:aarch64 = " tensorflow-lite"
 
+# IREE API compatibility: newer IREE renamed IREE_WHOLE_BUFFER -> IREE_HAL_WHOLE_BUFFER
+# and moved iree_allocator_system() behind IREE_ALLOCATOR_SYSTEM_CTL guard
+# (implementation is iree_allocator_libc_ctl in libiree_runtime_unified)
+CXXFLAGS:append:klamath = " -DIREE_ALLOCATOR_SYSTEM_CTL=iree_allocator_libc_ctl -DIREE_WHOLE_BUFFER=IREE_HAL_WHOLE_BUFFER"
+
 EXTRA_OECMAKE = "\
   -DVSSDK_DIR=${WORKDIR}/${SYNA_SOURCE_PREFIX} \
   -DCMAKE_BUILD_TYPE=Release \

@@ -3,20 +3,21 @@ LICENSE = "Apache-2.0-with-LLVM-exception"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=2e982d844baa4df1c80de75470e0c5cb"
 
 SRC_URI = " \
-    git://github.com/synaptics-torq/torq-compiler.git;branch=v1.5;protocol=https;submodules=1;name=torq \
-    git://github.com/synaptics-torq/iree.git;branch=torq-20240704.944;protocol=https;name=iree;submodules=1;destsuffix=git/third_party/iree \
+    git://github.com/synaptics-torq/torq-compiler.git;protocol=https;tag=v2.0.0_beta;name=torq;submodules=1;nobranch=1 \
+    git://github.com/synaptics-torq/iree.git;protocol=https;name=iree;submodules=1;destsuffix=git/third_party/iree;nobranch=1 \
     git://github.com/google/benchmark.git;branch=main;protocol=https;name=benchmark;submodules=1;destsuffix=git/third_party/iree/third_party/benchmark \
     git://github.com/google/googletest.git;branch=main;protocol=https;name=googletest;submodules=1;destsuffix=git/third_party/iree/third_party/googletest \
     git://github.com/dvidelabs/flatcc.git;branch=master;protocol=https;name=flatcc;submodules=1;destsuffix=git/third_party/iree/third_party/flatcc \
 "
-SRCREV_torq = "${AUTOREV}"
-SRCREV_iree = "e87ea27aedc79055658094b5a91779c3d7d5043c"
-SRCREV_benchmark = "1e96bb0ab5e758861f5bbbd4edbd0a8d9a2a7cae"
-SRCREV_googletest = "c8393f8554419dc27b688c535b8fa4afb82146a4"
+
+SRCREV_iree = "8862794e64dd2bbf9c3d4c5f002c74aae91ecb63"
+SRCREV_benchmark = "99bdb2127d1fa1cff444bbefb814e105c7d20c45"
+SRCREV_googletest = "52204f78f94d7512df1f0f3bea1d47437a2c3a58"
 SRCREV_flatcc = "9362cd00f0007d8cbee7bff86e90fb4b6b227ff3"
 
 SRCREV_FORMAT = "torq"
-PV = "1.0+git${SRCPV}"
+PV = "2.0.0_beta+git${SRCPV}"
+
 S = "${WORKDIR}/git"
 
 inherit cmake pkgconfig python3native
@@ -45,10 +46,12 @@ EXTRA_OECMAKE += "\
   -DCPUINFO_BUILD_BENCHMARKS=OFF \
   -DCPUINFO_BUILD_TOOLS=OFF \
   -DBENCHMARK_ENABLE_GTEST_TESTS=OFF \
+  -DIREE_ENABLE_LIBBACKTRACE=OFF \
   -DIREE_HOST_BIN_DIR=${STAGING_BINDIR_NATIVE}/iree \
 "
 EXTRA_OECMAKE:append = " \
   -DIREE_BUILD_PYTHON_BINDINGS=ON \
+  -DIREE_USE_SYSTEM_DEPS=ON \
   -Dnanobind_DIR=${RECIPE_SYSROOT}/usr/nanobind/cmake \
   -DPython3_EXECUTABLE:FILEPATH=${RECIPE_SYSROOT_NATIVE}/usr/bin/python3-native/python3 \
 "
@@ -69,15 +72,16 @@ DEP_LIBS = " \
     third_party/iree/runtime/src/iree/base/internal/libiree_base_internal_fpu_state.a \
     third_party/iree/runtime/src/iree/hal/utils/libiree_hal_utils_semaphore_base.a \
     third_party/iree/runtime/src/iree/hal/local/libiree_hal_local_executable_environment.a \
-    third_party/iree/runtime/src/iree/hal/utils/libiree_hal_utils_memory_file.a \
-    third_party/iree/runtime/src/iree/io/libiree_io_stdio_stream.a \
+    third_party/iree/runtime/src/iree/hal/utils/libiree_hal_utils_files.a \
+    third_party/iree/runtime/src/iree/hal/utils/libiree_hal_utils_executable_header.a \
+    third_party/iree/runtime/src/iree/hal/utils/libiree_hal_utils_caching_allocator.a \
+    third_party/iree/runtime/src/iree/io/libiree_io_stream.a \
     third_party/iree/runtime/src/iree/base/internal/libiree_base_internal_atomic_slist.a \
     third_party/iree/runtime/src/iree/base/internal/libiree_base_internal_cpu.a \
     third_party/iree/runtime/src/iree/hal/libiree_hal_hal.a \
     third_party/iree/runtime/src/iree/tooling/libiree_tooling_numpy_io.a \
     third_party/iree/runtime/src/iree/hal/utils/libiree_hal_utils_file_transfer.a \
     third_party/iree/runtime/src/iree/base/internal/libiree_base_internal_flags.a \
-    third_party/iree/runtime/src/iree/base/internal/libiree_base_internal_file_io.a \
     third_party/iree/runtime/plugins/TORQ/driver/registration/libdriver_registration_registration.a \
     third_party/iree/runtime/src/iree/hal/local/plugins/registration/libiree_hal_local_plugins_registration_registration.a \
     third_party/iree/runtime/src/iree/hal/local/libiree_hal_local_executable_plugin_manager.a \
