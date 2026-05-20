@@ -1,7 +1,14 @@
 DESCRIPTION = "Synaptics ImaginationTech PowerVR GPU binary files"
 SECTION = "libs"
-LICENSE = "CLOSED"
-LICENSE_FLAGS = "Synaptics-EULA"
+
+IMG_DDK_LICENSE_REL = "sysroot/linux-baseline/data/gfx_prebuilt/imagination/LICENSE"
+IMG_DDK_LICENSE_PATH = "file://${IMG_DDK_LICENSE_REL}"
+
+LIC_FILES_CHKSUM = "${IMG_DDK_LICENSE_PATH};md5=fca0d5fc4cd09e942135ae0673a9baca"
+
+NO_GENERIC_LICENSE[IMG_DDK] = "${IMG_DDK_LICENSE_REL}"
+
+LICENSE = "IMG_DDK & MIT"
 
 PR = "r1"
 
