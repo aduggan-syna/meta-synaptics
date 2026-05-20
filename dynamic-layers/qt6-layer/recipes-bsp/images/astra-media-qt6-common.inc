@@ -20,9 +20,9 @@ IMAGE_INSTALL:append = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'qtwayland', '', d)} \
 "
 
-#IMAGE_INSTALL:append:dolphin = " \
-#    synasdk-v4l2isp-qtapp \
-#"
+IMAGE_INSTALL:append:dolphin = " \
+    synasdk-opencv-gst-od \
+"
 
 IMAGE_INSTALL:remove:sl2611 = " \
     ${QT_PACKAGES} \

@@ -9,7 +9,7 @@ IMAGE_INSTALL:append = " \
 
 IMAGE_INSTALL:append:dolphin = " \
     nnstreamer \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' synasdk-face-recognition synasdk-audio-classification synasdk-superres-slideshow synasdk-superres', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' synasdk-face-recognition synasdk-audio-classification synasdk-superres-slideshow synasdk-superres synasdk-opencv-od-python', '', d)} \
 "
 
 IMAGE_INSTALL:append:platypus = " \
