@@ -3,7 +3,6 @@ Description=Android Debug Bridge
 ConditionPathExists=/etc/usb-debugging-enabled
 Before=android-system.service
 After=ncm-gadget-setup.service
-BindsTo=ncm-gadget-setup.service
 
 [Service]
 Type=simple

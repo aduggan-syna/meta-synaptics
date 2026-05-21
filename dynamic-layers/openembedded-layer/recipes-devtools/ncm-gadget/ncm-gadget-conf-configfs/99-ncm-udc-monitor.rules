@@ -1,1 +1,1 @@
-ACTION=="change", SUBSYSTEM=="udc", RUN+="/usr/bin/ncm-gadget-start"
+ACTION=="add", SUBSYSTEM=="udc", RUN+="/usr/bin/ncm-gadget-start"
