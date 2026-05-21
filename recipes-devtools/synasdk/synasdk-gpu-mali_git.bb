@@ -94,5 +94,16 @@ INHIBIT_SYSROOT_STRIP = "1"
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
-INSANE_SKIP:${PN} += "dev-so"
+INSANE_SKIP:${PN} += "dev-so file-rdeps already-stripped"
+
+sysroot_stage_mali_linker_scripts() {
+    for lib in EGL GLESv2 GLESv1_CM gbm; do
+        link="${SYSROOT_DESTDIR}${libdir}/lib${lib}.so"
+        if [ -f "${link}" ] || [ -L "${link}" ]; then
+            rm -f "${link}"
+            printf 'INPUT(libmali.so.0)\n' > "${link}"
+        fi
+    done
+}
+SYSROOT_PREPROCESS_FUNCS += "sysroot_stage_mali_linker_scripts"
 
