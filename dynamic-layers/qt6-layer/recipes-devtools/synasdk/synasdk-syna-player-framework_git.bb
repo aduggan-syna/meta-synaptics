@@ -9,7 +9,7 @@ DEPENDS += "qtbase qtdeclarative glib-2.0 gstreamer1.0 \
 # Add X11 and Wayland specific dependencies based on DISTRO_FEATURES
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', '', d)}"
 
-RDEPENDS_${PN} += "gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+RDEPENDS:${PN} += "gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
         gstreamer1.0-plugins-bad udev"
 
 SRC_URI = "${SYNA_SRC_DEMOS}"

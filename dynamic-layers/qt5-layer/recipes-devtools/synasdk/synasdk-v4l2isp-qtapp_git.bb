@@ -13,7 +13,7 @@ PV = "git${SRCPV}"
 COMPATIBLE_MACHINE = "klamath|dolphin"
 
 DEPENDS += "qtbase qtdeclarative qtmultimedia qtxmlpatterns libpng jpeg udev python3"
-RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
+RDEPENDS:${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
 
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/v4l2isp/qt5_camera_app"
 

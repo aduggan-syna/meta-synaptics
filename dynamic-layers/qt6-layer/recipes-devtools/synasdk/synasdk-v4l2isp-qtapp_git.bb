@@ -14,7 +14,7 @@ COMPATIBLE_MACHINE = "klamath|dolphin"
 
 #DEPENDS += "qtbase qtdeclarative qtmultimedia qtxmlpatterns libpng jpeg udev python3"
 DEPENDS += "qtbase qtdeclarative qtmultimedia libpng jpeg udev python3"
-RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
+RDEPENDS:${PN} += "qtdeclarative-qmlplugins qt5compat-qmlplugins"
 
 S = "${WORKDIR}/${SYNA_SOURCE_PREFIX}/application/v4l2isp/qt_camera_app"
 

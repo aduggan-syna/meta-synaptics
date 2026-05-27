@@ -3,7 +3,7 @@ SECTION = "multimedia"
 LICENSE = "Apache-2.0"
 
 DEPENDS += "qtbase qtdeclarative glib-2.0"
-RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins "
+RDEPENDS:${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins "
 
 # Add X11 and Wayland specific dependencies based on DISTRO_FEATURES
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', '', d)}"

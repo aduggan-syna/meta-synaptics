@@ -5,7 +5,7 @@ LICENSE = "Apache-2.0"
 DEPENDS += "qtbase qtdeclarative glib-2.0 gstreamer1.0 \
             gstreamer1.0-plugins-base gstreamer1.0-plugins-bad udev \
             synasdk-syna-player-framework qtmultimedia wayland"
-RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins \
+RDEPENDS:${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins \
         gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
         gstreamer1.0-plugins-bad udev"
 

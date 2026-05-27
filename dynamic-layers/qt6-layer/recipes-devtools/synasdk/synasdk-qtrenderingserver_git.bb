@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=900b7acb4257506b1e235adae7d3ac04"
 
 #DEPENDS += "qtbase qtdeclarative qtmultimedia qtxmlpatterns libpng jpeg udev python3"
 DEPENDS += "qtbase qtdeclarative qtmultimedia libpng jpeg udev python3"
-RDEPENDS_${PN} += "qtdeclarative-qmlplugins qtgraphicaleffects-qmlplugins"
+RDEPENDS:${PN} += "qtdeclarative-qmlplugins qt5compat-qmlplugins"
 
 SRC_URI = "${SYNA_SRC_DEMOS}"
 

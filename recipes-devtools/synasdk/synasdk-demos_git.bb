@@ -36,17 +36,13 @@ TARGET_HW:platypus = "platypus"
 TARGET_HW:myna2 = "myna2"
 TARGET_HW:klamath = "klamath"
 
-V4L2_ENABLE = "1"
-V4L2_ENABLE:myna2 = "0"
-V4L2_ENABLE:klamath = "0"
-
-CLEANBROKEN = "1"
+V4L2_ENABLE = "true"
+V4L2_ENABLE:myna2 = "false"
+V4L2_ENABLE:klamath = "false"
 
 inherit meson pkgconfig
 
-EXTRA_OEMESON = ""
-
-EXTRA_OECONF += " -Dcurr_mach=${TARGET_HW} -Dv4l2_enable=${V4L2_ENABLE}"
+EXTRA_OEMESON = " -Dcurr_mach=${TARGET_HW} -Dv4l2_enable=${V4L2_ENABLE}"
 
 do_install () {
     install -d ${D}${bindir}
@@ -76,7 +72,7 @@ FILES:${PN}-dev = " \
     ${includedir}/syna/* \
 "
 
-FILES:{$PN}-dbg = " \
+FILES:${PN}-dbg = " \
     ${bindir}/.debug \
     ${libdir}/.debug \
 "
