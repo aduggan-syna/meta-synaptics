@@ -4,13 +4,13 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=2e982d844baa4df1c80de75470e0c5cb"
 
 SRC_URI = " \
     git://github.com/synaptics-torq/torq-compiler.git;protocol=https;tag=v2.0.0_beta;name=torq;submodules=1;nobranch=1 \
-    git://github.com/synaptics-torq/iree.git;protocol=https;name=iree;submodules=1;destsuffix=git/third_party/iree;nobranch=1 \
+    git://github.com/synaptics-torq/iree.git;protocol=https;branch=torq-3.10;name=iree;submodules=1;destsuffix=git/third_party/iree \
     git://github.com/google/benchmark.git;branch=main;protocol=https;name=benchmark;submodules=1;destsuffix=git/third_party/iree/third_party/benchmark \
     git://github.com/google/googletest.git;branch=main;protocol=https;name=googletest;submodules=1;destsuffix=git/third_party/iree/third_party/googletest \
     git://github.com/dvidelabs/flatcc.git;branch=master;protocol=https;name=flatcc;submodules=1;destsuffix=git/third_party/iree/third_party/flatcc \
 "
 
-SRCREV_iree = "8862794e64dd2bbf9c3d4c5f002c74aae91ecb63"
+SRCREV_iree = "222e3ab7012fe0d2b38161957e87e4907cf8c9ba"
 SRCREV_benchmark = "99bdb2127d1fa1cff444bbefb814e105c7d20c45"
 SRCREV_googletest = "52204f78f94d7512df1f0f3bea1d47437a2c3a58"
 SRCREV_flatcc = "9362cd00f0007d8cbee7bff86e90fb4b6b227ff3"
