@@ -1,7 +1,10 @@
 DESCRIPTION = "DEMOS"
 SECTION = "multimedia"
-LICENSE = "CLOSED"
-LICENSE_FLAGS = "Synaptics-EULA"
+LICENSE = "Apache-2.0 & MIT"
+LIC_FILES_CHKSUM = " \
+    file://LICENSE.Apache-2.0;md5=900b7acb4257506b1e235adae7d3ac04 \
+    file://LICENSE.MIT;md5=54e336e2d7b1905fa0d67e0c2e94baec \
+"
 
 DEPENDS = " \
     gstreamer1.0-meta-base \
