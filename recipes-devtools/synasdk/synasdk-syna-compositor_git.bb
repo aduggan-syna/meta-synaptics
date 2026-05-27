@@ -1,8 +1,8 @@
 SUMMARY = "Video Mixing with EGL and GLES2"
 DESCRIPTION = "A library to mix DMA-BUF contents and render to another DMA-BUF using EGL and GLES2."
 SECTION = "multimedia"
-LICENSE = "CLOSED"
-LICENSE_FLAGS = "Synaptics-EULA"
+LICENSE = "Apache-2.0"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=900b7acb4257506b1e235adae7d3ac04"
 
 DEPENDS = "virtual/egl virtual/libgles2 libdrm"
 DEPENDS:append:myna2 = " mesa"
