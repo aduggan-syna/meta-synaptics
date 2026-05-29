@@ -6,6 +6,8 @@ rescue_configure() {
         MACHINE_NAME="platypus"
     elif [ "${MACHINE}" = "sl1680" ]; then
         MACHINE_NAME="dolphin"
+    elif [ "${MACHINE}" = "sl2619" ]; then
+        MACHINE_NAME="klamath"
     else
         echo "Unsupported MACHINE: ${MACHINE}"
         return 0
@@ -50,5 +52,9 @@ do_configure:prepend:platypus() {
 }
 
 do_configure:prepend:myna2() {
+    rescue_configure
+}
+
+do_configure:prepend:klamath() {
     rescue_configure
 }
