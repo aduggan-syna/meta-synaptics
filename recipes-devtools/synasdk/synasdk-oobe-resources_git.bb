@@ -39,9 +39,7 @@ do_install () {
     ${@bb.utils.contains('MACHINE', 'sl1620', 'cp ${S}/videos/h264/sl1620/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/videos/mp4/1080p/* ${D}${rootdir}/demos/videos/mp4/; install -d ${D}/usr/share/synap/models; cp -r ${S}/models/sl1620/object_detection ${D}/usr/share/synap/models/; cp ${S}/config_files/syna_capability_demo_sl1620_config.txt ${D}${rootdir}/demos/configs/', '', d)}
     ${@bb.utils.contains('MACHINE', 'sl1640', 'cp ${S}/videos/h264/sl1640/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/videos/mp4/1080p/* ${D}${rootdir}/demos/videos/mp4/; cp ${S}/config_files/syna_capability_demo_sl1640_config.txt ${D}${rootdir}/demos/configs/', '', d)}
     ${@bb.utils.contains('MACHINE', 'sl1680', 'cp ${S}/videos/h264/sl1680/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/videos/mp4/1080p/* ${D}${rootdir}/demos/videos/mp4/; cp ${S}/config_files/syna_capability_demo_sl1680_config.txt ${D}${rootdir}/demos/configs/', '', d)}
-    ${@bb.utils.contains('MACHINE', 'sl2619', 'cp ${S}/videos/h264/sl261x/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/videos/mp4/480p/* ${D}${rootdir}/demos/videos/mp4/; cp ${S}/videos/mp4/720p/* ${D}${rootdir}/demos/videos/mp4/; install -d ${D}/usr/share/synap/models; cp -r ${S}/models/sl261x/* ${D}/usr/share/synap/models/; cp ${S}/config_files/syna_capability_demo_sl2619_config.txt ${D}${rootdir}/demos/configs/', '', d)}
-    ${@bb.utils.contains('MACHINE', 'sl2619_coral', 'cp ${S}/videos/h264/sl261x/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/videos/mp4/720p/* ${D}${rootdir}/demos/videos/mp4/; install -d ${D}/usr/share/synap/models; cp -r ${S}/models/sl261x/* ${D}/usr/share/synap/models/; cp ${S}/config_files/syna_capability_demo_sl2619_config.txt ${D}${rootdir}/demos/configs/', '', d)}
-    ${@bb.utils.contains('MACHINE', 'sl2615', 'cp ${S}/videos/h264/sl261x/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/videos/mp4/480p/* ${D}${rootdir}/demos/videos/mp4/; cp ${S}/videos/mp4/720p/* ${D}${rootdir}/demos/videos/mp4/; install -d ${D}/usr/share/synap/models; cp -r ${S}/models/sl261x/* ${D}/usr/share/synap/models/; cp ${S}/config_files/syna_capability_demo_sl2615_config.txt ${D}${rootdir}/demos/configs/', '', d)}
+    ${@'cp ${S}/videos/h264/sl261x/* ${D}${rootdir}/demos/videos/h264/; cp ${S}/videos/mp4/480p/* ${D}${rootdir}/demos/videos/mp4/; cp ${S}/videos/mp4/720p/* ${D}${rootdir}/demos/videos/mp4/; install -d ${D}/usr/share/synap/models; cp -r ${S}/models/sl261x/* ${D}/usr/share/synap/models/; cp ${S}/config_files/syna_capability_demo_sl2619_config.txt ${D}${rootdir}/demos/configs/' if d.getVar('MACHINE') in ['sl2619', 'sl2619-coralboard', 'sl2615'] else ''}
 }
 
 PACKAGES = " \
@@ -56,7 +54,5 @@ FILES:${PN} = " \
     ${rootdir}/demos/default-slideshow-images/* \
 "
 FILES:${PN} += "${@bb.utils.contains('MACHINE', 'sl1620', '/usr/share/synap/models/*', '', d)} \
-                ${@bb.utils.contains('MACHINE', 'sl2619', '/usr/share/synap/models/*', '', d)} \
-                ${@bb.utils.contains('MACHINE', 'sl2619_coral', '/usr/share/synap/models/*', '', d)} \
-                ${@bb.utils.contains('MACHINE', 'sl2615', '${@bb.utils.contains("SYNA_NPU_ENABLE", "1", "/usr/share/synap/models/*", "", d)}', '', d)} \
+                ${@'/usr/share/synap/models/*' if d.getVar('MACHINE') in ['sl2619', 'sl2619-coralboard', 'sl2615'] else ''} \
 "

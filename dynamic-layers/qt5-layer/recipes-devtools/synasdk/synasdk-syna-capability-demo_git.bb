@@ -50,7 +50,7 @@ do_install () {
         install -m 0644 ${S}/qmls/sl1680-capability-demo.qml ${D}${qmldir}/
     fi
 
-    if [ "${MACHINE}" = "sl2619" ] || [ "${MACHINE}" = "sl2619nand" ]; then
+    if [ "${MACHINE}" = "sl2619" ] || [ "${MACHINE}" = "sl2619nand" ] || [ "${MACHINE}" = "sl2619-coralboard" ]; then
         install -m 0644 ${S}/qmls/sl2619-capability-demo.qml ${D}${qmldir}/
     fi
 
