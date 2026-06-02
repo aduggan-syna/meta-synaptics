@@ -128378,3 +128378,33 @@ index eb177b1..db8fa55 100644
 -- 
 2.7.4
 
+
+From 8e9360e690aea583338bdab45b10f48b5c394881 Mon Sep 17 00:00:00 2001
+From: Shaojun Feng <Shaojun.Feng@synaptics.com>
+Date: Wed, 27 May 2026 15:31:28 +0800
+Subject: [PATCH] mailbox: fix check issue
+
+Pointer 'cmd' may be dereferenced after having been checked for NULL
+
+Change-Id: Ib9b4c2a33c73b692d43a03ef389a6884b0e9dd91
+Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
+---
+ plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
+index bba5b77..854b53c 100644
+--- a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
++++ b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
+@@ -202,7 +202,7 @@ int mbox_send_command(mailbox_command_t *cmd, mailbox_rsp_t *rsp)
+ {
+ 	int ret = -1;
+ 
+-	if (!cmd && !rsp)
++	if (!cmd || !rsp)
+ 		return -1;
+ 
+ 	if (cmd->command.ns != MAILBOX_TEE && (cmd->command.sender_id != HOST2SYNA_SENDER_A55)) {
+-- 
+2.7.4
+
