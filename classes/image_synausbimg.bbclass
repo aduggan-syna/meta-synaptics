@@ -46,7 +46,7 @@ do_image_synausbimg[depends] += " \
 IMAGE_CMD:synausbimg () {
 
 # Check that the needed files are available
-    if [ "${MACHINE}" = "sl2619usb" ]; then
+    if [ "${MACHINE}" = "sl2619usb" ] || [ "${MACHINE}" = "sl2619-coralboard-usb" ]; then
         [ -f "${DEPLOY_DIR_IMAGE}/key.bin" ]
         [ -f "${DEPLOY_DIR_IMAGE}/spk.bin" ]
         [ -f "${DEPLOY_DIR_IMAGE}/m52bl.bin" ]
@@ -75,7 +75,7 @@ IMAGE_CMD:synausbimg () {
 # Add a "tag"
     touch "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/TAG--${IMAGE_NAME}--TAG"
 
-    if [ "${MACHINE}" = "sl2619usb" ]; then
+    if [ "${MACHINE}" = "sl2619usb" ] || [ "${MACHINE}" = "sl2619-coralboard-usb" ]; then
         cp "${DEPLOY_DIR_IMAGE}/bootloader_nopreload.subimg" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/bl.subimg"
         cp "${DEPLOY_DIR_IMAGE}/tee.subimg" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/tzk.subimg"
         cp "${DEPLOY_DIR_IMAGE}/key.bin" "${DEPLOY_DIR_IMAGE}/${SYNAIMG_DEPLOY_SUBDIR}/key.bin"

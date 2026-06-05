@@ -78,7 +78,7 @@ do_deploy() {
         fi
     else
         if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
-            if [ "${MACHINE}" = "sl2619usb" ]; then
+            if [ "${MACHINE}" = "sl2619usb" ] || [ "${MACHINE}" = "sl2619-coralboard-usb" ]; then
                 install -m 0644 target/preboot/intermediate/release/key.bin ${DEPLOYDIR}/key.bin
                 install -m 0644 target/preboot/intermediate/release/spk_raw.bin ${DEPLOYDIR}/spk.bin
                 install -m 0644 target/preboot/intermediate/release/bl_en.bin ${DEPLOYDIR}/m52bl.bin
