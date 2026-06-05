@@ -7,6 +7,10 @@ PR = "r1"
 
 PROVIDES = "virtual/egl virtual/libgles1 virtual/libgles2 virtual/libgles3 virtual/libgbm virtual/libgl"
 
+# Provide runtime package names so RDEPENDS on literal packages (e.g., libgles2)
+# are satisfied when this provider is selected by PREFERRED_PROVIDER_virtual/libgl
+RPROVIDES:${PN} += "libgles2 libgles1 libgles3 libgl libgbm libegl"
+
 RDEPENDS:${PN} = " \
     libffi \
     libdrm \
