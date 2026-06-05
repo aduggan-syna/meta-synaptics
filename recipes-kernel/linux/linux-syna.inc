@@ -133,6 +133,8 @@ KERNEL_MODULE_AUTOLOAD:append:dolphin = " \
     hrx_v4l2 \
 "
 
+KERNEL_MODULE_AUTOLOAD:append:klamath = " syna_drm "
+
 KERNEL_MODULE_PROBECONF:append = "syna_drm "
 KERNEL_MODULE_PROBECONF:append = "pvrsrvkm "
 KERNEL_MODULE_PROBECONF:append = "vpu "
