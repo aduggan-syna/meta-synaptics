@@ -32,6 +32,7 @@ GENERATE_SWU_SH = "generate_swu.sh"
 GENERATE_SWU_SH:klamath = "generate_swu_klamath.sh"
 RESCUE_OTA_SH = "rescue_ota.sh"
 RESCUE_OTA_SH:klamath = "rescue_ota_klamath.sh"
+RESCUE_OTA_SH:sl2619nand = "rescue_ota_klamath_nand.sh"
 
 SRC_URI = "file://${GENERATE_SWU_SH} \
            file://${RESCUE_OTA_SH} \

@@ -1,19 +1,10 @@
 rescue_configure() {
-    echo ${MACHINE}
-    if [ "${MACHINE}" = "sl1620" ]; then
-        MACHINE_NAME="myna2"
-    elif [ "${MACHINE}" = "sl1640" ]; then
-        MACHINE_NAME="platypus"
-    elif [ "${MACHINE}" = "sl1680" ]; then
-        MACHINE_NAME="dolphin"
-    elif [ "${MACHINE}" = "sl2619" ]; then
-        MACHINE_NAME="klamath"
-    else
+    if [ "${MACHINE}" != "sl1620" ] && [ "${MACHINE}" != "sl1640" ] && [ "${MACHINE}" != "sl1680" ] && [ "${MACHINE}" != "sl2619" ] && [ "${MACHINE}" != "sl2619nand" ]; then
         echo "Unsupported MACHINE: ${MACHINE}"
         return 0
     fi
 
-    UBOOT_DEFCONFIG="${S}/configs/${MACHINE_NAME}_suboot_defconfig"
+    UBOOT_DEFCONFIG="${S}/configs/${UBOOT_MACHINE}"
 
     if [ -f "${UBOOT_DEFCONFIG}" ]; then
         sed -i '/^CONFIG_SYNA_RESCUE_MODE[ =]/d' "${UBOOT_DEFCONFIG}"

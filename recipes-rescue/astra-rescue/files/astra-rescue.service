@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=oneshot
-ExecStart=/etc/rescue-handler
+ExecStart=/etc/rescue-handler @DEVICE@
 RemainAfterExit=true
 
 [Install]

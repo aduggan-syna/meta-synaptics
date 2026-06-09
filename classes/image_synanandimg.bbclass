@@ -195,6 +195,7 @@ IMAGE_CMD:synanandimg () {
                   /pre-bootloader/preboot /preboot/preboot \
                   /key_a/key /key_b/key \
                   /cmboot_a/cmboot /cmboot_b/cmboot \
+                  /rescue/rescue \
                   /rootfs_a/rootfs /rootfs_b/rootfs \
                   /opt/opt /home/home /tsb/tsb /app/app \
                   /firmware_a/firmware /firmware_b/firmware \
@@ -225,9 +226,26 @@ IMAGE_CMD:synanandimg () {
         prepend_image_info.sh ${DEPLOY_DIR_IMAGE}/cmboot_noinfo.subimg ${DEPLOY_DIR_IMAGE}/cmboot.subimg
     fi
 
+    leb=`expr ${CONFIG_NAND_BLOCK_SIZE} - ${CONFIG_NAND_PAGE_SIZE} \* 2`
+    mtbd_size2vol_size=`expr 1024 \* 1024 / ${CONFIG_NAND_BLOCK_SIZE}`
+
+# Make rescue
+    if [ "${ENABLE_RESCUE_MODE}" = "1" ]; then
+        rescue_size=`grep -m1 rescue ${DEPLOY_DIR_IMAGE}/subimglayout | awk '{print $3}'`
+        #reserve 4% size for eraseblocks
+        max_erase_blks=`expr ${rescue_size} - ${rescue_size} / 100 \* 4`
+        vol_size=`expr ${max_erase_blks} / ${mtbd_size2vol_size}`
+        rm -rf ${DEPLOY_DIR_IMAGE}/rescue
+        mkdir ${DEPLOY_DIR_IMAGE}/rescue
+        cp ${IMAGE_ROOTFS}/rescue/Image-${MACHINE}.gz ${DEPLOY_DIR_IMAGE}/rescue/Image.gz
+        cp ${IMAGE_ROOTFS}/rescue/rescue-${MACHINE}.dtb ${DEPLOY_DIR_IMAGE}/rescue/board.dtb
+        cp ${IMAGE_ROOTFS}/rescue/rescue-${MACHINE}.rootfs.cpio.gz ${DEPLOY_DIR_IMAGE}/rescue/initramfs.rootfs.cpio.gz
+        #make ubifs rescue
+        mkfs_ubifs " -e ${leb} -c ${max_erase_blks} -m ${CONFIG_NAND_PAGE_SIZE}" " -vv -m ${CONFIG_NAND_PAGE_SIZE} -p ${CONFIG_NAND_BLOCK_SIZE} -s ${CONFIG_NAND_PAGE_SIZE}" "${vol_size}" "${DEPLOY_DIR_IMAGE}/rescue" "rescue"
+    fi
+
 # Make rootfs
     rootfs_size=`grep -m1 rootfs ${DEPLOY_DIR_IMAGE}/subimglayout | awk '{print $3}'`
-    leb=`expr ${CONFIG_NAND_BLOCK_SIZE} - ${CONFIG_NAND_PAGE_SIZE} \* 2`
     #reserve 4% size for eraseblocks
     max_erase_blks=`expr ${rootfs_size} - ${rootfs_size} / 100 \* 4`
     #add boot subimg to rootfs
@@ -243,11 +261,10 @@ IMAGE_CMD:synanandimg () {
         find ${IMAGE_ROOTFS}/${nonarch_base_libdir}/modules/${PREFERRED_VERSION_linux-syna}/kernel/drivers/${driver} -name *.xz -exec sh -c 'mv "$1" "${1%.xz}"' _ {} \;
     done
 
-    mtbd_size2vol_size=`expr 1024 \* 1024 / ${CONFIG_NAND_BLOCK_SIZE}`
     vol_size=`expr ${max_erase_blks} / ${mtbd_size2vol_size}`
 
     #make ubifs rootfs
-    mkfs_ubifs " -e ${leb} -c ${max_erase_blks} -m ${CONFIG_NAND_PAGE_SIZE}" " -vv -m ${CONFIG_NAND_PAGE_SIZE} -p ${CONFIG_NAND_BLOCK_SIZE} -s ${CONFIG_NAND_PAGE_SIZE}" "${vol_size}" "${IMAGE_ROOTFS}" "rootfs"
+    mkfs_ubifs " -e ${leb} -c ${max_erase_blks} -m ${CONFIG_NAND_PAGE_SIZE}" " -vv -m ${CONFIG_NAND_PAGE_SIZE} -p ${CONFIG_NAND_BLOCK_SIZE} -s ${CONFIG_NAND_PAGE_SIZE} --image-seq=695949396" "${vol_size}" "${IMAGE_ROOTFS}" "rootfs"
 
     for i in ${subimg_list}; do
         subimg_name=`echo $mapping_list | grep -o "/${i}\(_[a|b]\)\?/[[:alnum:]_-]*" | head -1 | cut -d / -f3`

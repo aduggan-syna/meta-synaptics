@@ -273,6 +273,8 @@ OPTEE_TA_ENC= ##OPTEE_TA_ENC##
 PACKAGE_FEED_URIS ?= "https://astra-packages.synaptics.com/${ASTRA_VERSION}"
 EXTRA_IMAGE_FEATURES += " package-management "
 
+# If enable RESCUE_MODE, need remove tools-debug in EXTRA_IMAGE_FEATURES
+# because swupdate-image was skipped: 'tools-debug' in IMAGE_FEATURES
 ENABLE_RESCUE_MODE = "0"
 
 IMAGE_FSTYPES += " synaimg ext4 ext4.gz"

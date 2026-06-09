@@ -1,7 +1,8 @@
 #!/bin/sh
 
+device=$1
 mkdir -p /mnt/rescue
-mount /dev/mmcblk0p2 /mnt/rescue
+mount $device /mnt/rescue
 
 if [ $? -eq 0 ]; then
     if [ ! -f /mnt/rescue/Image ] && [ ! -f /mnt/rescue/Image.gz ]; then
@@ -30,5 +31,5 @@ if [ $? -eq 0 ]; then
 
     umount /mnt/rescue
 else
-    echo "Mount failed: /dev/mmcblk0p2"
+    echo "Mount failed: $device"
 fi

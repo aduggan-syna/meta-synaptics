@@ -20,6 +20,8 @@ LINUX_VERSION_EXTENSION = ""
 KERNEL_DEVICETREE = "${SYNA_KERNEL_DTS_FILE}  \
                      ${SYNA_KERNEL_DTBO_FILE} \
                      "
+KERNEL_DEVICETREE:sl2619nand:append = " ${SYNA_KERNEL_RESCUE_DTS_FILE} \
+                                        ${SYNA_KERNEL_DTS_FILE}"
 
 KERNEL_DTC_FLAGS += "-@"
 

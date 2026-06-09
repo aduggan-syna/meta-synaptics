@@ -22,8 +22,17 @@ do_install[depends] += "swupdate-image:do_image_complete linux-syna:do_deploy"
 do_install() {
     install -d ${D}/rescue
 
+    if [ "${SYNA_KERNEL_RESCUE_DTS_FILE}" != "" ]; then
+        dtb_name=${SYNA_KERNEL_RESCUE_DTS_FILE}
+    else
+        dtb_name=${SYNA_KERNEL_DTS_FILE}
+    fi
+    dtb_name=${dtb_name##*/}
+    dtb_name=${dtb_name%%.*}
+    echo "rescue dtb_name = $dtb_name"
+
     KERNEL_FILE="${DEPLOY_DIR_IMAGE}/Image-${MACHINE}.bin"
-    DTB_FILE=$(find ${DEPLOY_DIR_IMAGE} -name "*-rdk-*.dtb" | head -n 1)
+    DTB_FILE=${DEPLOY_DIR_IMAGE}/${dtb_name}.dtb
     INITRAMFS_FILE=$(find ${DEPLOY_DIR_IMAGE} -name "swupdate-image-${MACHINE}.rootfs-*.cpio.gz" | head -n 1)
 
     # Compress and install files
@@ -35,9 +44,14 @@ do_install() {
     install -d ${D}${sysconfdir}
     install -m 0755 ${WORKDIR}/rescue-handler ${D}${sysconfdir}/rescue-handler
 
+    device="/dev/mmcblk0p2"
+    if [ "${MACHINE}" = "sl2619nand" ]; then
+        device="/dev/ubi0_1"
+    fi
     # Install systemd service
     install -d ${D}${systemd_system_unitdir}
     install -m 0644 ${WORKDIR}/astra-rescue.service ${D}${systemd_system_unitdir}/
+    sed -i -e "s,@DEVICE@,${device},g" ${D}${systemd_system_unitdir}/astra-rescue.service
 }
 
 # Ensure files go into the main package
