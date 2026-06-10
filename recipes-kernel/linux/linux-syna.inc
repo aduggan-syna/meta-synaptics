@@ -117,6 +117,9 @@ KERNEL_MODULE_AUTOLOAD:append = " \
     rpi-panel-attiny-regulator \
     edt-ft5x06 \
     panel-waveshare-dsi \
+    waveshare-panel-regulator \
+    panel-waveshare-dsi-v2 \
+    goodix_ts \
     synadhd103 \
     synadhd591 \
     synadhd361 \
@@ -140,7 +143,7 @@ KERNEL_MODULE_PROBECONF:append = "pvrsrvkm "
 KERNEL_MODULE_PROBECONF:append = "vpu "
 KERNEL_MODULE_PROBECONF:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', 'm2m', '', d)}"
 
-module_conf_syna_drm = "softdep syna_drm pre: berlin_bm rpi-panel-attiny-regulator panel-waveshare-dsi${@'\n'}options syna_drm hdmi_preferred_mode=1920x1080"
+module_conf_syna_drm = "softdep syna_drm pre: berlin_bm rpi-panel-attiny-regulator panel-waveshare-dsi waveshare-panel-regulator panel-waveshare-dsi-v2 goodix_ts${@'\n'}options syna_drm hdmi_preferred_mode=1920x1080"
 module_conf_pvrsrvkm = "softdep pvrsrvkm pre: syna_drm"
 
 module_conf_vpu = "softdep vpu pre: berlin_bm"
