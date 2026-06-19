@@ -31,11 +31,13 @@ PACKAGES =+ "\
     gstreamer1.0-plugins-syna-compositor \
     gstreamer1.0-plugins-syna-synap \
     gstreamer1.0-plugins-syna-ai \
+    gstreamer1.0-plugins-syna-synaoverlay \
 "
 
 FILES:gstreamer1.0-plugins-syna-videoconvertscale = "${libdir}/gstreamer-1.0/libgstsynavideoconvertscale.so"
 FILES:gstreamer1.0-plugins-syna-compositor        = "${libdir}/gstreamer-1.0/libgstsynacompositor.so"
 FILES:gstreamer1.0-plugins-syna-synap             = "${libdir}/gstreamer-1.0/libgstsynap.so"
+FILES:gstreamer1.0-plugins-syna-synaoverlay       = "${libdir}/gstreamer-1.0/libgstsynaoverlay.so"
 
 FILES:gstreamer1.0-plugins-syna-ai = " \
     ${datadir}/gst-ai \

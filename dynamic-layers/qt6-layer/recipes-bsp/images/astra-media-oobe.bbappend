@@ -18,6 +18,7 @@ IMAGE_INSTALL:append:platypus = " \
 
 IMAGE_INSTALL:append:sl2619 = " \
     synasdk-torq-demo \
+    synasdk-synaoverlay-test \
 "
 
 IMAGE_INSTALL:append:sl2615 = " \

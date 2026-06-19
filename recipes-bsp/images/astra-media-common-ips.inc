@@ -41,6 +41,7 @@ SYNA_GST_PLUGINS = "\
     gstreamer1.0-plugins-syna-compositor \
     gstreamer1.0-plugins-syna-synap \
     gstreamer1.0-plugins-syna-ai \
+    gstreamer1.0-plugins-syna-synaoverlay \
 "
 PACKAGES =+ "${SYNA_GST_PLUGINS} ${PN}-dev ${PN}-dbg"
 
@@ -53,6 +54,7 @@ GPU_RELATED_PACKAGES = " \
     ${GPU_GST_PACKAGES} \
     gstreamer1.0-plugins-syna-videoconvertscale \
     gstreamer1.0-plugins-syna-compositor \
+    gstreamer1.0-plugins-syna-synaoverlay \
     gstreamer1.0-plugins-syna-ai \
     gstreamer1.0-plugins-syna-synadeint2x \
 "
