@@ -6,9 +6,6 @@ Subject: [PATCH] genx warm boot support
 Change-Id: I6834615f75538b1d048669d3bde71ffa5796fcf3
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
 Reviewed-on: http://10.135.9.200:8080/4445
----
- bl31/aarch64/bl31_entrypoint.S | 7 +++++++
- 1 file changed, 7 insertions(+)
 
 diff --git a/bl31/aarch64/bl31_entrypoint.S b/bl31/aarch64/bl31_entrypoint.S
 index b0c46dc..8e2c35f 100644
@@ -28,9 +25,6 @@ index b0c46dc..8e2c35f 100644
  	/* ---------------------------------------------------------------
  	 * Stash the previous bootloader arguments x0 - x3 for later use.
  	 * ---------------------------------------------------------------
--- 
-2.7.4
-
 
 From e5f90dc3f8ddee2cdabbb9f45031e4614d425a08 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -39,196 +33,6 @@ Subject: [PATCH] plat: syna: add dolphin, platypus and myna2 support
 
 Change-Id: If24e7e822ef930e9338430aae4b22064d93910aa
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/aarch64/berlin_helpers.S   |  186 +
- plat/syna/berlin/common/berlin_bl31_setup.c        |  402 +
- plat/syna/berlin/common/berlin_common.mk           |   47 +
- plat/syna/berlin/common/berlin_pm.c                |  539 ++
- plat/syna/berlin/common/berlin_sip_svc.c           |   85 +
- plat/syna/berlin/common/berlin_stack_protector.c   |   25 +
- plat/syna/berlin/common/berlin_topology.c          |   63 +
- plat/syna/berlin/common/drivers/bcm/bcm.c          |  300 +
- plat/syna/berlin/common/drivers/bcm/bcm_hal.c      |  141 +
- plat/syna/berlin/common/drivers/bcm/bcm_hal.h      |  101 +
- plat/syna/berlin/common/drivers/bcm/bcm_reg.h      |   60 +
- .../common/drivers/console/aarch64/console.S       |   89 +
- .../drivers/secure_register/secure_register.c      |   48 +
- plat/syna/berlin/common/drivers/sm/sm.c            |  166 +
- plat/syna/berlin/common/drivers/tos/tz.c           |  183 +
- .../syna/berlin/common/drivers/tos/tz_boot_param.c |   45 +
- plat/syna/berlin/common/drivers/watchdog/wdt.c     |   98 +
- plat/syna/berlin/common/gicv2_ext.c                |  120 +
- plat/syna/berlin/include/berlin_private.h          |   47 +
- plat/syna/berlin/include/berlin_sip_svc.h          |   23 +
- plat/syna/berlin/include/drivers/bcm.h             |  101 +
- plat/syna/berlin/include/drivers/clock.h           |   24 +
- plat/syna/berlin/include/drivers/crypto.h          |   99 +
- plat/syna/berlin/include/drivers/mc.h              |   18 +
- plat/syna/berlin/include/drivers/rf.h              |   52 +
- plat/syna/berlin/include/drivers/secure_register.h |   57 +
- plat/syna/berlin/include/drivers/sm.h              |   21 +
- plat/syna/berlin/include/drivers/tz.h              |   13 +
- plat/syna/berlin/include/drivers/tz_boot_param.h   |   93 +
- plat/syna/berlin/include/drivers/tz_perm.h         |   90 +
- plat/syna/berlin/include/drivers/wdt.h             |   10 +
- plat/syna/berlin/include/gicv2_ext.h               |   26 +
- plat/syna/berlin/include/plat_macros.S             |   60 +
- plat/syna/berlin/include/platform_def.h            |  119 +
- .../berlin/include/soc/dolphin/Galois_memmap.h     | 2186 +++++
- plat/syna/berlin/include/soc/dolphin/SysMgr.h      | 8534 ++++++++++++++++++++
- plat/syna/berlin/include/soc/dolphin/avpll_regs.h  |  100 +
- plat/syna/berlin/include/soc/dolphin/berlin_def.h  |  108 +
- plat/syna/berlin/include/soc/dolphin/clock_regs.h  |   32 +
- plat/syna/berlin/include/soc/dolphin/cpu_wrp.h     | 7559 +++++++++++++++++
- plat/syna/berlin/include/soc/dolphin/ctypes.h      |  126 +
- plat/syna/berlin/include/soc/dolphin/mc6_regs.h    |  218 +
- .../include/soc/dolphin/secure_register_setting.h  |   45 +
- plat/syna/berlin/include/soc/myna2/Galois_memmap.h |  666 ++
- plat/syna/berlin/include/soc/myna2/avpll_regs.h    |  100 +
- plat/syna/berlin/include/soc/myna2/berlin_def.h    |  134 +
- plat/syna/berlin/include/soc/myna2/clock_regs.h    |   27 +
- plat/syna/berlin/include/soc/myna2/cpu_wrp.h       | 7189 +++++++++++++++++
- plat/syna/berlin/include/soc/myna2/ctypes.h        |  126 +
- .../include/soc/myna2/secure_register_setting.h    |   47 +
- .../berlin/include/soc/platypus/Galois_memmap.h    | 2285 ++++++
- plat/syna/berlin/include/soc/platypus/SysMgr.h     | 8359 +++++++++++++++++++
- plat/syna/berlin/include/soc/platypus/avpll_regs.h |  100 +
- plat/syna/berlin/include/soc/platypus/berlin_def.h |  124 +
- plat/syna/berlin/include/soc/platypus/clock_regs.h |   27 +
- plat/syna/berlin/include/soc/platypus/cpu_wrp.h    | 7186 ++++++++++++++++
- plat/syna/berlin/include/soc/platypus/ctypes.h     |  126 +
- plat/syna/berlin/include/soc/platypus/mc6_regs.h   |  218 +
- .../include/soc/platypus/secure_register_setting.h |   47 +
- plat/syna/berlin/platform.mk                       |   40 +
- plat/syna/berlin/soc/dolphin/berlin_soc.mk         |   13 +
- plat/syna/berlin/soc/dolphin/clock.c               |  207 +
- plat/syna/berlin/soc/dolphin/mc.c                  |  169 +
- plat/syna/berlin/soc/dolphin/plat_pm.c             |  237 +
- plat/syna/berlin/soc/dolphin/plat_setup.c          |   24 +
- plat/syna/berlin/soc/dolphin/suspend.S             |   21 +
- plat/syna/berlin/soc/dolphin/suspend.c             |  100 +
- plat/syna/berlin/soc/myna2/berlin_soc.mk           |   22 +
- plat/syna/berlin/soc/myna2/clock.c                 |   93 +
- plat/syna/berlin/soc/myna2/mc.c                    |  204 +
- plat/syna/berlin/soc/myna2/plat_pm.c               |  406 +
- plat/syna/berlin/soc/myna2/plat_setup.c            |   24 +
- plat/syna/berlin/soc/myna2/suspend.S               |   21 +
- plat/syna/berlin/soc/myna2/suspend.c               |  171 +
- plat/syna/berlin/soc/platypus/berlin_soc.mk        |   21 +
- plat/syna/berlin/soc/platypus/clock.c              |  211 +
- plat/syna/berlin/soc/platypus/mc.c                 |  120 +
- plat/syna/berlin/soc/platypus/plat_pm.c            |  420 +
- plat/syna/berlin/soc/platypus/plat_setup.c         |   24 +
- plat/syna/berlin/soc/platypus/suspend.S            |   21 +
- plat/syna/berlin/soc/platypus/suspend.c            |  142 +
- plat/syna/berlin/suspend/avpll.c                   |  185 +
- plat/syna/berlin/suspend/avpll.h                   |   13 +
- plat/syna/berlin/suspend/berlin_suspend.mk         |  149 +
- plat/syna/berlin/suspend/clock.c                   |  124 +
- plat/syna/berlin/suspend/clock.h                   |   21 +
- plat/syna/berlin/suspend/mc6.c                     |  232 +
- plat/syna/berlin/suspend/mc6.h                     |   18 +
- plat/syna/berlin/suspend/mem4.c                    |   42 +
- plat/syna/berlin/suspend/mem4.h                    |    8 +
- plat/syna/berlin/suspend/sha256.c                  |  259 +
- plat/syna/berlin/suspend/sha256_ce.S               |  156 +
- plat/syna/berlin/suspend/suspend.ld.S              |   83 +
- plat/syna/berlin/suspend/suspend_entrypoint.S      |   67 +
- 94 files changed, 53288 insertions(+)
- create mode 100644 plat/syna/berlin/common/aarch64/berlin_helpers.S
- create mode 100644 plat/syna/berlin/common/berlin_bl31_setup.c
- create mode 100644 plat/syna/berlin/common/berlin_common.mk
- create mode 100644 plat/syna/berlin/common/berlin_pm.c
- create mode 100644 plat/syna/berlin/common/berlin_sip_svc.c
- create mode 100644 plat/syna/berlin/common/berlin_stack_protector.c
- create mode 100644 plat/syna/berlin/common/berlin_topology.c
- create mode 100644 plat/syna/berlin/common/drivers/bcm/bcm.c
- create mode 100644 plat/syna/berlin/common/drivers/bcm/bcm_hal.c
- create mode 100644 plat/syna/berlin/common/drivers/bcm/bcm_hal.h
- create mode 100644 plat/syna/berlin/common/drivers/bcm/bcm_reg.h
- create mode 100644 plat/syna/berlin/common/drivers/console/aarch64/console.S
- create mode 100644 plat/syna/berlin/common/drivers/secure_register/secure_register.c
- create mode 100644 plat/syna/berlin/common/drivers/sm/sm.c
- create mode 100644 plat/syna/berlin/common/drivers/tos/tz.c
- create mode 100644 plat/syna/berlin/common/drivers/tos/tz_boot_param.c
- create mode 100644 plat/syna/berlin/common/drivers/watchdog/wdt.c
- create mode 100644 plat/syna/berlin/common/gicv2_ext.c
- create mode 100644 plat/syna/berlin/include/berlin_private.h
- create mode 100644 plat/syna/berlin/include/berlin_sip_svc.h
- create mode 100644 plat/syna/berlin/include/drivers/bcm.h
- create mode 100644 plat/syna/berlin/include/drivers/clock.h
- create mode 100644 plat/syna/berlin/include/drivers/crypto.h
- create mode 100644 plat/syna/berlin/include/drivers/mc.h
- create mode 100644 plat/syna/berlin/include/drivers/rf.h
- create mode 100644 plat/syna/berlin/include/drivers/secure_register.h
- create mode 100644 plat/syna/berlin/include/drivers/sm.h
- create mode 100644 plat/syna/berlin/include/drivers/tz.h
- create mode 100644 plat/syna/berlin/include/drivers/tz_boot_param.h
- create mode 100644 plat/syna/berlin/include/drivers/tz_perm.h
- create mode 100644 plat/syna/berlin/include/drivers/wdt.h
- create mode 100644 plat/syna/berlin/include/gicv2_ext.h
- create mode 100644 plat/syna/berlin/include/plat_macros.S
- create mode 100644 plat/syna/berlin/include/platform_def.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/Galois_memmap.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/SysMgr.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/avpll_regs.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/berlin_def.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/clock_regs.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/cpu_wrp.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/ctypes.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/mc6_regs.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/secure_register_setting.h
- create mode 100644 plat/syna/berlin/include/soc/myna2/Galois_memmap.h
- create mode 100644 plat/syna/berlin/include/soc/myna2/avpll_regs.h
- create mode 100644 plat/syna/berlin/include/soc/myna2/berlin_def.h
- create mode 100644 plat/syna/berlin/include/soc/myna2/clock_regs.h
- create mode 100644 plat/syna/berlin/include/soc/myna2/cpu_wrp.h
- create mode 100644 plat/syna/berlin/include/soc/myna2/ctypes.h
- create mode 100644 plat/syna/berlin/include/soc/myna2/secure_register_setting.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/Galois_memmap.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/SysMgr.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/avpll_regs.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/berlin_def.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/clock_regs.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/cpu_wrp.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/ctypes.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/mc6_regs.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/secure_register_setting.h
- create mode 100644 plat/syna/berlin/platform.mk
- create mode 100644 plat/syna/berlin/soc/dolphin/berlin_soc.mk
- create mode 100644 plat/syna/berlin/soc/dolphin/clock.c
- create mode 100644 plat/syna/berlin/soc/dolphin/mc.c
- create mode 100644 plat/syna/berlin/soc/dolphin/plat_pm.c
- create mode 100644 plat/syna/berlin/soc/dolphin/plat_setup.c
- create mode 100644 plat/syna/berlin/soc/dolphin/suspend.S
- create mode 100644 plat/syna/berlin/soc/dolphin/suspend.c
- create mode 100644 plat/syna/berlin/soc/myna2/berlin_soc.mk
- create mode 100644 plat/syna/berlin/soc/myna2/clock.c
- create mode 100644 plat/syna/berlin/soc/myna2/mc.c
- create mode 100644 plat/syna/berlin/soc/myna2/plat_pm.c
- create mode 100644 plat/syna/berlin/soc/myna2/plat_setup.c
- create mode 100644 plat/syna/berlin/soc/myna2/suspend.S
- create mode 100644 plat/syna/berlin/soc/myna2/suspend.c
- create mode 100644 plat/syna/berlin/soc/platypus/berlin_soc.mk
- create mode 100644 plat/syna/berlin/soc/platypus/clock.c
- create mode 100644 plat/syna/berlin/soc/platypus/mc.c
- create mode 100644 plat/syna/berlin/soc/platypus/plat_pm.c
- create mode 100644 plat/syna/berlin/soc/platypus/plat_setup.c
- create mode 100644 plat/syna/berlin/soc/platypus/suspend.S
- create mode 100644 plat/syna/berlin/soc/platypus/suspend.c
- create mode 100644 plat/syna/berlin/suspend/avpll.c
- create mode 100644 plat/syna/berlin/suspend/avpll.h
- create mode 100644 plat/syna/berlin/suspend/berlin_suspend.mk
- create mode 100644 plat/syna/berlin/suspend/clock.c
- create mode 100644 plat/syna/berlin/suspend/clock.h
- create mode 100644 plat/syna/berlin/suspend/mc6.c
- create mode 100644 plat/syna/berlin/suspend/mc6.h
- create mode 100644 plat/syna/berlin/suspend/mem4.c
- create mode 100644 plat/syna/berlin/suspend/mem4.h
- create mode 100644 plat/syna/berlin/suspend/sha256.c
- create mode 100644 plat/syna/berlin/suspend/sha256_ce.S
- create mode 100644 plat/syna/berlin/suspend/suspend.ld.S
- create mode 100644 plat/syna/berlin/suspend/suspend_entrypoint.S
 
 diff --git a/plat/syna/berlin/common/aarch64/berlin_helpers.S b/plat/syna/berlin/common/aarch64/berlin_helpers.S
 new file mode 100644
@@ -54082,9 +53886,6 @@ index 0000000..59f6e2d
 +func plat_panic_handler
 +	ret
 +endfunc plat_panic_handler
--- 
-2.7.4
-
 
 From 54b3f6a487a56253fac9de7a54a5333248d8e800 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -54095,9 +53896,6 @@ Change-Id: I068228978045af0baa3f83eba6b7ea6dc209fc88
 Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
 Reviewed-on: http://10.135.9.200:8080/4473
 Reviewed-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- services/spd/opteed/opteed_pm.c | 7 +++++++
- 1 file changed, 7 insertions(+)
 
 diff --git a/services/spd/opteed/opteed_pm.c b/services/spd/opteed/opteed_pm.c
 index 719eeb7..f1c5a83 100644
@@ -54124,9 +53922,6 @@ index 719eeb7..f1c5a83 100644
  	assert(optee_vector_table);
  	assert(get_optee_pstate(optee_ctx->state) == OPTEE_PSTATE_SUSPEND);
  
--- 
-2.7.4
-
 
 From da26157f1cea6d296442563474f9a4e8fe3d80d1 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -54134,17 +53929,6 @@ Date: Tue, 3 Dec 2024 16:38:11 +0800
 Subject: [PATCH] myna2: add pvd support and adjust voltage in suspend/resume
 
 Change-Id: I5a7fc5d470a0cba6671fed5a35040d2c204144ae
----
- plat/syna/berlin/soc/myna2/berlin_soc.mk      |   2 +
- plat/syna/berlin/soc/myna2/i2c.c              | 489 ++++++++++++++++++++++++++
- plat/syna/berlin/soc/myna2/i2c.h              | 102 ++++++
- plat/syna/berlin/soc/myna2/i2c_pvd_tps62868.c | 198 +++++++++++
- plat/syna/berlin/soc/myna2/suspend.c          |  13 +-
- plat/syna/berlin/suspend/berlin_suspend.mk    |   8 +-
- 6 files changed, 810 insertions(+), 2 deletions(-)
- create mode 100644 plat/syna/berlin/soc/myna2/i2c.c
- create mode 100644 plat/syna/berlin/soc/myna2/i2c.h
- create mode 100644 plat/syna/berlin/soc/myna2/i2c_pvd_tps62868.c
 
 diff --git a/plat/syna/berlin/soc/myna2/berlin_soc.mk b/plat/syna/berlin/soc/myna2/berlin_soc.mk
 index 6655700..54949c6 100644
@@ -55047,9 +54831,6 @@ index 61a73d1..b86956d 100644
  
  define CRULES
  $(1): $(3)
--- 
-2.7.4
-
 
 From de687bb0ac3003a354e8850a24d201f2c9a9379a Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -55060,11 +54841,6 @@ Jira: https://synacsm.atlassian.net/browse/CSMSA-85
 
 Change-Id: Id33ff6f661f3a11ba110a869313edd7b98db7e24
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/soc/dolphin/plat_pm.c  | 4 ++--
- plat/syna/berlin/soc/myna2/plat_pm.c    | 4 ++--
- plat/syna/berlin/soc/platypus/plat_pm.c | 4 ++--
- 3 files changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/plat/syna/berlin/soc/dolphin/plat_pm.c b/plat/syna/berlin/soc/dolphin/plat_pm.c
 index b580003..89d6d5b 100644
@@ -55132,9 +54908,6 @@ index 88a72d5..660e83e 100644
  }
  
  void berlin_get_sys_suspend_power_state(psci_power_state_t *req_state)
--- 
-2.7.4
-
 
 From a125d5600c18fb9ab087e33d5bdd8d08b65bfbae Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -55143,39 +54916,6 @@ Subject: [PATCH] plat: syna: refine code structure
 
 Change-Id: I273c7b11146187c937af96050d8b221f42731fc2
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/aarch64/berlin_helpers.S   |   6 +
- plat/syna/berlin/common/berlin_bl31_setup.c        |  11 +-
- plat/syna/berlin/common/berlin_common.mk           |  36 +++-
- plat/syna/berlin/common/berlin_pm.c                |   8 +-
- plat/syna/berlin/common/berlin_sip_svc.c           |   2 +
- plat/syna/berlin/common/berlin_stack_protector.c   |  20 +-
- .../common/drivers/appcrypto/appcrypto_lock.c      |  79 ++++++++
- .../common/drivers/appcrypto/appcrypto_rng.c       |  81 +++++++++
- .../berlin/common/drivers/appcrypto/bcm_drv_rng.c  |  85 +++++++++
- plat/syna/berlin/common/drivers/mailbox/syna_ipc.c |  85 +++++++++
- plat/syna/berlin/common/drivers/mailbox/syna_ipc.h |  17 ++
- .../common/drivers/mailbox/synaprot_mailbox.c      | 197 ++++++++++++++++++++
- .../common/drivers/mailbox/synaprot_mailbox.h      |  90 +++++++++
- .../common/drivers/mailbox/synaprot_mailbox_tx.c   | 202 +++++++++++++++++++++
- plat/syna/berlin/common/drivers/tos/tz.c           |   4 +-
- plat/syna/berlin/include/berlin_private.h          |   2 +-
- plat/syna/berlin/platform.mk                       |   2 +-
- plat/syna/berlin/soc/dolphin/plat_pm.c             |   2 +-
- plat/syna/berlin/soc/myna2/plat_pm.c               |   2 +-
- plat/syna/berlin/soc/platypus/plat_pm.c            |   2 +-
- plat/syna/berlin/suspend/berlin_suspend.mk         |  20 +-
- plat/syna/berlin/suspend/clock.c                   | 124 -------------
- 22 files changed, 926 insertions(+), 151 deletions(-)
- create mode 100644 plat/syna/berlin/common/drivers/appcrypto/appcrypto_lock.c
- create mode 100644 plat/syna/berlin/common/drivers/appcrypto/appcrypto_rng.c
- create mode 100644 plat/syna/berlin/common/drivers/appcrypto/bcm_drv_rng.c
- create mode 100644 plat/syna/berlin/common/drivers/mailbox/syna_ipc.c
- create mode 100644 plat/syna/berlin/common/drivers/mailbox/syna_ipc.h
- create mode 100644 plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
- create mode 100755 plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h
- create mode 100755 plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox_tx.c
- delete mode 100644 plat/syna/berlin/suspend/clock.c
 
 diff --git a/plat/syna/berlin/common/aarch64/berlin_helpers.S b/plat/syna/berlin/common/aarch64/berlin_helpers.S
 index bf793fa..58016fa 100644
@@ -56284,14 +56024,14 @@ index 2851367..c6ba21d 100644
  #if defined(CONFIG_GENX)
  		bcm_kernel_genx_store_hash((void *)ddr_info.ddr_info_data.hash_value, i * HASH_LEN);
  #else
-@@ -167,6 +168,7 @@ static int tos_compute_ddr_sha(void *param)
+@@ -166,6 +167,7 @@ static int tos_compute_ddr_sha(void *param)
+ 
  		bcm_kernel_store_hash(&ddr_info, 0, param, header->size);
  #endif
- #endif
 +#endif
+ #endif
  	}
  	return 0;
- }
 diff --git a/plat/syna/berlin/include/berlin_private.h b/plat/syna/berlin/include/berlin_private.h
 index 2e093e3..8cfa61b 100644
 --- a/plat/syna/berlin/include/berlin_private.h
@@ -56526,9 +56266,6 @@ index e71c0a4..0000000
 -	pll_bypass_dis(&clock_config);
 -	avpll_resume(clock_config.avpll_power_base);
 -}
--- 
-2.7.4
-
 
 From 1a17b6e4a798841aecc5d137fdbea524e1635e7b Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -56537,68 +56274,6 @@ Subject: [PATCH] plat:syna: add klamath support
 
 Change-Id: Ibf0cbe3bde56ef0134b35e4c3a206e2d177f99ce
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_common.mk           |     2 +
- plat/syna/berlin/common/drivers/mailbox/sm_ipc.c   |    69 +
- plat/syna/berlin/common/drivers/mailbox/sm_ipc.h   |    22 +
- plat/syna/berlin/common/drivers/mailbox/syna_ipc.c |     2 +-
- plat/syna/berlin/include/platform_def.h            |     4 +-
- plat/syna/berlin/include/soc/klamath/berlin_def.h  |   119 +
- plat/syna/berlin/include/soc/klamath/cpu_wrp.h     |  4896 ++++
- plat/syna/berlin/include/soc/klamath/ctypes.h      |   126 +
- plat/syna/berlin/include/soc/klamath/global.h      | 23471 +++++++++++++++++++
- plat/syna/berlin/include/soc/klamath/ipc.h         |   949 +
- .../syna/berlin/include/soc/klamath/klamath_intr.h |   270 +
- .../berlin/include/soc/klamath/klamath_memmap.h    |   419 +
- plat/syna/berlin/include/soc/klamath/mc_wrap.h     |  4445 ++++
- .../soc/klamath/nexus_fw_include/mcu_cpu_ss.h      |  4042 ++++
- .../soc/klamath/nexus_fw_include/mcu_gbl_cfg.h     | 20496 ++++++++++++++++
- .../nexus_fw_include/nexus_app_crypto_regs.h       |   877 +
- .../soc/klamath/nexus_fw_include/nexus_intr.h      |   255 +
- .../nexus_fw_include/nexus_klamath_memmap.h        |   599 +
- .../soc/klamath/nexus_fw_include/nexus_memmap.h    |    16 +
- .../nexus_fw_include/nexus_otf_crypto_regs.h       |   327 +
- .../soc/klamath/nexus_fw_include/nexus_trng_regs.h |   326 +
- .../include/soc/klamath/secure_register_setting.h  |    13 +
- plat/syna/berlin/include/soc/klamath/soc.h         |  4892 ++++
- .../soc/klamath/synaprot_fw_include/mailbox.h      |   711 +
- plat/syna/berlin/soc/klamath/berlin_soc.mk         |    31 +
- plat/syna/berlin/soc/klamath/clock.c               |    94 +
- plat/syna/berlin/soc/klamath/mc.c                  |   202 +
- plat/syna/berlin/soc/klamath/plat_pm.c             |   301 +
- plat/syna/berlin/soc/klamath/plat_setup.c          |    24 +
- plat/syna/berlin/soc/klamath/suspend.S             |    21 +
- plat/syna/berlin/soc/klamath/suspend.c             |   179 +
- plat/syna/berlin/suspend/berlin_suspend.mk         |     8 +
- 32 files changed, 68205 insertions(+), 3 deletions(-)
- create mode 100644 plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
- create mode 100644 plat/syna/berlin/common/drivers/mailbox/sm_ipc.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/berlin_def.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/cpu_wrp.h
- create mode 100755 plat/syna/berlin/include/soc/klamath/ctypes.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/global.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/ipc.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/klamath_intr.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/klamath_memmap.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/mc_wrap.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/nexus_fw_include/mcu_cpu_ss.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/nexus_fw_include/mcu_gbl_cfg.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/nexus_fw_include/nexus_app_crypto_regs.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/nexus_fw_include/nexus_intr.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/nexus_fw_include/nexus_klamath_memmap.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/nexus_fw_include/nexus_memmap.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/nexus_fw_include/nexus_otf_crypto_regs.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/nexus_fw_include/nexus_trng_regs.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/secure_register_setting.h
- create mode 100644 plat/syna/berlin/include/soc/klamath/soc.h
- create mode 100755 plat/syna/berlin/include/soc/klamath/synaprot_fw_include/mailbox.h
- create mode 100644 plat/syna/berlin/soc/klamath/berlin_soc.mk
- create mode 100644 plat/syna/berlin/soc/klamath/clock.c
- create mode 100644 plat/syna/berlin/soc/klamath/mc.c
- create mode 100644 plat/syna/berlin/soc/klamath/plat_pm.c
- create mode 100644 plat/syna/berlin/soc/klamath/plat_setup.c
- create mode 100644 plat/syna/berlin/soc/klamath/suspend.S
- create mode 100644 plat/syna/berlin/soc/klamath/suspend.c
 
 diff --git a/plat/syna/berlin/common/berlin_common.mk b/plat/syna/berlin/common/berlin_common.mk
 index 9aeb30a..57f165a 100644
@@ -125021,9 +124696,6 @@ index 070735a..f6d4cb5 100644
  ifeq (${ENABLE_PVD}, 1)
  MODULE_SOURCES      += ${SOC_DIR}/i2c.c			\
                         ${SOC_DIR}/i2c_pvd_tps62868.c
--- 
-2.7.4
-
 
 From 78c8962fb85acf7749a84a9ebcdbf1862067a6b9 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -125032,9 +124704,6 @@ Subject: [PATCH] plat: syna: fix build error with gcc13
 
 Change-Id: I5a31b2faaa15c05f75109f792e925b3db08125c6
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/suspend/berlin_suspend.mk | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/suspend/berlin_suspend.mk b/plat/syna/berlin/suspend/berlin_suspend.mk
 index f6d4cb5..c7ac7a2 100644
@@ -125049,9 +124718,6 @@ index f6d4cb5..c7ac7a2 100644
  define CRULES
  $(1): $(3)
  	@echo "  CC      $$<"
--- 
-2.7.4
-
 
 From 39dd2d6e4699ef6f3665556fd9b0bfddb3c1a558 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -125060,13 +124726,6 @@ Subject: [PATCH] klamath: add warm boot flag
 
 Change-Id: Ied2b1be27500e5a7068b2f9cc479d32e70f140c2
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- bl31/aarch64/bl31_entrypoint.S                    |  6 ++++
- plat/syna/berlin/common/berlin_bl31_setup.c       |  2 +-
- plat/syna/berlin/include/berlin_private.h         |  2 ++
- plat/syna/berlin/include/soc/klamath/berlin_def.h |  4 ---
- plat/syna/berlin/soc/klamath/plat_pm.c            | 43 +++++++----------------
- 5 files changed, 21 insertions(+), 36 deletions(-)
 
 diff --git a/bl31/aarch64/bl31_entrypoint.S b/bl31/aarch64/bl31_entrypoint.S
 index 8e2c35f..c7eb9fc 100644
@@ -125204,9 +124863,6 @@ index 1333be3..37a1323 100644
  }
  
  void berlin_get_sys_suspend_power_state(psci_power_state_t *req_state)
--- 
-2.7.4
-
 
 From 883218ed416a827cc1a7eb9a8fb36eabeddbf5e8 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -125215,9 +124871,6 @@ Subject: [PATCH] ipc: set port1 as to communicate wit M52
 
 Change-Id: I49df4a7c154fe550baa32521aadd596aa0701cf8
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/drivers/mailbox/syna_ipc.c | 31 +++++++++++++++-------
- 1 file changed, 22 insertions(+), 9 deletions(-)
 
 diff --git a/plat/syna/berlin/common/drivers/mailbox/syna_ipc.c b/plat/syna/berlin/common/drivers/mailbox/syna_ipc.c
 index 236f60b..ad4e39e 100644
@@ -125312,9 +124965,6 @@ index 236f60b..ad4e39e 100644
  
      if (p_msg)
      {
--- 
-2.7.4
-
 
 From 2c2160574595149a412ecf72362a0e0905678a6a Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -125323,16 +124973,6 @@ Subject: [PATCH] klamath: refine synaprot mailbox driver
 
 Change-Id: I489831280e4f5731331924a0c4b47bba9cf00934
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- .../common/drivers/appcrypto/appcrypto_lock.c      |  12 +-
- .../berlin/common/drivers/appcrypto/bcm_drv_rng.c  |  85 ---------
- .../common/drivers/mailbox/synaprot_mailbox.c      | 133 ++++++++++----
- .../common/drivers/mailbox/synaprot_mailbox.h      |  16 +-
- .../common/drivers/mailbox/synaprot_mailbox_tx.c   | 202 ---------------------
- plat/syna/berlin/soc/klamath/plat_pm.c             |   2 +
- 6 files changed, 119 insertions(+), 331 deletions(-)
- delete mode 100644 plat/syna/berlin/common/drivers/appcrypto/bcm_drv_rng.c
- delete mode 100755 plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox_tx.c
 
 diff --git a/plat/syna/berlin/common/drivers/appcrypto/appcrypto_lock.c b/plat/syna/berlin/common/drivers/appcrypto/appcrypto_lock.c
 index fd939f0..8a14d67 100644
@@ -125699,17 +125339,17 @@ index 7103b3a..222272e 100755
  	HOST2SYNA_CMD_WIRELESS		= 0x3,
  }HOST2SYNA_CMD_CATGORY;
  
-@@ -37,6 +37,10 @@ typedef enum {
+@@ -36,6 +36,10 @@ typedef enum {
+ 	SP_PI_QUERY_BOOT_CONTEXT	= 0x0,
  }HOST2SYNA_SM_CMD_ID;
  
- typedef enum {
++typedef enum {
 +	SP_PI_SECURE_SEPARATION_DONE	= 0x1,
 +}HOST2SYNA_KLAMATH_CMD_ID;
 +
-+typedef enum {
+ typedef enum {
  	SP_PI_OTP_READ_WIRELESS		= 0x0,
  	SP_PI_OTP_WRITE_WIRELESS	= 0x1,
- }HOST2SYNA_WIRELESS_CMD_ID;
 @@ -49,6 +53,7 @@ typedef enum {
   *	  [15:8]:	CMD_CATGORY
   *	  [7:0]:	Command ID
@@ -125962,9 +125602,6 @@ index 37a1323..62f639e 100644
  }
  
  void berlin_suspend_to_sram(unsigned long sec_entrypoint,
--- 
-2.7.4
-
 
 From 972c6fca32f41af2cc59c7b0d3cf88c409e52e87 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -125972,13 +125609,6 @@ Date: Mon, 7 Apr 2025 11:27:25 +0800
 Subject: [PATCH] berlin: sip: add service of read public OTP
 
 Change-Id: I7018039bca178340e0f7ac1a42c5c3361921692e
----
- plat/syna/berlin/common/berlin_sip_svc.c      | 13 +++++++
- plat/syna/berlin/common/drivers/bcm/bcm.c     | 55 +++++++++++++++++++++++++++
- plat/syna/berlin/common/drivers/bcm/bcm_hal.c |  4 +-
- plat/syna/berlin/include/berlin_sip_svc.h     |  9 +++++
- plat/syna/berlin/include/drivers/bcm.h        |  3 ++
- 5 files changed, 81 insertions(+), 3 deletions(-)
 
 diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
 index 16229a3..829a4bd 100644
@@ -126125,9 +125755,6 @@ index 9522f07..92c9d80 100644
 +int bcm_otp_write_otp(uint32_t index, uint32_t data, uint32_t mask);
 +int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size);
  #endif
--- 
-2.7.4
-
 
 From fe3c213a9d362f739cd20164131f433e67155dfa Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -126136,28 +125763,25 @@ Subject: [PATCH] klamath: set boot mode before disable mmu
 
 Change-Id: Idea56a1a4984b577ea10b57c28f486e3d34aa37d
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/soc/klamath/plat_pm.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/plat/syna/berlin/soc/klamath/plat_pm.c b/plat/syna/berlin/soc/klamath/plat_pm.c
 index 62f639e..b833149 100644
 --- a/plat/syna/berlin/soc/klamath/plat_pm.c
 +++ b/plat/syna/berlin/soc/klamath/plat_pm.c
-@@ -209,13 +209,6 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
+@@ -208,13 +208,6 @@ void berlin_soc_init(void)
+ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
  				unsigned int power_state)
  {
- 	/*
+-	/*
 -	 * disable the mmu before jump to sram entry, or, it will lead
 -	 * to a permission fault when execute in SRAM, because of WXN and XN
 -	 * bit effect.
 -	 */
 -	disable_mmu_el3();
 -	arm_set_PWRCTLR(0);
--	/*
+ 	/*
  	 * Mark warm boot for BL31: store a flag in retention memory so that
  	 * bl31_entrypoint can detect warm resume and jump to bl31_warm_entrypoint.
- 	 * Do this before disabling MMU and perform cache maintenance afterwards
 @@ -223,6 +216,13 @@ void berlin_suspend_to_sram(unsigned long sec_entrypoint,
  	 */
  	boot_mode = WARM_BOOT;
@@ -126172,9 +125796,6 @@ index 62f639e..b833149 100644
  	/* Flush all caches. */
  	dcsw_op_all(DCCISW);
  	sm_system_warmdown(power_state);
--- 
-2.7.4
-
 
 From 7147a88f927dcbcccc12d3e042451f8dd7cc4564 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -126183,9 +125804,6 @@ Subject: [PATCH] plat: syna: set NS_TIMER_SWITCH=0
 
 Change-Id: Ia11439ff6e0f90389d9370c83bafde306cea87a5
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/platform.mk | 1 +
- 1 file changed, 1 insertion(+)
 
 diff --git a/plat/syna/berlin/platform.mk b/plat/syna/berlin/platform.mk
 index a67c463..6404458 100644
@@ -126199,9 +125817,6 @@ index a67c463..6404458 100644
  
  WORKAROUND_CVE_2017_5715 := 1
  SPMD_SPM_AT_SEL2 :=0
--- 
-2.7.4
-
 
 From 07c61eb7c0a2e10f8d6e080b1b7dfa4f8946d5bb Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -126210,9 +125825,6 @@ Subject: [PATCH] klamath: add secure separation PI call
 
 Change-Id: I07dc21eec3d4898b1825b681e775be798554e79f
 Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
----
- plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
 
 diff --git a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
 index 2ffbeb0..9941df0 100644
@@ -126243,9 +125855,6 @@ index 2ffbeb0..9941df0 100644
 +
  	INFO("mailbox init done.\n");
  }
--- 
-2.7.4
-
 
 From 1effd0d85f1ce81e04befeae3bbab72957ed12b1 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -126254,16 +125863,6 @@ Subject: [PATCH] syna: enable TRNG_SUPPORT
 
 Change-Id: I24e61243d579e6cff099ac22707f9c35565b8895
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_common.mk           |  3 ++
- plat/syna/berlin/common/berlin_trng.c              | 54 ++++++++++++++++++++++
- .../common/drivers/appcrypto/appcrypto_lock.h      | 14 ++++++
- .../common/drivers/appcrypto/appcrypto_rng.c       |  8 ++++
- plat/syna/berlin/common/drivers/bcm/bcm.c          | 11 ++++-
- plat/syna/berlin/platform.mk                       |  1 +
- 6 files changed, 90 insertions(+), 1 deletion(-)
- create mode 100644 plat/syna/berlin/common/berlin_trng.c
- create mode 100644 plat/syna/berlin/common/drivers/appcrypto/appcrypto_lock.h
 
 diff --git a/plat/syna/berlin/common/berlin_common.mk b/plat/syna/berlin/common/berlin_common.mk
 index 57f165a..7e08255 100644
@@ -126425,9 +126024,6 @@ index 6404458..2b87277 100644
  
  CRASH_REPORTING		:=	1
  $(eval $(call add_define,CRASH_REPORTING))
--- 
-2.7.4
-
 
 From e2c59f1b7985f35309b131f58f03f83e2e114601 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -126436,12 +126032,6 @@ Subject: [PATCH] klamath: set secondary CPU off when warmboot
 
 Change-Id: I0660c60a6ba98a6f646aee18d955756eb4252cfc
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- bl31/aarch64/bl31_entrypoint.S                 |  2 +-
- plat/syna/berlin/common/aarch64/berlin_setup.S | 22 ++++++++++++++++++++++
- plat/syna/berlin/common/berlin_common.mk       |  1 +
- 3 files changed, 24 insertions(+), 1 deletion(-)
- create mode 100644 plat/syna/berlin/common/aarch64/berlin_setup.S
 
 diff --git a/bl31/aarch64/bl31_entrypoint.S b/bl31/aarch64/bl31_entrypoint.S
 index c7eb9fc..56d80fb 100644
@@ -126496,9 +126086,6 @@ index 7e08255..fffa4a3 100644
  				${COMMON_DIR}/drivers/tos/tz_boot_param.c	\
  				${COMMON_DIR}/drivers/tos/tz.c			\
  				${COMMON_DIR}/drivers/secure_register/secure_register.c	\
--- 
-2.7.4
-
 
 From 8fc45f7dbf4c73ba3e7cdc9cb34bd57de79835a2 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -126507,9 +126094,6 @@ Subject: [PATCH] syna: disable TRNG_SUPPORT
 
 Change-Id: Ie10c17265339629f8f3e009723c7e343f376acb8
 Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
----
- plat/syna/berlin/platform.mk | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/platform.mk b/plat/syna/berlin/platform.mk
 index 2b87277..27ef920 100644
@@ -126524,9 +126108,6 @@ index 2b87277..27ef920 100644
  
  CRASH_REPORTING		:=	1
  $(eval $(call add_define,CRASH_REPORTING))
--- 
-2.7.4
-
 
 From 60089a02231a818e135db8959b5f5ba4e34a49ef Mon Sep 17 00:00:00 2001
 From: Darren Huang <darren.huang@synaptics.com>
@@ -126537,12 +126118,6 @@ JIRA: https://synaptics.atlassian.net/browse/VSSDK-36171
 
 Change-Id: I0b4b0f4d1f7f97566d6ab0a58d795c2d376ed480
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_sip_svc.c  |  5 +++++
- plat/syna/berlin/common/drivers/bcm/bcm.c | 20 ++++++++++++++++++++
- plat/syna/berlin/include/berlin_sip_svc.h |  4 ++++
- plat/syna/berlin/include/drivers/bcm.h    |  1 +
- 4 files changed, 30 insertions(+)
 
 diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
 index 829a4bd..ba3a0aa 100644
@@ -126622,9 +126197,6 @@ index 92c9d80..1b30e87 100644
  int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size);
 +int bcm_get_warmboot_cnt(uint64_t *pdata);
  #endif
--- 
-2.7.4
-
 
 From ff5d976dd6f17a640810290965a4b68754a75ed6 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -126633,9 +126205,6 @@ Subject: [PATCH] syna: fix a typo
 
 Change-Id: I6ec7a1975a8c26eecfb02a6e225d500c5cfa07ac
 Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
----
- plat/syna/berlin/common/drivers/bcm/bcm_reg.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/common/drivers/bcm/bcm_reg.h b/plat/syna/berlin/common/drivers/bcm/bcm_reg.h
 index cb6781d..c3b0a51 100644
@@ -126650,9 +126219,6 @@ index cb6781d..c3b0a51 100644
  #define __BCM_REG_H__
  
  // the command mailbox registers which appears in the Client's memory space
--- 
-2.7.4
-
 
 From 8df297f7478e9b39837f49b30e06ba868fcd98a1 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -126662,12 +126228,6 @@ Subject: [PATCH] Revert "syna: sip: add SYNA_SIP_SMC[32/64]_WARMBOOT_COUNT"
 This reverts commit 60089a02231a818e135db8959b5f5ba4e34a49ef.
 
 Change-Id: Ia2bb4de7b5f9888e307905078f4a5079b6454db2
----
- plat/syna/berlin/common/berlin_sip_svc.c  |  5 -----
- plat/syna/berlin/common/drivers/bcm/bcm.c | 20 --------------------
- plat/syna/berlin/include/berlin_sip_svc.h |  4 ----
- plat/syna/berlin/include/drivers/bcm.h    |  1 -
- 4 files changed, 30 deletions(-)
 
 diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
 index ba3a0aa..829a4bd 100644
@@ -126747,9 +126307,6 @@ index 1b30e87..92c9d80 100644
  int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size);
 -int bcm_get_warmboot_cnt(uint64_t *pdata);
  #endif
--- 
-2.7.4
-
 
 From 65d148c2000444e11e37c6c75e825a9ee213592b Mon Sep 17 00:00:00 2001
 From: Darren Huang <darren.huang@synaptics.com>
@@ -126758,12 +126315,6 @@ Subject: [PATCH] syna: sip: add SYNA_SIP_SMC[32/64]_SECURE_SRAM_ACCESS
 
 Change-Id: I0171cf6e1f1944efc6697fceff69ffdfa162ad40
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_sip_svc.c  |  7 +++++++
- plat/syna/berlin/common/drivers/bcm/bcm.c | 24 ++++++++++++++++++++++++
- plat/syna/berlin/include/berlin_sip_svc.h |  4 ++++
- plat/syna/berlin/include/drivers/bcm.h    |  1 +
- 4 files changed, 36 insertions(+)
 
 diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
 index 829a4bd..aa633ab 100644
@@ -126849,9 +126400,6 @@ index 92c9d80..97cb49c 100644
  int bcm_erom_read_public_otp(uint64_t otp_buff, uint64_t size);
 +int bcm_access_secure_sram(uint32_t type, uint32_t idx, uint64_t *pdata);
  #endif
--- 
-2.7.4
-
 
 From db2776479fdaed831292752de7515d50df6e12bd Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -126860,10 +126408,6 @@ Subject: [PATCH] dolphin/platypus: skip the uart initialisation
 
 Change-Id: Ibcece379a8cf24a67522f6ccd75a6c929331d747
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/include/soc/dolphin/berlin_def.h  | 2 +-
- plat/syna/berlin/include/soc/platypus/berlin_def.h | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/plat/syna/berlin/include/soc/dolphin/berlin_def.h b/plat/syna/berlin/include/soc/dolphin/berlin_def.h
 index 1345369..72356f2 100644
@@ -126891,9 +126435,6 @@ index ff5b990..c2e2833 100644
  #define BERLIN_UART_BAUDRATE		115200
  #endif
  /* GIC */
--- 
-2.7.4
-
 
 From 8b7b7c9f62c90863ae1728d5ba56a91ee6f40746 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -126906,24 +126447,6 @@ get PCI memory region from system
 
 Change-Id: I648068ea0bfea8d0696b6df9ce8589afb055f338
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_bl31_setup.c        |   3 +-
- plat/syna/berlin/common/berlin_sip_svc.c           |  12 +++
- .../common/drivers/secure_register/perif_reset.c   | 116 +++++++++++++++++++++
- .../syna/berlin/common/drivers/tos/tz_boot_param.c |  52 +++++++++
- plat/syna/berlin/include/berlin_sip_svc.h          |   3 +
- plat/syna/berlin/include/drivers/perif_reset.h     |  12 +++
- plat/syna/berlin/include/drivers/tz_boot_param.h   |  19 ++++
- plat/syna/berlin/include/soc/dolphin/berlin_def.h  |  14 +++
- .../berlin/include/soc/dolphin/perif_reset_id.h    |  24 +++++
- plat/syna/berlin/include/soc/platypus/berlin_def.h |  14 +++
- .../berlin/include/soc/platypus/perif_reset_id.h   |  23 ++++
- plat/syna/berlin/soc/platypus/berlin_soc.mk        |   1 +
- 12 files changed, 292 insertions(+), 1 deletion(-)
- create mode 100644 plat/syna/berlin/common/drivers/secure_register/perif_reset.c
- create mode 100644 plat/syna/berlin/include/drivers/perif_reset.h
- create mode 100644 plat/syna/berlin/include/soc/dolphin/perif_reset_id.h
- create mode 100644 plat/syna/berlin/include/soc/platypus/perif_reset_id.h
 
 diff --git a/plat/syna/berlin/common/berlin_bl31_setup.c b/plat/syna/berlin/common/berlin_bl31_setup.c
 index abde8e1..ee358b7 100644
@@ -127354,9 +126877,6 @@ index beadfae..d27c7f3 100644
  				${SOC_DIR}/suspend.S			\
  				${SOC_DIR}/plat_setup.c			\
  				${SOC_DIR}/plat_pm.c
--- 
-2.7.4
-
 
 From e47d02d58440e5ff73b2ca01a3e5bfb984437eb0 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127365,9 +126885,6 @@ Subject: [PATCH] plat: syna: fix klamath boot issue
 
 Change-Id: I3c9d9ff64cc7c91555b4186cbbdba849469e3810
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_bl31_setup.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/common/berlin_bl31_setup.c b/plat/syna/berlin/common/berlin_bl31_setup.c
 index ee358b7..70090a0 100644
@@ -127383,9 +126900,6 @@ index ee358b7..70090a0 100644
  
  	/*
  	 * save the secure boot param when cold boot for suspend/resume
--- 
-2.7.4
-
 
 From 3c3d511c6adb7c9acd60b9effd9dd51d915a5bce Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127394,9 +126908,6 @@ Subject: [PATCH] SIP: perif_reset: use PCIE region for PCIE setting
 
 Change-Id: I18f6918ebfc1f7011180e871acf99f475e7b00e6
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- .../berlin/common/drivers/secure_register/perif_reset.c   | 15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
 
 diff --git a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
 index f8db42b..7350f00 100644
@@ -127430,9 +126941,6 @@ index f8db42b..7350f00 100644
  	mmio_write_32(PCIE_LOWER_BOUNDARY_ADDR , mr->base);
  	mmio_write_32(PCIE_UPPER_BOUNDARY_ADDR, mr->base + mr->size);
  
--- 
-2.7.4
-
 
 From 1789009a227629b1193c144ab7535f45f807887c Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127441,9 +126949,6 @@ Subject: [PATCH] plat: syna: fix tos suspend hang issue
 
 Change-Id: Ifa0a9a034dd5a9511c7610139337147a0afb1500
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/drivers/tos/tz.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/plat/syna/berlin/common/drivers/tos/tz.c b/plat/syna/berlin/common/drivers/tos/tz.c
 index c6ba21d..3db7e51 100644
@@ -127471,9 +126976,6 @@ index c6ba21d..3db7e51 100644
  
  #if defined(BCM_CALCULATE_HASH) && defined(CFG_SYNA_BCM)
  		struct ddr_reg_info ddr_info[MAX_DDR_REG_NUM];
--- 
-2.7.4
-
 
 From 6a96717e41eda6b635bda23f7a7c33c4606929fb Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127482,9 +126984,6 @@ Subject: [PATCH] SIP: perif_reset: add bootloader and system1 for PCIE setting
 
 Change-Id: I878e486156926e013cec83a45d55989b21b4b1b4
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- .../common/drivers/secure_register/perif_reset.c   | 42 +++++++++++++++++-----
- 1 file changed, 34 insertions(+), 8 deletions(-)
 
 diff --git a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
 index 7350f00..c7e8cb9 100644
@@ -127548,9 +127047,6 @@ index 7350f00..c7e8cb9 100644
  
  	INFO("PCIE 0x%x:0x%x, 0x%x:0x%x\n",
  				PCIE_LOWER_BOUNDARY_ADDR, mmio_read_32(PCIE_LOWER_BOUNDARY_ADDR),
--- 
-2.7.4
-
 
 From 488873afaab6e7f9fd8833e76fff912e7a360235 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127559,9 +127055,6 @@ Subject: [PATCH] perif_reset: change system1 to system_1
 
 Change-Id: I9e64e0bd6c449bc634e5f9555cffcbf90dd5ff1f
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/drivers/secure_register/perif_reset.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/common/drivers/secure_register/perif_reset.c b/plat/syna/berlin/common/drivers/secure_register/perif_reset.c
 index c7e8cb9..df3e579 100644
@@ -127576,9 +127069,6 @@ index c7e8cb9..df3e579 100644
  
  static void set_pcie_axi_limit(void)
  {
--- 
-2.7.4
-
 
 From 859bfc7652d23681ce3ab3cb61a15065f252cbb2 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127590,14 +127080,6 @@ SYNA_SIP_SMC64_BCM_CMD 0xC2000003
 
 Change-Id: I17888554d568434c56f7161eb92041ec2ed61a1d
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_sip_svc.c           | 30 ++++++++++++++++
- plat/syna/berlin/common/drivers/bcm/bcm.c          | 41 ++++++++++++++++++++++
- .../common/drivers/mailbox/synaprot_mailbox.c      | 33 +++++++++++++++++
- .../common/drivers/mailbox/synaprot_mailbox.h      |  2 ++
- plat/syna/berlin/include/berlin_sip_svc.h          |  3 ++
- plat/syna/berlin/include/drivers/bcm.h             |  2 ++
- 6 files changed, 111 insertions(+)
 
 diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
 index 68bd432..0b46a2f 100644
@@ -127790,9 +127272,6 @@ index 97cb49c..472336f 100644
 +int bcm_cmd_handle(uint32_t cmd_id, uint32_t arg0, uint32_t arg1, uint32_t arg2,
 +			uint32_t arg3, uint32_t arg4 , uint32_t arg5);
  #endif
--- 
-2.7.4
-
 
 From e01017e99686c9e7ff3f347c0e8e3b93c9142db8 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127801,11 +127280,6 @@ Subject: [PATCH] SIP: BCM: checking bcm command when caller is from non secure
 
 Change-Id: I20d028dd52c43d25df89b8b7e323a266964ad1fc
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_sip_svc.c  | 4 ++++
- plat/syna/berlin/common/drivers/bcm/bcm.c | 2 +-
- plat/syna/berlin/include/drivers/bcm.h    | 2 ++
- 3 files changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
 index 0b46a2f..ca8c9d8 100644
@@ -127846,9 +127320,6 @@ index 472336f..0723f39 100644
 +bool bcm_sip_cmd_is_supported(uint32_t cmd_id);
 +
  #endif
--- 
-2.7.4
-
 
 From 8b587e65e221cb4e460c9e4d710d1fcfcb9414aa Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127857,9 +127328,6 @@ Subject: [PATCH] bcm: remove bcm command check from TEE
 
 Change-Id: I10dec5eed64849f888ce631bb7c377cfeac3a15b
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/drivers/bcm/bcm.c | 3 ---
- 1 file changed, 3 deletions(-)
 
 diff --git a/plat/syna/berlin/common/drivers/bcm/bcm.c b/plat/syna/berlin/common/drivers/bcm/bcm.c
 index cb2cc17..08a24c9 100644
@@ -127875,9 +127343,6 @@ index cb2cc17..08a24c9 100644
  	bcm_clear_command(&cmd);
  	cmd.arg0 = arg0;
  	cmd.arg1 = arg1;
--- 
-2.7.4
-
 
 From 20bc3267c1a3a879b0ab489f76e926f52150c875 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127886,9 +127351,6 @@ Subject: [PATCH] myna2: skip the uart initialisation
 
 Change-Id: I1d8f32f9b46aa9d6048f9a13a0c70ac09a2a18fb
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/include/soc/myna2/berlin_def.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/include/soc/myna2/berlin_def.h b/plat/syna/berlin/include/soc/myna2/berlin_def.h
 index dcc9596..ce27567 100644
@@ -127903,9 +127365,6 @@ index dcc9596..ce27567 100644
  #define BERLIN_UART_BAUDRATE		115200
  #endif
  /* GIC */
--- 
-2.7.4
-
 
 From 9007acb21858dee73efbe532d0f5cde0c02b84ee Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -127914,14 +127373,6 @@ Subject: [PATCH] sip: klamath: add SYNA_SIP_SMC[64|32]_RD_PUBLIC_OTP
 
 Change-Id: I9fe1b6fc81b0be17a2b412e02c0f14dcd7afbfb7
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_sip_svc.c          |  3 +-
- plat/syna/berlin/include/platform_def.h           |  4 ++
- plat/syna/berlin/include/soc/klamath/berlin_def.h |  7 ++-
- plat/syna/berlin/soc/klamath/berlin_soc.mk        |  1 +
- plat/syna/berlin/soc/klamath/plat_sip_call.c      | 74 +++++++++++++++++++++++
- 5 files changed, 86 insertions(+), 3 deletions(-)
- create mode 100644 plat/syna/berlin/soc/klamath/plat_sip_call.c
 
 diff --git a/plat/syna/berlin/common/berlin_sip_svc.c b/plat/syna/berlin/common/berlin_sip_svc.c
 index ca8c9d8..b2a183c 100644
@@ -128075,9 +127526,6 @@ index 0000000..6ddf127
 +	SMC_RET1(handle, ret);
 +
 +}
--- 
-2.7.4
-
 
 From 5b52cb5b9ac725ca89d179d3b2f9133febcb76e3 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -128086,10 +127534,6 @@ Subject: [PATCH] bcm: add lock to protect bcm access
 
 Change-Id: Ia07e6a7be2a5f993def5d2cee91080f220f84560
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/drivers/bcm/bcm_hal.c | 26 ++++++++++++++++++++++++++
- plat/syna/berlin/suspend/berlin_suspend.mk    |  2 +-
- 2 files changed, 27 insertions(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/common/drivers/bcm/bcm_hal.c b/plat/syna/berlin/common/drivers/bcm/bcm_hal.c
 index 3ce3a38..81a0c72 100644
@@ -128156,9 +127600,6 @@ index c7ac7a2..e561ff6 100644
  LDFLAGS += --no-warn-rwx-segments
  define CRULES
  $(1): $(3)
--- 
-2.7.4
-
 
 From a9148739de8605f676028c6461418113dcb4643e Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -128167,9 +127608,6 @@ Subject: [PATCH] syna: resume to linux instead of miniloader
 
 Change-Id: I2a945ed52e14840747bb3415621a6131defff749
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/berlin_bl31_setup.c | 37 ++++-------------------------
- 1 file changed, 5 insertions(+), 32 deletions(-)
 
 diff --git a/plat/syna/berlin/common/berlin_bl31_setup.c b/plat/syna/berlin/common/berlin_bl31_setup.c
 index 70090a0..39ef5d4 100644
@@ -128226,9 +127664,6 @@ index 70090a0..39ef5d4 100644
  }
  
  static inline void reset_soc(void)
--- 
-2.7.4
-
 
 From 144d43e48fb163ea9ff10db628b87cf352ce1383 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -128237,9 +127672,6 @@ Subject: [PATCH] ipc: set timeout value to 1
 
 Change-Id: I4bfc02868e3a5c71636dc532a6fd8f15a897761b
 Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
----
- plat/syna/berlin/common/drivers/mailbox/sm_ipc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c b/plat/syna/berlin/common/drivers/mailbox/sm_ipc.c
 index ed74ea5..edbae47 100644
@@ -128254,9 +127686,6 @@ index ed74ea5..edbae47 100644
  
  void sm_system_off(void)
  {
--- 
-2.7.4
-
 
 From 0d572ed52c35b062d1a7d802813f8c83004851e8 Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -128266,12 +127695,6 @@ Subject: [PATCH] dolphin:platypus: add BCM_KERNEL_PI_VERIFY_FW_XX command
 
 Change-Id: If64ffb0cc31ed47d005d28ef7585a871ff24201a
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- plat/syna/berlin/common/drivers/bcm/bcm.c  | 10 ++++++++++
- plat/syna/berlin/include/berlin_private.h  | 30 ++++++++++++++++++++++++++++++
- plat/syna/berlin/soc/dolphin/plat_setup.c  | 11 +++++++++++
- plat/syna/berlin/soc/platypus/plat_setup.c | 11 +++++++++++
- 4 files changed, 62 insertions(+)
 
 diff --git a/plat/syna/berlin/common/drivers/bcm/bcm.c b/plat/syna/berlin/common/drivers/bcm/bcm.c
 index 08a24c9..0181af2 100644
@@ -128375,9 +127798,6 @@ index eb177b1..db8fa55 100644
 +			return false;
 +	}
 +}
--- 
-2.7.4
-
 
 From 8e9360e690aea583338bdab45b10f48b5c394881 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -128388,9 +127808,6 @@ Pointer 'cmd' may be dereferenced after having been checked for NULL
 
 Change-Id: Ib9b4c2a33c73b692d43a03ef389a6884b0e9dd91
 Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
----
- plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
 index bba5b77..854b53c 100644
@@ -128405,9 +127822,6 @@ index bba5b77..854b53c 100644
  		return -1;
  
  	if (cmd->command.ns != MAILBOX_TEE && (cmd->command.sender_id != HOST2SYNA_SENDER_A55)) {
--- 
-2.7.4
-
 
 From 961ca6e012bfeafd75b01974d5a6431e7dd38d0a Mon Sep 17 00:00:00 2001
 From: Jingju Hou <Jingju.Hou@synaptics.com>
@@ -128416,10 +127830,6 @@ Subject: [PATCH] klamath: SIP: allow to send SP_CMD_OTP_ACCESS command
 
 Change-Id: I8d1080d66fdf04f9a1f3b56ccdcfd6221f12636d
 Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
----
- .../syna/berlin/common/drivers/mailbox/synaprot_mailbox.c | 15 +++++++--------
- .../syna/berlin/common/drivers/mailbox/synaprot_mailbox.h |  3 +++
- 2 files changed, 10 insertions(+), 8 deletions(-)
 
 diff --git a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.c
 index 854b53c..01d0161 100644
@@ -128468,9 +127878,6 @@ index af5f8d7..68c4f7f 100755
  void mailbox_init(void);
  int mailbox_cmd_handle(uint32_t cmd_id, uint32_t arg0, uint32_t arg1, uint32_t arg2,
  		uint32_t arg3, uint32_t arg4 , uint32_t arg5, mailbox_rsp_t *rsp);
--- 
-2.7.4
-
 
 From b68b237e8a2bfac75b26c894eb79bb4024f1ffe0 Mon Sep 17 00:00:00 2001
 From: Shaojun Feng <Shaojun.Feng@synaptics.com>
@@ -128479,13 +127886,6 @@ Subject: [PATCH] myna2: add power consumption print
 
 Change-Id: I49aa5dc2133fc5acee959424bf1fccc9eb901a84
 Signed-off-by: Shaojun Feng <Shaojun.Feng@synaptics.com>
----
- plat/syna/berlin/soc/myna2/berlin_soc.mk   |   1 +
- plat/syna/berlin/soc/myna2/powermeasure.c  | 591 +++++++++++++++++++++++++++++
- plat/syna/berlin/soc/myna2/suspend.c       |  23 +-
- plat/syna/berlin/suspend/berlin_suspend.mk |   5 +
- 4 files changed, 619 insertions(+), 1 deletion(-)
- create mode 100755 plat/syna/berlin/soc/myna2/powermeasure.c
 
 diff --git a/plat/syna/berlin/soc/myna2/berlin_soc.mk b/plat/syna/berlin/soc/myna2/berlin_soc.mk
 index 54949c6..0761d89 100644
@@ -129174,6 +128574,3 @@ index e561ff6..8eb7369 100644
  endif
  
  MODULE_LINKERSCRIPT := ${SUSPEND_DIR}/suspend.ld.S
--- 
-2.7.4
-
