@@ -128574,3 +128574,25 @@ index e561ff6..8eb7369 100644
  endif
  
  MODULE_LINKERSCRIPT := ${SUSPEND_DIR}/suspend.ld.S
+
+From bc4ae6a2403d5e2b0cd5fd408107ea6a81c3d76b Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Tue, 23 Jun 2026 18:44:22 +0800
+Subject: [PATCH] synaprot mailbox: align SPI_PI_OTP_ACCESS with Synaprot SPEC
+
+Change-Id: I8340418dfeaa618b34411c9c4f058ad1e65f36ea
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+
+diff --git a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h
+index 68c4f7f..754b6d8 100755
+--- a/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h
++++ b/plat/syna/berlin/common/drivers/mailbox/synaprot_mailbox.h
+@@ -30,7 +30,7 @@ typedef enum {
+ 	SPI_PI_QUERY_SPK_VERSION	= 0x0,
+ 	SPI_PI_VERIFY_SIGNATURE 	= 0x1,
+ 	SPI_PI_DERIVE_KEY	= 0x2,
+-	SPI_PI_OTP_ACCESS	= 0x6,
++	SPI_PI_OTP_ACCESS	= 0x5,
+ }HOST2SYNA_SOC_CMD_ID;
+ 
+ typedef enum {
