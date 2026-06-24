@@ -128596,3 +128596,36 @@ index 68c4f7f..754b6d8 100755
  }HOST2SYNA_SOC_CMD_ID;
  
  typedef enum {
+
+From 0cd58c2d5909432f2e1207e37b697b13c05c4e19 Mon Sep 17 00:00:00 2001
+From: Jingju Hou <Jingju.Hou@synaptics.com>
+Date: Wed, 24 Jun 2026 15:57:32 +0800
+Subject: [PATCH] bcm: refine BCM_KERNEL_PI_VERIFY_FW_END range
+
+Change-Id: Idf21f41ae479f603f1be6b05edfda75a46c5112b
+Signed-off-by: Jingju Hou <Jingju.Hou@synaptics.com>
+
+diff --git a/plat/syna/berlin/include/berlin_private.h b/plat/syna/berlin/include/berlin_private.h
+index f3a6b83..a56fbca 100644
+--- a/plat/syna/berlin/include/berlin_private.h
++++ b/plat/syna/berlin/include/berlin_private.h
+@@ -42,18 +42,7 @@ enum {
+ 	BCM_KERNEL_PI_VERIFY_TSP_FW = 0x10,
+ 	BCM_KERNEL_PI_VERIFY_DSP_FW = 0x11,
+ 	BCM_KERNEL_PI_VERIFY_GPU_FW = 0x12,
+-	BCM_KERNEL_PI_VERIFY_ATF = 0x13,
+-	BCM_KERNEL_PI_VERIFY_TZK = 0x14,
+-	BCM_KERNEL_PI_VERIFY_TZK_BOOT_PARAM = 0x15,
+-	BCM_KERNEL_PI_VERIFY_TZK_OEM_SETTING = 0x16,
+-	BCM_KERNEL_PI_VERIFY_TA = 0x17,
+-	BCM_KERNEL_PI_VERIFY_BOOTLOADER = 0x18,
+-	BCM_KERNEL_PI_VERIFY_SM_FW = 0x19,
+-	BCM_KERNEL_PI_VERIFY_AVB_KEYS = 0x1A,
+-	BCM_KERNEL_PI_VERIFY_LINUX = 0x1B,
+-	BCM_KERNEL_PI_VERIFY_FASTBOOT = 0x1C,
+-	BCM_KERNEL_PI_VERIFY_FASTLOGO = 0x20,
+-	BCM_KERNEL_PI_VERIFY_FW_END = 0x20,
++	BCM_KERNEL_PI_VERIFY_FW_END = 0x12,
+ };
+ 
+ extern unsigned int boot_mode;
