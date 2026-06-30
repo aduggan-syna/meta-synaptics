@@ -13,7 +13,7 @@ SRCREV_FORMAT = "build"
 
 PV = "${ASTRA_VERSION}+git${SRCPV}"
 
-DEPENDS += " openssl-native synasdk-config-native"
+DEPENDS += " openssl-native synasdk-config-native genx-img-py-native"
 
 TOOL_NAMES = "parse_pt crc mkbootimg mkyaffs2img parse_pt_emmc gen_uniimg gen_subimg_info genimg parse_pt_xspi"
 
@@ -49,6 +49,32 @@ do_install () {
     install -m 0755 ${S}/build/tools/lib/sec_tools/bin/sign_image_v4 ${D}${prefix}/libexec/syna/sign_image_v4
     install -m 0755 ${S}/build/tools/lib/sec_tools/bin/genx_img ${D}${prefix}/libexec/syna/genx_img
     install -m 0755 ${S}/build/tools/lib/sec_tools/bin/genx_img_v3 ${D}${prefix}/libexec/syna/genx_img_v3
+
+    if [ "is${CONFIG_GENX_IMG_PY}" = "isy" ]; then
+        genx_img_py_staged="${STAGING_DIR_NATIVE}/usr/libexec/syna-build/genx_img_py"
+
+        if [ ! -x "${genx_img_py_staged}" ]; then
+            echo "ERROR: CONFIG_GENX_IMG_PY=y but staged genx_img_py missing: ${genx_img_py_staged}"
+            exit 1
+        fi
+
+        install -m 0755 "${genx_img_py_staged}" ${D}${prefix}/libexec/syna/genx_img_py
+    else
+        bbnote "CONFIG_GENX_IMG_PY is not 'y' (got '${CONFIG_GENX_IMG_PY}'); using legacy genx_img as configured."
+    fi
+
+    if [ "is${CONFIG_GENX_IMG_V3_PY}" = "isy" ]; then
+        genx_img_v3_py_staged="${STAGING_DIR_NATIVE}/usr/libexec/syna-build/genx_img_v3_py"
+
+        if [ ! -x "${genx_img_v3_py_staged}" ]; then
+            echo "ERROR: CONFIG_GENX_IMG_V3_PY=y but staged genx_img_v3_py missing: ${genx_img_v3_py_staged}"
+            exit 1
+        fi
+
+        install -m 0755 "${genx_img_v3_py_staged}" ${D}${prefix}/libexec/syna/genx_img_v3_py
+    else
+        bbnote "CONFIG_GENX_IMG_V3_PY is not 'y' (got '${CONFIG_GENX_IMG_V3_PY}'); using legacy genx_img_v3 as configured."
+    fi
 
     for file in ${TOOL_NAMES}
     do

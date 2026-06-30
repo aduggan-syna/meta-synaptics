@@ -19,6 +19,9 @@ do_compile:prepend () {
 
     . ${CONFIG_FILE}
 
+    export CONFIG_GENX_IMG_PY
+    export CONFIG_GENX_IMG_V3_PY
+
     CONFIG_SYNA_SDK_PATH=${S}
     CONFIG_SYNA_SDK_OUT_TARGET_PATH=${B}/target
     CONFIG_SYNA_SDK_OUT_HOST_OBJ_PATH=${B}/host/obj/EXECUTABLES
@@ -37,6 +40,9 @@ do_install:prepend () {
 
     . ${CONFIG_FILE}
 
+    export CONFIG_GENX_IMG_PY
+    export CONFIG_GENX_IMG_V3_PY
+
     CONFIG_SYNA_SDK_PATH=${S}
     CONFIG_SYNA_SDK_OUT_TARGET_PATH=${B}/target
     CONFIG_SYNA_SDK_OUT_HOST_OBJ_PATH=${B}/host/obj/EXECUTABLES
@@ -54,6 +60,9 @@ do_deploy:prepend () {
     TOPDIR=${S}
 
     . ${CONFIG_FILE}
+
+    export CONFIG_GENX_IMG_PY
+    export CONFIG_GENX_IMG_V3_PY
 
     CONFIG_SYNA_SDK_PATH=${S}
     CONFIG_SYNA_SDK_OUT_TARGET_PATH=${B}/target

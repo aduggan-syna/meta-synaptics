@@ -6,6 +6,9 @@ genx_secure_image() {
   f_input=$1; shift
   f_output=$1; shift
 
+  export CONFIG_GENX_IMG_PY
+  export CONFIG_GENX_IMG_V3_PY
+
   ### Check input file ###
   [ -f $f_input ]
 
