@@ -9,7 +9,10 @@ SRC_URI:append = " \
     file://astra-swupdate.cfg \
 "
 
-SRC_URI:append:sl2619nand = " file://cfi.cfg"
+SRC_URI:append:sl2619nand = " \
+    file://cfi.cfg \
+    file://0001-erase-full-mtd-in-flash_write_nand.patch \
+"
 
 do_install:append() {
     # To install the files on respective directory on target

@@ -29,36 +29,115 @@ ROOTFS="rootfs.subimg"
 
 # Compute the SHA256 hash for each file
 HASH_ROOTFS=$(sha256sum "$RESCUE_OTA/$ROOTFS" | awk '{ print $1 }')
-HASH_BL=$(sha256sum "$RESCUE_OTA/$BL" | awk '{ print $1 }')
+HASH_PREBL=$(sha256sum "$RESCUE_OTA/$PREBL" | awk '{ print $1 }')
 HASH_CMBOOT=$(sha256sum "$RESCUE_OTA/$CMBOOT" | awk '{ print $1 }')
 
 # content of sw-description file (Must be modified as per needs)
 cat << EOF > $SW_DESCRIPTION_FILE
 software =
 {
-    version = "$VERSION";
-    description = "SWUpdate package for Astra platform";
-        ${MACHINE} = {
-        hardware-compatibility: [ "1.0" ];
-        images: (
-        {
-            filename = "$PREBL";
-            device = "/dev/mtd1";
-            sha256 = "$HASH_PREBL";
-        },
-        {
-            filename = "$CMBOOT";
-            device = "/dev/mtd3";
-            sha256 = "$HASH_CMBOOT";
-        },
-        {
-            filename = "$ROOTFS";
-            compressed = true;
-            device = "/dev/mtd5";
-            sha256 = "$HASH_ROOTFS";
-        }
-        );
-    };
+	version = "$VERSION";
+	description = "SWUpdate package for Astra platform";
+	${MACHINE} = {
+		hardware-compatibility: [ "1.0" ];
+		slot_a: {
+			images: (
+				{
+					filename = "$PREBL";
+					type = "raw";
+					device = "/dev/mtd1";
+					sha256 = "$HASH_PREBL";
+				},
+				{
+					filename = "$PREBL";
+					type = "raw";
+					device = "/dev/mtd1";
+					offset = "0x80000";
+					sha256 = "$HASH_PREBL";
+				},
+				{
+					filename = "$PREBL";
+					type = "raw";
+					device = "/dev/mtd1";
+					offset = "0x100000";
+					sha256 = "$HASH_PREBL";
+				},
+				{
+					filename = "$PREBL";
+					type = "raw";
+					device = "/dev/mtd1";
+					offset = "0x180000";
+					sha256 = "$HASH_PREBL";
+				},
+				{
+					filename = "$CMBOOT";
+					type = "flash";
+					device = "/dev/mtd2";
+					sha256 = "$HASH_CMBOOT";
+				},
+				{
+					filename = "$ROOTFS";
+					type = "flash";
+					device = "/dev/mtd5";
+					sha256 = "$HASH_ROOTFS";
+				},
+			)
+		};
+		slot_b: {
+			images: (
+			{
+				filename = "$PREBL";
+				type = "raw";
+				device = "/dev/mtd1";
+				offset = "0x200000";
+				sha256 = "$HASH_PREBL";
+			},
+			{
+				filename = "$PREBL";
+				type = "raw";
+				device = "/dev/mtd1";
+				offset = "0x280000";
+				sha256 = "$HASH_PREBL";
+			},
+			{
+				filename = "$PREBL";
+				type = "raw";
+				device = "/dev/mtd1";
+				offset = "0x300000";
+				sha256 = "$HASH_PREBL";
+			},
+			{
+				filename = "$PREBL";
+				type = "raw";
+				device = "/dev/mtd1";
+				offset = "0x380000";
+				sha256 = "$HASH_PREBL";
+			},
+			{
+				filename = "$CMBOOT";
+				type = "flash";
+				device = "/dev/mtd3";
+				sha256 = "$HASH_CMBOOT";
+			},
+			{
+				filename = "$ROOTFS";
+				type = "flash";
+				device = "/dev/mtd5";
+				sha256 = "$HASH_ROOTFS";
+			},
+			);
+		};
+		rootfs: {
+			images: (
+			{
+				filename = "$ROOTFS";
+				type = "flash";
+				device = "/dev/mtd5";
+				sha256 = "$HASH_ROOTFS";
+			},
+			);
+		};
+	};
 }
 EOF
 

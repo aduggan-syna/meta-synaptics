@@ -1,0 +1,15 @@
+Upstream-Status: Inappropriate [ astra specific ]
+
+diff --git a/handlers/flash_handler.c b/handlers/flash_handler.c
+index a6b22cd5..3be723e7 100644
+--- a/handlers/flash_handler.c
++++ b/handlers/flash_handler.c
+@@ -126,7 +126,7 @@ static int flash_write_nand(int mtdnum, struct img_type *img)
+ 		return -EINVAL;
+ 	}
+ 
+-	if(flash_erase_sector(mtdnum, img->seek, img->size)) {
++	if(flash_erase_sector(mtdnum, img->seek, mtd->size)) {
+ 		ERROR("I cannot erasing %s",
+ 			img->device);
+ 		return -1;
