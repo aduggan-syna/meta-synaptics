@@ -67,7 +67,7 @@ nand_gen_subimg_info() {
 }
 
 mkfs_ubifs() {
-  ubifs_args="$1"
+  ubifs_args="$1 -x zlib"
   ubinize_args="$2"
   vol_size="$3"
   rootfs_dir="$4"
