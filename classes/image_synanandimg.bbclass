@@ -81,10 +81,31 @@ mkfs_ubifs() {
   mkfs.ubifs  -F -r ${rootfs_dir} ${ubifs_args} -o ${DEPLOY_DIR_IMAGE}/${subimg_name}.ubifs
 
   ubinize_cfg=${DEPLOY_DIR_IMAGE}/${subimg_name}-ubinize.cfg
-  echo "[${subimg_name}-volume]" > ${ubinize_cfg}
-  echo "mode=ubi" >> ${ubinize_cfg}
-  echo "image=${DEPLOY_DIR_IMAGE}/${subimg_name}.ubifs" >> ${ubinize_cfg}
-  echo "vol_id=0" >> ${ubinize_cfg}
+  if [ "${subimg_name}" = "rescue" ]; then
+    echo "[uboot-env-volume]" > ${ubinize_cfg}
+    echo "mode=ubi" >> ${ubinize_cfg}
+    echo "vol_id=0" >> ${ubinize_cfg}
+    echo "vol_size=16KiB" >> ${ubinize_cfg}
+    echo "vol_type=dynamic" >> ${ubinize_cfg}
+    echo "vol_name=uboot_env" >> ${ubinize_cfg}
+
+    echo "[uboot-env-r-volume]" >> ${ubinize_cfg}
+    echo "mode=ubi" >> ${ubinize_cfg}
+    echo "vol_id=1" >> ${ubinize_cfg}
+    echo "vol_size=16KiB" >> ${ubinize_cfg}
+    echo "vol_type=dynamic" >> ${ubinize_cfg}
+    echo "vol_name=uboot_env_r" >> ${ubinize_cfg}
+
+    echo "[${subimg_name}-volume]" >> ${ubinize_cfg}
+    echo "mode=ubi" >> ${ubinize_cfg}
+    echo "image=${DEPLOY_DIR_IMAGE}/${subimg_name}.ubifs" >> ${ubinize_cfg}
+    echo "vol_id=2" >> ${ubinize_cfg}
+  else
+    echo "[${subimg_name}-volume]" > ${ubinize_cfg}
+    echo "mode=ubi" >> ${ubinize_cfg}
+    echo "image=${DEPLOY_DIR_IMAGE}/${subimg_name}.ubifs" >> ${ubinize_cfg}
+    echo "vol_id=0" >> ${ubinize_cfg}
+  fi
   echo "vol_size=${vol_size}MiB" >> ${ubinize_cfg}
   echo "vol_type=dynamic" >> ${ubinize_cfg}
   echo "vol_name=${subimg_name}" >> ${ubinize_cfg}
