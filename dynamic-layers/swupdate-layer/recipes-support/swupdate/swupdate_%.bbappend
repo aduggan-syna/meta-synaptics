@@ -9,6 +9,8 @@ SRC_URI:append = " \
     file://astra-swupdate.cfg \
 "
 
+SRC_URI:append:sl2619nand = " file://cfi.cfg"
+
 do_install:append() {
     # To install the files on respective directory on target
     install -Dm 0644 ${WORKDIR}/09-swupdate-args.in ${D}${libdir}/swupdate/conf.d/09-swupdate-args.sh
