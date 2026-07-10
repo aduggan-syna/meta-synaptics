@@ -30,7 +30,7 @@ SRC_URI += "${@bb.utils.contains('KGDB_ENABLE', '1', ' \
     file://kgdb.cfg', '', d)}"
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://add-docker.cfg', '', d)}"
 SRC_URI += "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'file://selinux.cfg', '', d)}"
-SRC_URI:append:klamath = "file://0001-ov5647-add-flip-ctrls-and-1280x720p.patch"
+SRC_URI:append:klamath = " file://0001-ov5647-add-flip-ctrls-and-1280x720p.patch"
 SRC_URI:append:sl2619-coralboard = " file://gpio-led.cfg"
 SRC_URI:append:sl2619-coralboard = " file://usb_ethernet_adapter.cfg"
 
