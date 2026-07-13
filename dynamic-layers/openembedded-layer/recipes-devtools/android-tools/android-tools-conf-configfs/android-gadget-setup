@@ -16,7 +16,13 @@ if [ -r /etc/android-gadget-setup.machine ]; then
   . /etc/android-gadget-setup.machine
 fi
 
-[ -d /sys/kernel/config/usb_gadget ] || modprobe libcomposite
+env_usb_gadget() {
+  mkdir -p /dev/pts /dev/shm
+  mount -t devpts devpts /dev/pts
+  mount -t configfs none /sys/kernel/config
+}
+
+[ -d /sys/kernel/config/usb_gadget ] || modprobe libcomposite || env_usb_gadget
 
 create_android_gadget_defaults() {
   mkdir -p strings/0x409
