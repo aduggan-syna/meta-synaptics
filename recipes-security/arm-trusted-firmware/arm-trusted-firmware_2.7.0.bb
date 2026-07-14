@@ -4,7 +4,7 @@ LICENSE = "BSD-3-Clause & MIT"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 PATCHTOOL = "git"
 
-inherit deploy
+inherit deploy syna-security
 
 BRANCH = "master"
 SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=http;branch=${BRANCH}"
@@ -75,9 +75,8 @@ do_install:append() {
     . ${CONFIG_FILE}
     . ${CHIP_RC_FILE}
 
-    SYNA_KEY_PATH="${STAGING_DIR_NATIVE}/usr/share/syna/keys"
-    security_keys_path="${SYNA_KEY_PATH}/${syna_chip_name}/${syna_chip_rev}"
-    security_libexec_path="${STAGING_DIR_NATIVE}/usr/libexec/syna"
+    security_keys_path="${STAGING_DATADIR_NATIVE}/syna/keys/${syna_chip_name}/${syna_chip_rev}"
+    security_tools_path="${STAGING_DIR_NATIVE}${prefix}/libexec/syna/"
 
     in_bin=${B}/${ATF_PLATFORM}/${ATF_SOC}/release/${ATF_TARGET}.${ATF_SUFFIX}
     out_bin=${D}${nonarch_base_libdir}/firmware/tz1_en.bin
@@ -85,26 +84,10 @@ do_install:append() {
 
     prod_image_flag=0x00000000
     destination_addr=0x00120000
-    ${security_libexec_path}/in_extras.py "ATF" ${B}/atf_extras.bin ${prod_image_flag} ${destination_addr}
-
-    if [ "is${CONFIG_GENX_MCU}" = "isy" ]; then
-        tool_version=genx_v3
-    else
-        tool_version=genx
-    fi
+    ${security_tools_path}/in_extras.py "ATF" ${B}/atf_extras.bin ${prod_image_flag} ${destination_addr}
 
     # Generate image
-    gen_x_secure_image --chip-name=${syna_chip_name} \
-                       --chip-rev=${syna_chip_rev} \
-                       --img_type="ATF" \
-                       --key_type="ree" \
-                       --length=0x0 \
-                       --extras=${B}/atf_extras.bin \
-                       --workdir-security-tools=${security_libexec_path} \
-                       --workdir-security-keys=${security_keys_path} \
-                       --tool-version=${tool_version} \
-                       --in_payload=${in_bin} \
-                       --out_store=${out_bin}
+    genx_secure_image "ATF" "ree" ${B}/atf_extras.bin 0x0 ${in_bin} ${out_bin}
 }
 
 do_deploy() {
