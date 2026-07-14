@@ -24,8 +24,11 @@ CHIP_FULL_NAME:dolphin = "dolphin_a0"
 EXTRA_OEMAKE += "TA_DEV_KIT_DIR=${TA_DEV_KIT_DIR} \
                  CHIP_FULL_NAME=${CHIP_FULL_NAME} \
                  CROSS_COMPILE=${HOST_PREFIX} \
-                 TEE_CATEGORY=OPTEE \
                  O=${OUT}"
+
+do_compile() {
+     oe_runmake -f Makefile.op -C ${B}
+}
 
 do_install() {
     install -d ${D}${nonarch_base_libdir}/optee_armtz/
