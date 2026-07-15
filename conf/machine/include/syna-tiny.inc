@@ -7,7 +7,7 @@
 SOC_FAMILY = "syna"
 include conf/machine/include/soc-family.inc
 
-SERIAL_CONSOLE = "115200 ttyS0"
+SERIAL_CONSOLES = "115200;ttyS0"
 
 IMAGE_CLASSES += "image_synaimg"
 IMAGE_FSTYPES ?= "synaimg"
