@@ -1,0 +1,62 @@
+commit 48dc4b90167a4000467dc174367ba66b40bec181
+Author: Dan Huo <Dan.Huo@synaptics.com>
+Date:   Thu Jul 16 20:16:46 2026 +0800
+
+    support erase full mtd for flash_write_nand
+
+Upstream-Status: Inappropriate [ astra specific ]
+
+diff --git a/handlers/flash_handler.c b/handlers/flash_handler.c
+index a6b22cd5..c2d82b17 100644
+--- a/handlers/flash_handler.c
++++ b/handlers/flash_handler.c
+@@ -126,7 +126,11 @@ static int flash_write_nand(int mtdnum, struct img_type *img)
+ 		return -EINVAL;
+ 	}
+ 
+-	if(flash_erase_sector(mtdnum, img->seek, img->size)) {
++	if (img->erase_full_mtd)
++		ret = flash_erase_sector(mtdnum, img->seek, mtd->size);
++	else
++		ret = flash_erase_sector(mtdnum, img->seek, img->size);
++	if (ret) {
+ 		ERROR("I cannot erasing %s",
+ 			img->device);
+ 		return -1;
+diff --git a/include/swupdate_image.h b/include/swupdate_image.h
+index 26ace794..670fadee 100644
+--- a/include/swupdate_image.h
++++ b/include/swupdate_image.h
+@@ -58,6 +58,7 @@ struct img_type {
+ 	bool is_encrypted;
+ 	char ivt_ascii[33];
+ 	bool install_directly;
++	bool erase_full_mtd;
+ 	int is_script;
+ 	int is_partitioner;
+ 	struct dict properties;
+diff --git a/parser/parse_external.c b/parser/parse_external.c
+index 20ac0771..92619e8a 100644
+--- a/parser/parse_external.c
++++ b/parser/parse_external.c
+@@ -102,6 +102,8 @@ static void sw_append_stream(struct img_type *img, const char *key,
+ 		img->id.install_if_different = 1;
+ 	if (!strcmp(key, "install-if-higher"))
+ 		img->id.install_if_higher = 1;
++	if (!strcmp(key, "erase-full-mtd"))
++		img->erase_full_mtd = 1;
+ }
+ 
+ int parse_external(struct swupdate_cfg *software, const char *filename,
+diff --git a/parser/parser.c b/parser/parser.c
+index 99c3396e..07c616de 100644
+--- a/parser/parser.c
++++ b/parser/parser.c
+@@ -459,6 +459,7 @@ static int parse_common_attributes(parsertype p, void *elem, struct img_type *im
+ 	GET_FIELD_BOOL(p, elem, "install-if-different", &image->id.install_if_different);
+ 	GET_FIELD_BOOL(p, elem, "install-if-higher", &image->id.install_if_higher);
+ 	GET_FIELD_BOOL(p, elem, "encrypted", &image->is_encrypted);
++	GET_FIELD_BOOL(p, elem, "erase-full-mtd", &image->erase_full_mtd);
+ 	GET_FIELD_STRING(p, elem, "ivt", image->ivt_ascii);
+ 
+ 	if (is_image_installed(&cfg->installed_sw_list, image)) {

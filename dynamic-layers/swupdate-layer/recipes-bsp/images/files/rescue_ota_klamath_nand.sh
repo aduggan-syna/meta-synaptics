@@ -79,9 +79,10 @@ software =
 					filename = "$ROOTFS";
 					type = "flash";
 					device = "/dev/mtd5";
+					erase-full-mtd = true;
 					sha256 = "$HASH_ROOTFS";
 				},
-			)
+			);
 		};
 		slot_b: {
 			images: (
@@ -123,6 +124,7 @@ software =
 				filename = "$ROOTFS";
 				type = "flash";
 				device = "/dev/mtd5";
+				erase-full-mtd = true;
 				sha256 = "$HASH_ROOTFS";
 			},
 			);
@@ -133,6 +135,7 @@ software =
 				filename = "$ROOTFS";
 				type = "flash";
 				device = "/dev/mtd5";
+				erase-full-mtd = true;
 				sha256 = "$HASH_ROOTFS";
 			},
 			);
