@@ -99,7 +99,7 @@ do_deploy () {
                       ${spi_block_size} ${spi_total_size}"
         fi
 
-        if [ "${MACHINE}" = "sl2619nand" ] || [ "${MACHINE}" = "sl2611nand" ]; then
+        if [ "${MACHINE}" = "sl2619nand" ] || [ "${MACHINE}" = "sl2611nand" ] || [ "${MACHINE}" = "sl2615nand" ]; then
             exec_cmd="parse_pt 0 0 \
                  ${CONFIG_NAND_BLOCK_SIZE} ${CONFIG_NAND_TOTAL_SIZE}"
         fi
@@ -113,7 +113,7 @@ do_deploy () {
                   ${DEPLOYDIR}/linux_params_mtdparts \
                   ${DEPLOYDIR}/version_table \
                   ${DEPLOYDIR}/subimglayout "
-        if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ] && [ "${MACHINE}" != "sl1640spi" ] && [ "${MACHINE}" != "sl2619nand" ] && [ "${MACHINE}" != "sl2611nand" ]; then
+        if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ] && [ "${MACHINE}" != "sl1640spi" ] && [ "${MACHINE}" != "sl2619nand" ] && [ "${MACHINE}" != "sl2611nand" ] && [ "${MACHINE}" != "sl2615nand" ]; then
             exec_args="${exec_args} \
                                   ${DEPLOYDIR}/emmc_part_table \
                                   ${DEPLOYDIR}/emmc_part_list \
@@ -125,7 +125,7 @@ do_deploy () {
 
         # Update the CRC of the version table
         crc -a "${DEPLOYDIR}/version_table"
-        if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ] && [ "${MACHINE}" != "sl1640spi" ] && [ "${MACHINE}" != "sl2619nand" ] && [ "${MACHINE}" != "sl2611nand" ]; then
+        if [ "${MACHINE}" != "sl1680spi" ] && [ "${MACHINE}" != "sl1620spi" ] && [ "${MACHINE}" != "sl1640spi" ] && [ "${MACHINE}" != "sl2619nand" ] && [ "${MACHINE}" != "sl2611nand" ] && [ "${MACHINE}" != "sl2615nand" ]; then
             # Change the subimage files to .gz
             sed -i -e 's:\([a-zA-Z0-9]\+\)\(_[a|b]\)\?\.subimg,:\1.subimg.gz,:' "${DEPLOYDIR}/emmc_image_list"
         fi

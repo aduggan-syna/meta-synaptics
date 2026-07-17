@@ -40,6 +40,10 @@ do_install:append:sl2611nand() {
     keep_sdio_fws
 }
 
+do_install:append:sl2615nand() {
+    keep_sdio_fws
+}
+
 do_install:append:sl2619nand() {
     keep_sdio_fws
 }

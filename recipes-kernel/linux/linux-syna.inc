@@ -23,6 +23,12 @@ KERNEL_DEVICETREE = "${SYNA_KERNEL_DTS_FILE}  \
 KERNEL_DEVICETREE:sl2619nand:append = " ${SYNA_KERNEL_RESCUE_DTS_FILE} \
                                         ${SYNA_KERNEL_DTS_FILE}"
 
+KERNEL_DEVICETREE:sl2615nand:append = " ${SYNA_KERNEL_RESCUE_DTS_FILE} \
+                                        ${SYNA_KERNEL_DTS_FILE}"
+
+KERNEL_DEVICETREE:sl2611nand:append = " ${SYNA_KERNEL_RESCUE_DTS_FILE} \
+                                        ${SYNA_KERNEL_DTS_FILE}"
+
 KERNEL_DTC_FLAGS += "-@"
 
 COMPATIBLE_MACHINE = "syna"
@@ -47,6 +53,7 @@ CMDLINE_EMMC_BOOT:sl1620spi = "${CMDLINE_EARLY_BOOT}"
 CMDLINE_EMMC_BOOT:sl1640spi = "${CMDLINE_EARLY_BOOT}"
 CMDLINE_EMMC_BOOT:sl2619xspi = "${CMDLINE_EARLY_BOOT}"
 CMDLINE_EMMC_BOOT:sl2611nand = "${CMDLINE_NAND_BOOT}"
+CMDLINE_EMMC_BOOT:sl2615nand = "${CMDLINE_NAND_BOOT}"
 CMDLINE_EMMC_BOOT:sl2619nand = "${CMDLINE_NAND_BOOT}"
 CMDLINE_EMMC_BOOT:append = "${@bb.utils.contains('KGDB_ENABLE', '1', ' kgdboc=ttyS0,115200', '', d)}"
 CMDLINE_EMMC_BOOT:append = "${@bb.utils.contains('KGDB_WAIT', '1', ' kgdbwait', '', d)}"

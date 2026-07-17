@@ -14,3 +14,4 @@ conf/machine/sl2619nand.conf
 conf/machine/sl2619usb.conf
 conf/machine/sl2619-coralboard.conf
 conf/machine/sl2619xspi.conf
+conf/machine/sl2615nand.conf

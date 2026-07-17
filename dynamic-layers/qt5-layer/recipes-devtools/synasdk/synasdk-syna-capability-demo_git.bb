@@ -54,7 +54,7 @@ do_install () {
         install -m 0644 ${S}/qmls/sl2619-capability-demo.qml ${D}${qmldir}/
     fi
 
-    if [ "${MACHINE}" = "sl2615" ]; then
+    if [ "${MACHINE}" = "sl2615" ] || [ "${MACHINE}" = "sl2615nand" ]; then
         install -m 0644 ${S}/qmls/sl2615-capability-demo.qml ${D}${qmldir}/
     fi
 }

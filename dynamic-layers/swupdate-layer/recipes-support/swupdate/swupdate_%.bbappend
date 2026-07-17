@@ -7,9 +7,6 @@ SRC_URI:append = " \
     file://swupdate-wrapper \
     file://swupdate-wrapper-rescue \
     file://astra-swupdate.cfg \
-"
-
-SRC_URI:append:sl2619nand = " \
     file://cfi.cfg \
     file://0001-support-erase-full-mtd-for-flash_write_nand.patch \
 "

@@ -1,5 +1,5 @@
 rescue_configure() {
-    if [ "${MACHINE}" != "sl1620" ] && [ "${MACHINE}" != "sl1640" ] && [ "${MACHINE}" != "sl1680" ] && [ "${MACHINE}" != "sl2619" ] && [ "${MACHINE}" != "sl2619nand" ]; then
+    if [ "${MACHINE}" != "sl1620" ] && [ "${MACHINE}" != "sl1640" ] && [ "${MACHINE}" != "sl1680" ] && [ "${MACHINE}" != "sl2619" ] && [ "${MACHINE}" != "sl2619nand" ] && [ "${MACHINE}" != "sl2615nand" ] && [ "${MACHINE}" != "sl2611nand" ]; then
         echo "Unsupported MACHINE: ${MACHINE}"
         return 0
     fi
