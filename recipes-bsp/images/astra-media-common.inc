@@ -179,7 +179,7 @@ IMAGE_INSTALL:append = "${@bb.utils.contains('DISTRO_FEATURES', 'smp', ' synasdk
 # swupdate related packages, need 11M
 # swupdate dependend on systemd
 PACKAGE_EXCLUDE:sl2619nand += " swupdate swupdate-client swupdate-progress swupdate-tools swupdate-tools-hawkbit swupdate-tools-ipc swu-conf \
-  openssh openssh-sshd openssh-scp util-linux-lsblk util-linux udev-extraconf chrony rescue-support"
+  openssh openssh-sshd openssh-scp util-linux-lsblk udev-extraconf chrony rescue-support"
 
 TOOLCHAIN_TARGET_TASK:append = " synasdk-synap-runtime-staticdev kernel-devsrc"
 
