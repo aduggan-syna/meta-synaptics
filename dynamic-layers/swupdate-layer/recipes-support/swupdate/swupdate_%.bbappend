@@ -11,7 +11,7 @@ SRC_URI:append = " \
 
 SRC_URI:append:sl2619nand = " \
     file://cfi.cfg \
-    file://0001-erase-full-mtd-in-flash_write_nand.patch \
+    file://0001-support-erase-full-mtd-for-flash_write_nand.patch \
 "
 
 do_install:append() {
