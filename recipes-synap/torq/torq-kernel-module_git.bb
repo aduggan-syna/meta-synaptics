@@ -4,13 +4,13 @@ DESCRIPTION = "Out-of-tree kmod built against the staged kernel for SL26xx"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
 
-SRC_URI = "git://github.com/synaptics-torq/torq-compiler.git;protocol=https;branch=v2.0;name=torq_driver;submodules=1;subpath=runtime/torq_hw/hal/SL2610;destsuffix=git/runtime/torq_hw/hal/SL2610"
+SRC_URI = "git://github.com/synaptics-torq/torq-compiler.git;protocol=https;branch=v2.1;name=torq_driver;submodules=1;subpath=runtime/torq_hw/hal/SL2610;destsuffix=git/runtime/torq_hw/hal/SL2610"
 SRC_URI += "file://COPYING"
 
-SRCREV_torq_driver = "e92ae1521074dca6d70cf4d2fb440374f65f2eeb"
+SRCREV_torq_driver = "58c5714d8a7dbf8dbe71b17cb2471f6451bc836c"
 
 
-PV = "2.0+git${SRCPV}"
+PV = "2.1+git${SRCPV}"
 
 S = "${WORKDIR}/git/runtime/torq_hw/hal/SL2610"
 B = "${WORKDIR}/build"
