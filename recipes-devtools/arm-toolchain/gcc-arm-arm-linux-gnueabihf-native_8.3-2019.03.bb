@@ -16,7 +16,7 @@ LIC_FILES_CHKSUM = "file://${WORKDIR}/EULA;md5=6a034e43fab16794f2c743f6003936b6"
 
 SRC_URI = " \
     https://developer.arm.com/-/media/Files/downloads/gnu-a/${PV}/binrel/gcc-arm-${PV}-x86_64-arm-linux-gnueabihf.tar.xz;name=gcc \
-    https://developer.arm.com/GetEula?Id=c2de6e61-beb6-42ff-8b05-c21abdbe74f7;downloadfilename=EULA;name=eula \
+    https://github.com/synaptics-astra/sdk/releases/download/scarthgap_6.12_v2.4.0/EULA;downloadfilename=EULA;name=eula
 "
 
 SRC_URI[gcc.md5sum] = "650dc30f7e937fa12e37ea70ff6e10dd"
